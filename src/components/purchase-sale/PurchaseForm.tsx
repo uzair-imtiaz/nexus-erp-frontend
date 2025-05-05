@@ -305,10 +305,10 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({ transaction, onSave, onClos
                           {item.unit}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-500">
-                          ${item.rate.toFixed(2)}
+                          {item.rate.toFixed(2)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-500">
-                          ${item.amount.toFixed(2)}
+                          {item.amount.toFixed(2)}
                         </td>
                         <td className="px-4 py-3 text-sm">
                           <button
@@ -444,7 +444,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({ transaction, onSave, onClos
               </div>
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-700">Total Amount</p>
-                <p className="text-xl font-semibold">${formData.totalAmount.toFixed(2)}</p>
+                <p className="text-xl font-semibold">{formData.totalAmount.toFixed(2)}</p>
               </div>
             </div>
           </div>

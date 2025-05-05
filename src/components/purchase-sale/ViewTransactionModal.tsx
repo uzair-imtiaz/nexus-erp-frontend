@@ -89,10 +89,10 @@ const ViewTransactionModal: React.FC<ViewTransactionModalProps> = ({ transaction
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      ${item.rate.toFixed(2)} per {item.unit}
+                      {item.rate.toFixed(2)} per {item.unit}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      ${item.amount.toFixed(2)}
+                      {item.amount.toFixed(2)}
                     </td>
                   </tr>
                 ))}
@@ -103,7 +103,7 @@ const ViewTransactionModal: React.FC<ViewTransactionModalProps> = ({ transaction
                     Total:
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ${transaction.totalAmount.toFixed(2)}
+                    {transaction.totalAmount.toFixed(2)}
                   </td>
                 </tr>
               </tfoot>

@@ -18,7 +18,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ transaction, onSave, onClose }) => 
   const isEditing = !!transaction;
   
   const [formData, setFormData] = useState({
-    id: transaction ? transaction.id : `SALE-${Math.floor(10000 + Math.random() * 90000)}`,
+    id: transaction ? transaction.id : `SALE-{Math.floor(10000 + Math.random() * 90000)}`,
     date: transaction ? transaction.date : new Date().toISOString().split('T')[0],
     entity: transaction ? transaction.entity : { id: '', name: '', type: 'customer' as const },
     items: transaction ? [...transaction.items] : [],
@@ -155,7 +155,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ transaction, onSave, onClose }) => 
       const baseQuantity = newItem.quantity * unitConversionFactor;
 
       if (baseQuantity > selectedProduct.quantityAvailable) {
-        itemErrors.quantity = `Not enough stock. Available: ${selectedProduct.quantityAvailable} ${selectedProduct.baseUnit}`;
+        itemErrors.quantity = `Not enough stock. Available: {selectedProduct.quantityAvailable} {selectedProduct.baseUnit}`;
         setErrors(itemErrors);
         return;
       }
@@ -333,10 +333,10 @@ const SaleForm: React.FC<SaleFormProps> = ({ transaction, onSave, onClose }) => 
                           {item.unit}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-500">
-                          ${item.rate.toFixed(2)}
+                          {item.rate.toFixed(2)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-500">
-                          ${item.amount.toFixed(2)}
+                          {item.amount.toFixed(2)}
                         </td>
                         <td className="px-4 py-3 text-sm">
                           <button
@@ -493,7 +493,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ transaction, onSave, onClose }) => 
               </div>
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-700">Total Amount</p>
-                <p className="text-xl font-semibold">${formData.totalAmount.toFixed(2)}</p>
+                <p className="text-xl font-semibold">{formData.totalAmount.toFixed(2)}</p>
               </div>
             </div>
           </div>
