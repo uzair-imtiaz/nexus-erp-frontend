@@ -2,7 +2,7 @@ import { CloseOutlined } from "@ant-design/icons";
 import { Button, Descriptions, Divider, Modal, Table, Typography } from "antd";
 import { ViewItemModalProps } from "./types";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const ViewItemModal: React.FC<ViewItemModalProps> = ({
   item,
@@ -62,7 +62,7 @@ const ViewItemModal: React.FC<ViewItemModalProps> = ({
       ]}
       onCancel={onClose}
       width={800}
-      closeIcon={null} // Hide default close icon since we're using a custom one
+      closeIcon={null}
     >
       <Descriptions bordered column={2}>
         <Descriptions.Item label="Item Code">{item.id}</Descriptions.Item>

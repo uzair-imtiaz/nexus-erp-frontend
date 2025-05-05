@@ -37,11 +37,6 @@ const AppLayout = () => {
       label: "Dashboard",
     },
     {
-      key: "/inventory",
-      icon: <InboxOutlined />,
-      label: "Inventory",
-    },
-    {
       key: "/production",
       icon: <ExperimentOutlined />,
       label: "Production",
@@ -73,7 +68,6 @@ const AppLayout = () => {
     // },
   ];
 
-  // Function to get the page title from current path
   const getPageTitle = () => {
     const currentPath = location.pathname;
     const menuItem = menuItems.find((item) => item.key === currentPath);

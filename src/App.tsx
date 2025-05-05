@@ -1,9 +1,9 @@
 import { ConfigProvider } from "antd";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import Core from "./components/Core";
+import Core from "./pages/Core";
 import Dashboard from "./components/Dashboard";
 import Formulation from "./components/Formulation";
-import Inventory from "./components/inventory/inventory";
+import Inventory from "./features/inventory/inventory";
 import Production from "./components/Production";
 import PurchaseSale from "./components/PurchaseSale";
 import Reports from "./components/Reports";
@@ -24,12 +24,13 @@ function App() {
         <Routes>
           <Route path="/" element={<AppLayout />}>
             <Route index element={<Dashboard />} />
-            <Route path="inventory" element={<Inventory />} />
+            <Route path="core/inventory" element={<Inventory />} />
             <Route path="production" element={<Production />} />
             <Route path="formulation" element={<Formulation />} />
             <Route path="purchase-sale" element={<PurchaseSale />} />
             <Route path="core" element={<Core />} />
             <Route path="reports" element={<Reports />} />
+            <Route path="core/banks" element={<Reports />} />
             {/* <Route path="settings" element={<Settings />} /> */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

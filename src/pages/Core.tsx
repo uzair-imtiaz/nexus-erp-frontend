@@ -1,4 +1,5 @@
 import {
+  BankOutlined,
   DeleteOutlined,
   DownloadOutlined,
   EditOutlined,
@@ -6,6 +7,7 @@ import {
   PlusOutlined,
   SearchOutlined,
   ShoppingOutlined,
+  StockOutlined,
   UploadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -27,6 +29,8 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import React, { useState } from "react";
+import Banks from "../features/bank";
+import Inventory from "../features/inventory/inventory";
 
 // Define entity types
 type EntityType = "vendor" | "customer";
@@ -716,6 +720,24 @@ const Core = () => {
           onDeleteEntity={handleDeleteEntity}
         />
       ),
+    },
+    {
+      key: "bank",
+      label: (
+        <span>
+          <BankOutlined /> Banks
+        </span>
+      ),
+      children: <Banks />,
+    },
+    {
+      key: "inventory",
+      label: (
+        <span>
+          <StockOutlined /> Inventory
+        </span>
+      ),
+      children: <Inventory />,
     },
   ];
 

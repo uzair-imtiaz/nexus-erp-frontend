@@ -85,8 +85,8 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
         //   name: unit.name,
         //   factor: Number(unit.factor),
         // })),
-        quantity: Number(values.quantity), // Ensure numeric value
-        baseRate: Number(values.baseRate), // Ensure numeric value
+        quantity: Number(values.quantity),
+        baseRate: Number(values.baseRate),
       };
       const response = await createInventory(finalData);
       if (!response.success) {
@@ -101,7 +101,7 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
         message: "Success",
         description: response.message,
       });
-      debugger
+      debugger;
       setItems((prev) => [...prev, response.data]);
       onClose();
     } catch (error) {
