@@ -81,10 +81,10 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
       const finalData = {
         ...values,
         accountGroup: "asset",
-        // multiUnits: multiUnits.map((unit) => ({
-        //   name: unit.name,
-        //   factor: Number(unit.factor),
-        // })),
+        multiUnits: multiUnits.map((unit) => ({
+          name: unit.name,
+          factor: Number(unit.factor),
+        })),
         quantity: Number(values.quantity),
         baseRate: Number(values.baseRate),
       };
@@ -101,7 +101,6 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
         message: "Success",
         description: response.message,
       });
-      debugger;
       setItems((prev) => [...prev, response.data]);
       onClose();
     } catch (error) {

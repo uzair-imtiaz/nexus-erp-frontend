@@ -5,20 +5,24 @@ import {
   ExperimentOutlined,
   FileTextOutlined,
   InboxOutlined,
+  LogoutOutlined,
   MenuFoldOutlined,
   MenuOutlined,
   ShoppingCartOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu } from "antd";
+import { Button, Layout, Menu, message } from "antd";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { logout } from "../../services/auth.services";
+import Title from "antd/es/typography/Title";
 
 const { Header, Sider, Content } = Layout;
 
 const AppLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileVisible, setMobileVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -67,6 +71,24 @@ const AppLayout = () => {
     //   label: 'Settings',
     // },
   ];
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      const response = await logout();
+      if (!response.success) {
+        message.error(response.message);
+        return;
+      }
+      message.success(response.message);
+      navigate("/login");
+    } catch (error: any) {
+      message.error(error.message);
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getPageTitle = () => {
     const currentPath = location.pathname;
@@ -164,7 +186,21 @@ const AppLayout = () => {
           >
             {collapsed ? <MenuOutlined /> : <MenuFoldOutlined />}
           </Button>
-          <h2 style={{ margin: 0 }}>{getPageTitle()}</h2>
+          <Title level={5} style={{ margin: 0 }}>
+            {getPageTitle()}
+          </Title>
+          <div style={{ marginLeft: "auto" }}>
+            <Button
+              type="primary"
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
+              style={{ background: "#1B4D3E" }}
+              block
+              loading={loading}
+            >
+              Logout
+            </Button>
+          </div>
         </Header>
         <Content
           style={{
