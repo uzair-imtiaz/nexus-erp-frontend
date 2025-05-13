@@ -1,17 +1,17 @@
 import { ConfigProvider } from "antd";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import Core from "./pages/Core";
 import Dashboard from "./components/Dashboard";
 import Formulation from "./components/Formulation";
-import Inventory from "./features/inventory/inventory";
 import Production from "./components/Production";
 import PurchaseSale from "./components/PurchaseSale";
 import Reports from "./components/Reports";
+import Inventory from "./features/inventory/inventory";
 // import Settings from './components/Settings';
 import AppLayout from "./components/common/layout";
 import Login from "./features/auth/LoginForm";
-import RegisterForm from "./features/auth/RegisterForm";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
+import RegisterForm from "./features/auth/RegisterForm";
+import Core from "./features/core";
 
 const theme = {
   token: {
