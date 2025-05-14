@@ -216,9 +216,9 @@ const Inventory = () => {
         dataSource={items}
         rowKey="id"
         pagination={{
-          current: pagination.page,
-          pageSize: pagination.limit,
-          total: pagination.total,
+          current: pagination?.page,
+          pageSize: pagination?.limit,
+          total: pagination?.total,
           showSizeChanger: true,
         }}
         onChange={(pagination) => {
