@@ -1,0 +1,19 @@
+.tr-l1 {
+  background-color: #c7e6ea;
+}
+
+.tr-l2 {
+  background-color: #d8eef1;
+}
+
+.tr-l3 {
+  background-color: #e2f5fa;
+}
+
+.tr-l4 {
+  background-color: #f5fcfe;
+}
+
+.not-expandible .ant-table-row-expand-icon {
+  visibility: hidden;
+}
