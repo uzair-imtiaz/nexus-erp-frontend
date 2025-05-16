@@ -36,7 +36,7 @@ export const columnsConfig = [
     render: (text: string) => prettifyLabel(text),
   },
   {
-    title: "code",
+    title: "Code",
     dataIndex: "code",
     width: "30%",
     key: "code",

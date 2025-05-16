@@ -4,18 +4,17 @@ import {
   DashboardOutlined,
   ExperimentOutlined,
   FileTextOutlined,
-  InboxOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuOutlined,
+  SettingOutlined,
   ShoppingCartOutlined,
-  TeamOutlined,
 } from "@ant-design/icons";
 import { Button, Layout, Menu, message } from "antd";
+import Title from "antd/es/typography/Title";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../services/auth.services";
-import Title from "antd/es/typography/Title";
 
 const { Header, Sider, Content } = Layout;
 
@@ -56,14 +55,14 @@ const AppLayout = () => {
       label: "Purchase/Sale",
     },
     {
-      key: "/core",
-      icon: <TeamOutlined />,
-      label: "Core",
-    },
-    {
       key: "/reports",
       icon: <BarChartOutlined />,
       label: "Reports",
+    },
+    {
+      key: "/core",
+      icon: <SettingOutlined />,
+      label: "Core",
     },
     // {
     //   key: '/settings',
@@ -139,17 +138,20 @@ const AppLayout = () => {
         }}
       >
         <div
-          className="logo"
           style={{
-            height: "64px",
-            padding: "16px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#1B4D3E",
+            backgroundColor: "#0f4741",
+            paddingBlock: 9,
           }}
         >
-          <h1 style={{ color: "white", margin: 0 }}>ALGO Bricks</h1>
+          <img
+            src="/assets/images/logo-expanded.png"
+            alt="Logo"
+            style={{
+              width: "100%",
+              display: "block" /* Removes bottom space */,
+              verticalAlign: "bottom" /* Removes any baseline spacing */,
+            }}
+          />
         </div>
         <Menu
           theme="light"
@@ -230,19 +232,21 @@ const AppLayout = () => {
         />
       )}
 
-      <style jsx>{`
-        @media (max-width: 767px) {
-          .mobile-menu-button {
-            display: block !important;
+      <style>
+        {`
+          @media (max-width: 767px) {
+            .mobile-menu-button {
+              display: block !important;
+            }
+            .desktop-toggle {
+              display: none !important;
+            }
+            .sidebar {
+              left: ${mobileVisible ? "0" : "-200px"};
+            }
           }
-          .desktop-toggle {
-            display: none !important;
-          }
-          .sidebar {
-            left: ${mobileVisible ? "0" : "-200px"};
-          }
-        }
-      `}</style>
+        `}
+      </style>
     </Layout>
   );
 };

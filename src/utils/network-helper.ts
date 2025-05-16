@@ -48,7 +48,7 @@ axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error) => {
     const { response } = error;
-    if (response?.status === 401) {
+    if (response?.status === 401 || response?.status === 403) {
       Cookies.remove("token");
       window.location.href = "/signin";
       return Promise.reject(new Error("Unauthorized"));
