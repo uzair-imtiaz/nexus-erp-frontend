@@ -1,22 +1,24 @@
+import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import {
-  Modal,
+  Button,
+  Col,
+  Divider,
   Form,
   Input,
   InputNumber,
-  Select,
-  Table,
-  Button,
-  Space,
-  Typography,
-  Divider,
-  Row,
-  Col,
+  Modal,
   notification,
+  Row,
+  Select,
+  Space,
+  Table,
+  Typography,
 } from "antd";
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
+import { createInventory } from "../../../apis";
+import { getAccountByTypeApi } from "../../../services/charts-of-accounts.services";
+import { PARENT_MAP } from "../../charts-of-accounts/utils";
 import { AddEditItemModalProps } from "./types";
-import { createInventory, getAccounts } from "../../../apis";
 
 const { Option } = Select;
 
@@ -31,21 +33,19 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [accounts, setAccounts] = useState([]);
-  const [accountTypes, setAccountTypes] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setFetchLoading(true);
-        const [accountsRes, accountTypesRes] = await Promise.all([
-          getAccounts("l3"),
-          getAccounts("l2"),
-        ]);
-        if (accountsRes.success) {
-          setAccounts(accountsRes.data);
-        }
-        if (accountTypesRes.success) {
-          setAccountTypes(accountTypesRes.data);
+        const response = await getAccountByTypeApi(PARENT_MAP["subAccount"]);
+        if (response.success) {
+          setAccounts(response.data);
+        } else {
+          notification.error({
+            message: "Error",
+            description: response.message,
+          });
         }
       } catch (error: any) {
         notification.error({
@@ -80,7 +80,6 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
       const values = await form.validateFields();
       const finalData = {
         ...values,
-        accountGroup: "asset",
         multiUnits: multiUnits.map((unit) => ({
           name: unit.name,
           factor: Number(unit.factor),
@@ -101,13 +100,12 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
         message: "Success",
         description: response.message,
       });
-      setItems((prev) => [...prev, response.data]);
-      onClose();
+      onClose(response.data);
     } catch (error) {
       console.error("Form validation failed:", error);
       notification.error({
         message: "Error",
-        description: "Form validation failed",
+        description: error?.message,
       });
     } finally {
       setLoading(false);
@@ -152,7 +150,6 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
       okButtonProps={{ loading }}
       width={800}
       destroyOnClose
-      loading={fetchLoading}
     >
       <Form
         form={form}
@@ -168,6 +165,14 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
       >
         <Row gutter={16}>
           <Col span={12}>
+            <Form.Item
+              label="Item Code"
+              name="code"
+              rules={[{ required: true, message: "Code is required" }]}
+            >
+              <Input type="text" name="id" />
+            </Form.Item>
+
             <Form.Item
               label="Item Name"
               name="name"
@@ -189,33 +194,45 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
             </Form.Item>
 
             <Form.Item
-              label="Account Type"
-              name="accountLevel1"
-              rules={[{ required: true, message: "Field is required" }]}
-            >
-              <Select>
-                {accountTypes.map((accountType) => (
-                  <Option key={accountType.id} value={accountType.id}>
-                    {accountType.name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-
-            <Form.Item
               label="Account"
-              name="accountLevel2"
+              name="parentId"
               rules={[{ required: true, message: "Field is required" }]}
             >
-              <Select>
-                {accounts.map((account) => (
-                  <Option key={account.id} value={account.id}>
-                    {account.name}
+              <Select
+                loading={fetchLoading}
+                allowClear
+                showSearch
+                filterOption={(input, option) => {
+                  const account = option?.data;
+                  return (
+                    account?.name
+                      ?.toLowerCase()
+                      .includes(input.toLowerCase()) ||
+                    account?.code?.toLowerCase().includes(input.toLowerCase())
+                  );
+                }}
+                optionFilterProp="children"
+                optionLabelProp="label"
+              >
+                {accounts.map((account: any) => (
+                  <Option
+                    key={account.id}
+                    value={account.id}
+                    data={account}
+                    label={account.name}
+                  >
+                    <div>
+                      <div>{account.name}</div>
+                      <div style={{ color: "gray", fontSize: "12px" }}>
+                        Code: {account.code}
+                      </div>
+                    </div>
                   </Option>
                 ))}
               </Select>
             </Form.Item>
           </Col>
+
           <Col span={12}>
             <Form.Item
               label="Base Unit"
@@ -225,13 +242,12 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
               <Input />
             </Form.Item>
 
-            <Form.Item label="Quantity Available" name="quantity">
-              <InputNumber
-                min={0}
-                step={1}
-                defaultValue={0}
-                style={{ width: "100%" }}
-              />
+            <Form.Item
+              label="Quantity Available"
+              name="quantity"
+              initialValue={0}
+            >
+              <InputNumber min={0} step={1} style={{ width: "100%" }} />
             </Form.Item>
 
             <Form.Item
@@ -239,12 +255,7 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
               name="baseRate"
               rules={[{ required: true, message: "Rate is required" }]}
             >
-              <InputNumber
-                min={0}
-                step={1}
-                defaultValue={0}
-                style={{ width: "100%" }}
-              />
+              <InputNumber min={0} step={1} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
         </Row>

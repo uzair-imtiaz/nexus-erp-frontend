@@ -231,8 +231,10 @@ const Inventory = () => {
       {showAddModal && (
         <AddEditItemModal
           item={currentItem}
-          setItems={setItems}
-          onClose={() => setShowAddModal(false)}
+          onClose={(item) => {
+            setShowAddModal(false);
+            setItems((items) => [...items, item]);
+          }}
         />
       )}
 

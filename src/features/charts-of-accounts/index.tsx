@@ -140,7 +140,7 @@ const ChartOfAccounts: React.FC = () => {
               size="small"
               icon={<DeleteOutlined />}
               type="link"
-              color="danger"
+              danger
               disabled={record?.systemGenerated}
             />
           </Popconfirm>

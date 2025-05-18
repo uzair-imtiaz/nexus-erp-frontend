@@ -63,7 +63,7 @@ const Core = () => {
 
   return (
     <div style={{ padding: "24px" }}>
-      <Tabs defaultActiveKey="vendor" items={items} />
+      <Tabs defaultActiveKey="vendor" items={items} destroyInactiveTabPane />
     </div>
   );
 };
