@@ -7,7 +7,7 @@ import {
   SearchOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { Button, Input, notification, Select, Space, Table } from "antd";
+import { Button, Flex, Input, notification, Select, Space, Table } from "antd";
 import { useEffect, useState } from "react";
 import { getInventories } from "../../apis";
 import AddEditItemModal from "./add-edit-modal/add-edit-modal";
@@ -134,7 +134,7 @@ const Inventory = () => {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
-        <Space>
+        <Flex>
           <Button
             icon={<EyeOutlined />}
             type="link"
@@ -151,7 +151,7 @@ const Inventory = () => {
             danger
             onClick={() => handleDeleteItem(record.id)}
           />
-        </Space>
+        </Flex>
       ),
     },
   ];
