@@ -14,10 +14,9 @@ import {
   Table,
   Typography,
 } from "antd";
-import { useEffect, useState } from "react";
-import { createInventory } from "../../../apis";
-import { getAccountByTypeApi } from "../../../services/charts-of-accounts.services";
-import { PARENT_MAP } from "../../charts-of-accounts/utils";
+import { useState } from "react";
+import { createInventory, updateInventory } from "../../../apis";
+import { responseMetadata } from "../../../apis/types";
 import { AddEditItemModalProps } from "./types";
 
 const { Option } = Select;
@@ -26,40 +25,12 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
   item,
   setItems = () => {},
   onClose = () => {},
+  onSuccess,
 }) => {
   const [form] = Form.useForm();
   const [multiUnits, setMultiUnits] = useState(item?.multiUnits || []);
   const [newUnit, setNewUnit] = useState({ name: "", factor: null });
   const [loading, setLoading] = useState(false);
-  const [fetchLoading, setFetchLoading] = useState(false);
-  const [accounts, setAccounts] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setFetchLoading(true);
-        const response = await getAccountByTypeApi(PARENT_MAP["subAccount"]);
-        if (response.success) {
-          setAccounts(response.data);
-        } else {
-          notification.error({
-            message: "Error",
-            description: response.message,
-          });
-        }
-      } catch (error: any) {
-        notification.error({
-          message: "Error",
-          description: error?.message,
-        });
-        console.error("Error fetching data:", error);
-      } finally {
-        setFetchLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const handleAddUnit = () => {
     if (newUnit.name && newUnit.factor) {
@@ -87,7 +58,9 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
         quantity: Number(values.quantity),
         baseRate: Number(values.baseRate),
       };
-      const response = await createInventory(finalData);
+      const response: responseMetadata = item?.code
+        ? await updateInventory(item.id, finalData)
+        : await createInventory(finalData);
       if (!response.success) {
         notification.error({
           message: "Error",
@@ -100,8 +73,9 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
         message: "Success",
         description: response.message,
       });
-      onClose(response.data);
-    } catch (error) {
+      onClose();
+      onSuccess(response.data);
+    } catch (error: any) {
       console.error("Form validation failed:", error);
       notification.error({
         message: "Error",
@@ -161,6 +135,7 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
           baseUnit: item?.baseUnit || "",
           quantity: item?.quantity || 0,
           baseRate: item?.baseRate || 0,
+          code: item?.code || "",
         }}
       >
         <Row gutter={16}>
@@ -170,7 +145,7 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
               name="code"
               rules={[{ required: true, message: "Code is required" }]}
             >
-              <Input type="text" name="id" />
+              <Input type="text" name="id" disabled={!!item} />
             </Form.Item>
 
             <Form.Item
@@ -190,45 +165,6 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
                 <Option value="Raw Material">Raw Material</Option>
                 <Option value="Semi-Finished Goods">Semi-Finished Goods</Option>
                 <Option value="Finished Goods">Finished Goods</Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item
-              label="Account"
-              name="parentId"
-              rules={[{ required: true, message: "Field is required" }]}
-            >
-              <Select
-                loading={fetchLoading}
-                allowClear
-                showSearch
-                filterOption={(input, option) => {
-                  const account = option?.data;
-                  return (
-                    account?.name
-                      ?.toLowerCase()
-                      .includes(input.toLowerCase()) ||
-                    account?.code?.toLowerCase().includes(input.toLowerCase())
-                  );
-                }}
-                optionFilterProp="children"
-                optionLabelProp="label"
-              >
-                {accounts.map((account: any) => (
-                  <Option
-                    key={account.id}
-                    value={account.id}
-                    data={account}
-                    label={account.name}
-                  >
-                    <div>
-                      <div>{account.name}</div>
-                      <div style={{ color: "gray", fontSize: "12px" }}>
-                        Code: {account.code}
-                      </div>
-                    </div>
-                  </Option>
-                ))}
               </Select>
             </Form.Item>
           </Col>
