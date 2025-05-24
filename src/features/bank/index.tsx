@@ -1,28 +1,57 @@
+import { Button, Input, notification, Space } from "antd";
 import { useEffect, useState } from "react";
-import { Button, notification } from "antd";
 import {
-  getBanks,
   createBank,
-  updateBank,
   deleteBank,
+  getBanks,
+  updateBank,
 } from "../../services/bank-services";
-import { BankTable } from "./bank-listing";
 import { BankFormModal } from "./bank-form";
+import { BankTable } from "./bank-listing";
+import { buildQueryString } from "../../utils";
+import {
+  DownloadOutlined,
+  PlusOutlined,
+  SearchOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 
 const BanksPage = () => {
-  const [banks, setBanks] = useState([]);
+  const [banks, setBanks] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingBank, setEditingBank] = useState(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
+    nextPage: null,
+    prevPage: null,
+  });
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const fetchBanks = async () => {
-    setLoading(true);
+  const fetchBanks = async (queryParams: Record<string, any> = {}) => {
     try {
-      const res = await getBanks();
-      setBanks(res.data);
-    } catch {
-      notification.error({ message: "Failed to fetch banks" });
+      setLoading(true);
+      const queryString = buildQueryString(queryParams);
+      const response = await getBanks(queryString);
+
+      if (!response.success) {
+        return notification.error({
+          message: "Error",
+          description: response.message,
+        });
+      }
+
+      setBanks(response.data);
+      setPagination(response.pagination);
+    } catch (error: any) {
+      notification.error({
+        message: "Error",
+        description: error?.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -36,17 +65,31 @@ const BanksPage = () => {
     setSubmitting(true);
     try {
       if (editingBank) {
-        await updateBank(editingBank.id, data);
-        notification.success({ message: "Bank updated successfully" });
+        const response = await updateBank(editingBank.id, data);
+        if (response?.success) {
+          notification.success({ message: response.message });
+          const updatedBanks = banks.map((bank) => {
+            if (bank.id === editingBank.id) {
+              return response.data;
+            }
+            return bank;
+          });
+          setBanks(updatedBanks);
+        }
       } else {
-        await createBank(data);
-        notification.success({ message: "Bank created successfully" });
+        const response = await createBank(data);
+        if (!response.success) {
+          notification.error({ message: response.message });
+          return;
+        }
+        notification.success({ message: response.message });
+        setBanks([...banks, response.data]);
       }
-      fetchBanks();
+      // fetchBanks();
       setModalVisible(false);
       setEditingBank(null);
-    } catch {
-      notification.error({ message: "Operation failed" });
+    } catch (error: any) {
+      notification.error({ message: error.message });
     } finally {
       setSubmitting(false);
     }
@@ -54,11 +97,29 @@ const BanksPage = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteBank(id);
-      notification.success({ message: "Bank deleted" });
-      fetchBanks();
-    } catch {
-      notification.error({ message: "Failed to delete bank" });
+      const response = await deleteBank(id);
+      if (!response.success) {
+        notification.error({ message: response.message });
+        return;
+      }
+      notification.success({ message: response.message });
+      const updatedBanks = banks.filter((bank) => bank.id !== id);
+      setBanks(updatedBanks);
+    } catch (error: any) {
+      notification.error({ message: error.message });
+    }
+  };
+
+  const handleSeach = async (value: string) => {
+    try {
+      if (!value) return;
+      fetchBanks({ name: value });
+    } catch (error: any) {
+      console.log(error);
+      notification.error({
+        message: "Error",
+        description: error?.message,
+      });
     }
   };
 
@@ -68,25 +129,48 @@ const BanksPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Banks</h2>
-        <Button
-          type="primary"
-          onClick={() => {
-            setEditingBank(null);
-            setModalVisible(true);
-          }}
-        >
-          Add New Bank
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <Space
+        style={{
+          width: "100%",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+        }}
+        direction="horizontal"
+      >
+        <Space wrap>
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="Search ..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: 250 }}
+            onPressEnter={() => handleSeach(searchTerm)}
+          />
+        </Space>
+        <Space wrap>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              setEditingBank(null);
+              setModalVisible(true);
+            }}
+          >
+            Add New Bank
+          </Button>
+          <Button icon={<DownloadOutlined />}>Export</Button>
+          <Button icon={<UploadOutlined />}>Import</Button>
+        </Space>
+      </Space>
 
       <BankTable
         data={banks}
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        pagination={pagination}
+        fetchItems={fetchBanks}
       />
 
       <BankFormModal

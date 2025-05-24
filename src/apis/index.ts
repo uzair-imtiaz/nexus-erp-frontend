@@ -17,20 +17,21 @@ export const createInventory = async (data: any) => {
 };
 
 export const getAccounts = async (type: string) => {
-  const response: responseMetadata = await getCallback(`/accounts?type=${type}`);
+  const response: responseMetadata = await getCallback(
+    `/accounts?type=${type}`
+  );
   return response;
 };
 
-export const updateInventory = async (id: number, data: any) => {
-  const response: responseMetadata = await putCallback(`/inventory/${id}`, data);
+export const updateInventory = async (id: string, data: any) => {
+  const response: responseMetadata = await putCallback(
+    `/inventory/${id}`,
+    data
+  );
   return response;
 };
 
-export const deleteInventory = async (id: number) => {
+export const deleteInventory = async (id: string) => {
   const response: responseMetadata = await deleteCallback(`/inventory/${id}`);
   return response;
 };
-
-
-
-

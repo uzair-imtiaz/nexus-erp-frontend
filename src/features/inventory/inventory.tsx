@@ -7,9 +7,18 @@ import {
   SearchOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { Button, Input, notification, Select, Space, Table } from "antd";
+import {
+  Button,
+  Flex,
+  Input,
+  notification,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
+} from "antd";
 import { useEffect, useState } from "react";
-import { getInventories } from "../../apis";
+import { deleteInventory, getInventories } from "../../apis";
 import AddEditItemModal from "./add-edit-modal/add-edit-modal";
 import { InventoryItem } from "./types";
 import ViewItemModal from "./view-item-modal/view-modal";
@@ -37,7 +46,6 @@ const Inventory = () => {
     try {
       setLoading(true);
       const queryString = buildQueryString(queryParams);
-      console.log("queryString", queryString);
       const response = await getInventories(queryString);
 
       if (!response.success) {
@@ -73,9 +81,24 @@ const Inventory = () => {
     setShowViewModal(true);
   };
 
-  const handleDeleteItem = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this item?")) {
-      setItems(items.filter((item) => item.id !== id));
+  const handleDeleteItem = async (id: string) => {
+    try {
+      const response = await deleteInventory(id);
+      if (response?.success) {
+        notification.success({ message: response?.message });
+        fetchItems();
+      } else {
+        notification.error({
+          message: "Error",
+          description: response.message,
+        });
+      }
+    } catch (error: any) {
+      notification.error({
+        message: "Error",
+        description: error?.message,
+      });
+      console.error("Error fetching data:", error);
     }
   };
 
@@ -134,24 +157,34 @@ const Inventory = () => {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
-        <Space>
+        <Flex>
           <Button
             icon={<EyeOutlined />}
             type="link"
             onClick={() => handleViewItem(record)}
+            size="small"
           />
           <Button
             icon={<EditOutlined />}
             type="link"
             onClick={() => handleEditItem(record)}
+            size="small"
           />
-          <Button
-            icon={<DeleteOutlined />}
-            type="link"
-            danger
-            onClick={() => handleDeleteItem(record.id)}
-          />
-        </Space>
+          <Popconfirm
+            title="Are you sure?"
+            onConfirm={() => handleDeleteItem(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button
+              size="small"
+              icon={<DeleteOutlined />}
+              type="link"
+              danger
+              disabled={record?.systemGenerated}
+            />
+          </Popconfirm>
+        </Flex>
       ),
     },
   ];
@@ -231,8 +264,12 @@ const Inventory = () => {
       {showAddModal && (
         <AddEditItemModal
           item={currentItem}
-          setItems={setItems}
-          onClose={() => setShowAddModal(false)}
+          onClose={() => {
+            setShowAddModal(false);
+          }}
+          onSuccess={(item) => {
+            setItems((items) => [...items, item]);
+          }}
         />
       )}
 

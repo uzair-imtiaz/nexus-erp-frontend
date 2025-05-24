@@ -1,8 +1,9 @@
 import {
   BankOutlined,
   ShoppingOutlined,
-  StockOutlined,
+  InboxOutlined,
   UserOutlined,
+  FundOutlined,
 } from "@ant-design/icons";
 import { Tabs } from "antd";
 import BanksPage from "../bank";
@@ -44,7 +45,7 @@ const Core = () => {
       key: "inventory",
       label: (
         <span>
-          <StockOutlined /> Inventory
+          <InboxOutlined /> Inventory
         </span>
       ),
       children: <Inventory />,
@@ -53,7 +54,7 @@ const Core = () => {
       key: "charts-of-accounts",
       label: (
         <span>
-          <StockOutlined /> Charts of Accounts
+          <FundOutlined /> Charts of Accounts
         </span>
       ),
       children: <ChartOfAccounts />,
@@ -62,7 +63,7 @@ const Core = () => {
 
   return (
     <div style={{ padding: "24px" }}>
-      <Tabs defaultActiveKey="vendor" items={items} />
+      <Tabs defaultActiveKey="vendor" items={items} destroyInactiveTabPane />
     </div>
   );
 };

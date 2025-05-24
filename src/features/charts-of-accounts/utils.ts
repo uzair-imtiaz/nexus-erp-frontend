@@ -36,16 +36,34 @@ export const columnsConfig = [
     render: (text: string) => prettifyLabel(text),
   },
   {
-    title: "code",
+    title: "Code",
     dataIndex: "code",
-    width: "30%",
     key: "code",
+  },
+  {
+    title: "Path",
+    dataIndex: "pathName",
+    key: "pathName",
+    render: (text: string) => text.split("/").join(" > "),
+  },
+  {
+    title: "Credit Amount",
+    dataIndex: "creditAmount",
+    key: "creditAmount",
+    render: (text: number) => formatCurrency(text),
+  },
+  {
+    title: "Debit Amount",
+    dataIndex: "debitAmount",
+    key: "debitAmount",
+    render: (text: number) => formatCurrency(text),
   },
   {
     title: "Amount",
     dataIndex: "amount",
     key: "amount",
-    render: (text: number) => formatCurrency(text),
+    render: (_, record: any) =>
+      formatCurrency(record?.debitAmount - record?.creditAmount),
   },
 ];
 

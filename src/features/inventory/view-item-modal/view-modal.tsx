@@ -25,11 +25,11 @@ const ViewItemModal: React.FC<ViewItemModalProps> = ({
       ),
     },
     {
-      title: "Equivalent Quantity",
+      title: "Equivalent Quantity Available",
       key: "equivalentQty",
       render: (_, record) => (
         <span>
-          {(item.quantityAvailable / record.factor).toFixed(2)} {record.name}
+          {(item.quantity / record.factor).toFixed(2)} {record.name}
         </span>
       ),
     },

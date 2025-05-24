@@ -143,7 +143,7 @@ export const TransactorListComponent: React.FC<
           prefix={<SearchOutlined />}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: "300px" }}
+          style={{ width: "250px" }}
         />
         <Space>
           <Button

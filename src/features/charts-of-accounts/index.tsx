@@ -36,7 +36,61 @@ const ChartOfAccounts: React.FC = () => {
   const [accountToEdit, setAccountToEdit] = useState(null);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
 
-  const handleSearch = (value: string) => {};
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+    if (!value) {
+      setExpandedKeys([]);
+      return;
+    }
+
+    // Find all accounts that match the search
+    const findMatchingAccounts = (
+      accounts: any[],
+      searchValue: string,
+      parentIds: string[] = []
+    ): { matches: string[]; parentIds: string[] } => {
+      let matches: string[] = [];
+      let allParentIds: string[] = [];
+
+      accounts.forEach((account) => {
+        const currentParentIds = [...parentIds];
+        if (account.parentId) {
+          currentParentIds.push(account.parentId);
+        }
+
+        if (
+          account.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+          account.code?.toLowerCase().includes(searchValue.toLowerCase())
+        ) {
+          // matches.push(account.id);
+          allParentIds = [...allParentIds, ...currentParentIds];
+        }
+
+        if (account.children) {
+          const childResults = findMatchingAccounts(
+            account.children,
+            searchValue,
+            currentParentIds
+          );
+          matches = [...matches, ...childResults.matches];
+          allParentIds = [...allParentIds, ...childResults.parentIds];
+        }
+      });
+
+      return { matches, parentIds: allParentIds };
+    };
+
+    const { matches, parentIds } = findMatchingAccounts(accounts, value);
+    // Combine matching IDs with their parent IDs and remove duplicates
+    const allIdsToExpand = [...new Set([...matches, ...parentIds])];
+    setExpandedKeys(allIdsToExpand);
+  };
+
+  useEffect(() => {
+    if (searchText) {
+      handleSearch(searchText);
+    }
+  }, [accounts]);
 
   const fetchData = async () => {
     try {
@@ -140,7 +194,7 @@ const ChartOfAccounts: React.FC = () => {
               size="small"
               icon={<DeleteOutlined />}
               type="link"
-              color="danger"
+              danger
               disabled={record?.systemGenerated}
             />
           </Popconfirm>
@@ -196,16 +250,13 @@ const ChartOfAccounts: React.FC = () => {
         bordered
         rowClassName={(record) => getRowClassName(record)}
         expandable={{
-          onExpand: () => {
-            (expanded, record) => {
-              if (expanded) {
-                setExpandedKeys([record.id]);
-              } else {
-                setExpandedKeys((prev) =>
-                  prev.filter((key) => key !== record.id)
-                );
-              }
-            };
+          expandedRowKeys: expandedKeys,
+          onExpand: (expanded, record) => {
+            if (expanded) {
+              setExpandedKeys([...expandedKeys, record.id]);
+            } else {
+              setExpandedKeys(expandedKeys.filter((key) => key !== record.id));
+            }
           },
         }}
       />

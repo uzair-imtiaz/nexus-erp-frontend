@@ -1,4 +1,4 @@
-import { DatePicker, Form, Input, InputNumber, Modal } from "antd";
+import { DatePicker, Form, Input, InputNumber, Modal, Row, Col } from "antd";
 import dayjs from "dayjs";
 import { useEffect } from "react";
 
@@ -25,11 +25,12 @@ export const BankFormModal = ({
   }, [initialValues]);
 
   const handleFinish = (values: any) => {
+    const { code, ...rest } = values;
     onSubmit({
-      ...values,
+      ...rest,
       openingDate: values.openingDate.format("YYYY-MM-DD"),
+      ...(!initialValues && { code }),
     });
-    form.resetFields();
   };
 
   return (
@@ -41,44 +42,58 @@ export const BankFormModal = ({
       confirmLoading={loading}
     >
       <Form layout="vertical" form={form} onFinish={handleFinish}>
-        <Form.Item
-          name="bankCode"
-          label="Bank Code"
-          rules={[{ required: true }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          name="bankName"
-          label="Bank Name"
-          rules={[{ required: true }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          name="accountNumber"
-          label="Account Number"
-          rules={[{ required: true }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item name="iban" label="IBAN" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item
-          name="currentBalance"
-          label="Current Balance"
-          rules={[{ required: true }]}
-        >
-          <InputNumber style={{ width: "100%" }} />
-        </Form.Item>
-        <Form.Item
-          name="openingDate"
-          label="Opening Date"
-          rules={[{ required: true }]}
-        >
-          <DatePicker style={{ width: "100%" }} />
-        </Form.Item>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              name="code"
+              label="Bank Code"
+              rules={[{ required: true }]}
+            >
+              <Input disabled={initialValues} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="name"
+              label="Bank Name"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="accountNumber"
+              label="Account Number"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item name="iban" label="IBAN" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="currentBalance"
+              label="Current Balance"
+              rules={[{ required: true }]}
+            >
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="openingDate"
+              label="Opening Date"
+              rules={[{ required: true }]}
+            >
+              <DatePicker style={{ width: "100%" }} />
+            </Form.Item>
+          </Col>
+        </Row>
       </Form>
     </Modal>
   );
