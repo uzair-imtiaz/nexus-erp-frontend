@@ -46,7 +46,6 @@ const Inventory = () => {
     try {
       setLoading(true);
       const queryString = buildQueryString(queryParams);
-      console.log("queryString", queryString);
       const response = await getInventories(queryString);
 
       if (!response.success) {

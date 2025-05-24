@@ -1,10 +1,17 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Popconfirm, Space, Table } from "antd";
 
-export const BankTable = ({ data, loading, onEdit, onDelete }: any) => {
+export const BankTable = ({
+  data,
+  loading,
+  onEdit,
+  onDelete,
+  pagination,
+  fetchItems,
+}: any) => {
   const columns = [
-    { title: "Bank Code", dataIndex: "bankCode", key: "bankCode" },
-    { title: "Bank Name", dataIndex: "bankName", key: "bankName" },
+    { title: "Bank Code", dataIndex: "code", key: "code" },
+    { title: "Bank Name", dataIndex: "name", key: "name" },
     {
       title: "Account Number",
       dataIndex: "accountNumber",
@@ -46,7 +53,11 @@ export const BankTable = ({ data, loading, onEdit, onDelete }: any) => {
       dataSource={data}
       loading={loading}
       rowKey="id"
-      pagination={{ pageSize: 10 }}
+      pagination={pagination}
+      onChange={(pagination) => {
+        fetchItems({ page: pagination.current, limit: pagination.pageSize });
+      }}
+      bordered
     />
   );
 };
