@@ -1,6 +1,7 @@
 import { Button, Descriptions, Divider, Modal, Typography } from "antd";
 import React from "react";
 import { ViewTransactorModalProps } from "./types";
+import dayjs from "dayjs";
 
 export const ViewTransactorModal: React.FC<ViewTransactorModalProps> = ({
   visible,
@@ -23,6 +24,7 @@ export const ViewTransactorModal: React.FC<ViewTransactorModalProps> = ({
     >
       <Descriptions bordered column={2}>
         <Descriptions.Item label="ID">{entity.id}</Descriptions.Item>
+        <Descriptions.Item label="Code">{entity.code}</Descriptions.Item>
         <Descriptions.Item label="Name">{entity.name}</Descriptions.Item>
         <Descriptions.Item label="Contact Person">
           {entity.contactPerson || "-"}
@@ -31,10 +33,7 @@ export const ViewTransactorModal: React.FC<ViewTransactorModalProps> = ({
           {entity.email || "-"}
         </Descriptions.Item>
         <Descriptions.Item label="Phone">
-          {entity.phone || "-"}
-        </Descriptions.Item>
-        <Descriptions.Item label="Current Balance">
-          ${entity.currentBalance.toFixed(2)}
+          {entity.contactNumber || "-"}
         </Descriptions.Item>
         <Descriptions.Item label="Address" span={2}>
           {entity.address || "-"}
@@ -53,7 +52,7 @@ export const ViewTransactorModal: React.FC<ViewTransactorModalProps> = ({
         <div>
           <Typography.Text type="secondary">As of Date</Typography.Text>
           <Typography.Title level={5}>
-            {new Date(entity.asOfDate).toLocaleDateString()}
+            {dayjs(entity.openingBalanceDate).format("YYYY-MM-DD")}
           </Typography.Title>
         </div>
       </div>

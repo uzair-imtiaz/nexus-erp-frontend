@@ -24,6 +24,7 @@ import {
 import AddAccountModal from "./create-account-modal";
 import "./index.css";
 import { columnsConfig, getRowClassName } from "./utils";
+import { formatCurrency } from "../../utils";
 
 const { Title, Text } = Typography;
 
@@ -258,6 +259,36 @@ const ChartOfAccounts: React.FC = () => {
               setExpandedKeys(expandedKeys.filter((key) => key !== record.id));
             }
           },
+        }}
+        summary={(pageData) => {
+          const totalCredit = pageData.reduce(
+            (sum, record) => sum + Number(record.creditAmount || 0),
+            0
+          );
+          const totalDebit = pageData.reduce(
+            (sum, record) => sum + Number(record.debitAmount || 0),
+            0
+          );
+
+          return (
+            <Table.Summary fixed>
+              <Table.Summary.Row>
+                <Table.Summary.Cell index={0} colSpan={4}>
+                  <Text strong>Balance</Text>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={4}>
+                  <Text strong>{formatCurrency(totalCredit)}</Text>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={5}>
+                  <Text strong>{formatCurrency(totalDebit)}</Text>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={6}>
+                  <Text strong>{formatCurrency(totalDebit - totalCredit)}</Text>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={7} />
+              </Table.Summary.Row>
+            </Table.Summary>
+          );
         }}
       />
     </>

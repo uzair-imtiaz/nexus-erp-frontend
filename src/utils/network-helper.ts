@@ -4,9 +4,7 @@ import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
   baseURL:
-    process.env.NODE_ENV === "production"
-      ? "https://api.ds.algobricks.org/api"
-      : "http://localhost:3001/api",
+    "http://localhost:3001/api",
   timeout: 35000,
   withCredentials: true,
   headers: {

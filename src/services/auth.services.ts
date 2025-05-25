@@ -1,10 +1,5 @@
 import { responseMetadata } from "../apis/types";
-import {
-  deleteCallback,
-  getCallback,
-  postCallback,
-  putCallback,
-} from "../utils/network-helper";
+import { postCallback } from "../utils/network-helper";
 
 export const login = async (payload: any) => {
   const response: responseMetadata = await postCallback("/auth/login", payload);

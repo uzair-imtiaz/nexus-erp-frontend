@@ -1,6 +1,15 @@
-import { Button, DatePicker, Form, Input, InputNumber, Modal } from "antd";
+import {
+  Col,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Row,
+  Switch,
+} from "antd";
 import dayjs from "dayjs";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TransactorFormModalProps } from "./types";
 
 const { TextArea } = Input;
@@ -12,35 +21,37 @@ export const TransactorFormModal: React.FC<TransactorFormModalProps> = ({
   onSave,
   onCancel,
 }) => {
+  const [loading, setLoading] = useState(false);
+
   const [form] = Form.useForm();
   const isEditing = !!entity;
 
-  React.useEffect(() => {
-    if (visible && entity) {
+  useEffect(() => {
+    if (entity)
       form.setFieldsValue({
         ...entity,
-        asOfDate: entity.asOfDate ? dayjs(entity.asOfDate) : null,
+        openingBalanceDate: entity?.openingBalanceDate
+          ? dayjs(entity.openingBalanceDate)
+          : null,
       });
+  }, []);
+
+  const handleSubmit = async (values: any) => {
+    try {
+      setLoading(true);
+      const formattedValues = {
+        openingBalanceDate: values.openingBalanceDate
+          ? values.openingBalanceDate.format("YYYY-MM-DD")
+          : new Date().toISOString().split("T")[0],
+        status: !!values.status,
+        ...values,
+      };
+
+      await onSave(formattedValues);
+    } finally {
+      setLoading(false);
+      onCancel();
     }
-  }, [visible, entity, form]);
-
-  const handleSubmit = (values: any) => {
-    const formattedValues = {
-      ...values,
-      id: entity
-        ? entity.id
-        : `${type === "vendor" ? "VEN" : "CUS"}-${Math.floor(
-            10000 + Math.random() * 90000
-          )}`,
-      type,
-      asOfDate: values.asOfDate
-        ? values.asOfDate.format("YYYY-MM-DD")
-        : new Date().toISOString().split("T")[0],
-      currentBalance: isEditing ? values.currentBalance : values.openingBalance,
-    };
-
-    onSave(formattedValues);
-    form.resetFields();
   };
 
   return (
@@ -51,100 +62,101 @@ export const TransactorFormModal: React.FC<TransactorFormModalProps> = ({
           : `Add New ${type === "vendor" ? "Vendor" : "Customer"}`
       }
       open={visible}
+      onOk={form.submit}
+      okText={entity ? "Update" : "Save"}
       onCancel={() => {
         form.resetFields();
         onCancel();
       }}
-      footer={null}
       width={800}
+      confirmLoading={loading}
     >
       <Form
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
         initialValues={{
-          id: entity
-            ? entity.id
-            : `${type === "vendor" ? "VEN" : "CUS"}-${Math.floor(
-                10000 + Math.random() * 90000
-              )}`,
           openingBalance: 0,
-          asOfDate: dayjs(),
+          openingBalanceDate: dayjs(),
         }}
       >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "16px",
-          }}
-        >
-          <Form.Item label="ID" name="id">
-            <Input disabled />
-          </Form.Item>
-
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[{ required: true, message: "Please enter the name!" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item label="Contact Person" name="contactPerson">
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[{ type: "email", message: "Please enter a valid email!" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item label="Phone" name="phone">
-            <Input />
-          </Form.Item>
-
-          <Form.Item label="Opening Balance" name="openingBalance">
-            <InputNumber
-              style={{ width: "100%" }}
-              min={0}
-              precision={2}
-              disabled={isEditing}
-            />
-          </Form.Item>
-
-          <Form.Item label="As of Date" name="asOfDate">
-            <DatePicker style={{ width: "100%" }} disabled={isEditing} />
-          </Form.Item>
-
-          {isEditing && (
-            <Form.Item label="Current Balance" name="currentBalance">
-              <InputNumber style={{ width: "100%" }} min={0} precision={2} />
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              label="Code"
+              name="code"
+              rules={[{ required: true, message: "Please enter the code!" }]}
+            >
+              <Input disabled={isEditing} />
             </Form.Item>
-          )}
-        </div>
+
+            <Form.Item
+              label="Name"
+              name="name"
+              rules={[{ required: true, message: "Please enter the name!" }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item label="Contact Person" name="personName">
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[
+                { type: "email", message: "Please enter a valid email!" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+
+          <Col span={12}>
+            <Form.Item label="Phone" name="contactNumber">
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              label="Opening Balance"
+              name="openingBalance"
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter the opening balance!",
+                },
+              ]}
+            >
+              <InputNumber style={{ width: "100%" }} min={0} precision={1} />
+            </Form.Item>
+
+            <Form.Item
+              label="As of Date"
+              name="openingBalanceDate"
+              rules={[
+                { required: true, message: "Please select the as of date!" },
+              ]}
+            >
+              <DatePicker style={{ width: "100%" }} />
+            </Form.Item>
+
+            {entity && (
+              <Form.Item
+                label="Status"
+                name="status"
+                rules={[
+                  { required: true, message: "Please select the status!" },
+                ]}
+              >
+                <Switch />
+              </Form.Item>
+            )}
+          </Col>
+        </Row>
 
         <Form.Item label="Address" name="address">
-          <TextArea rows={3} />
-        </Form.Item>
-
-        <Form.Item>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "end",
-              gap: "8px",
-              marginTop: "16px",
-            }}
-          >
-            <Button onClick={onCancel}>Cancel</Button>
-            <Button type="primary" htmlType="submit">
-              {isEditing ? "Update" : "Save"}
-            </Button>
-          </div>
+          <TextArea rows={2} />
         </Form.Item>
       </Form>
     </Modal>

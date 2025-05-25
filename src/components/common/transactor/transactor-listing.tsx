@@ -7,18 +7,22 @@ import {
   SearchOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { Button, Input, Modal, Space, Table } from "antd";
-import React, { useState } from "react";
+import { Button, Input, notification, Popconfirm, Space, Table } from "antd";
+import React, { useEffect, useState } from "react";
 import { TransactorFormModal } from "./transactor-form";
 import { Transactor, TransactorType } from "./types";
 import { ViewTransactorModal } from "./view-transactor-modal";
+import { formatCurrency } from "../../../utils";
 
 interface TransactorListComponentProps {
   entities: Transactor[];
   entityType: TransactorType;
   onAddTransactor: (entity: Transactor) => void;
-  onEditTransactor: (entity: Transactor) => void;
+  onEditTransactor: (id: string, entity: Transactor) => Promise<void>;
   onDeleteTransactor: (id: string) => void;
+  fetch: (queryParams?: Record<string, any>) => {};
+  loading: boolean;
+  pagination: {};
 }
 
 export const TransactorListComponent: React.FC<
@@ -29,6 +33,9 @@ export const TransactorListComponent: React.FC<
   onAddTransactor,
   onEditTransactor,
   onDeleteTransactor,
+  fetch,
+  loading,
+  pagination,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -37,21 +44,15 @@ export const TransactorListComponent: React.FC<
     null
   );
 
-  // Filter entities by type and search term
-  const filteredEntities = entities.filter((entity) => {
-    return (
-      entity.type === entityType &&
-      (entity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entity.id.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  });
+  useEffect(() => {
+    fetch();
+  }, []);
 
-  // Table columns
   const columns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: "Code",
+      dataIndex: "code",
+      key: "code",
     },
     {
       title: "Name",
@@ -60,8 +61,8 @@ export const TransactorListComponent: React.FC<
     },
     {
       title: "Contact Person",
-      dataIndex: "contactPerson",
-      key: "contactPerson",
+      dataIndex: "personName",
+      key: "personName",
       render: (text: string) => text || "-",
     },
     {
@@ -71,19 +72,20 @@ export const TransactorListComponent: React.FC<
       render: (text: string) => text || "-",
     },
     {
-      title: "Current Balance",
-      dataIndex: "currentBalance",
-      key: "currentBalance",
-      render: (value: number) => `$${value.toFixed(2)}`,
+      title: "Opening Balance",
+      dataIndex: "openingBalance",
+      key: "openingBalance",
+      render: (text: number) => formatCurrency(text),
     },
     {
       title: "Actions",
       key: "actions",
       render: (_: any, record: Transactor) => (
-        <Space size="middle">
+        <Space size="small">
           <Button
             type="text"
             icon={<EyeOutlined />}
+            size="small"
             onClick={() => {
               setCurrentTransactor(record);
               setShowViewModal(true);
@@ -92,38 +94,36 @@ export const TransactorListComponent: React.FC<
           <Button
             type="text"
             icon={<EditOutlined />}
+            size="small"
             onClick={() => {
               setCurrentTransactor(record);
               setShowAddModal(true);
             }}
           />
-          <Button
-            type="text"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDeleteTransactor(record.id)}
-          />
+          <Popconfirm
+            title="Are you sure?"
+            onConfirm={() => onDeleteTransactor(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button size="small" icon={<DeleteOutlined />} type="link" danger />
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
-  const handleAddTransactor = (entity: Transactor) => {
-    onAddTransactor(entity);
-    setShowAddModal(false);
-  };
-
-  const handleDeleteTransactor = (id: string) => {
-    Modal.confirm({
-      title: "Are you sure you want to delete this entity?",
-      content: "This action cannot be undone.",
-      okText: "Yes",
-      okType: "danger",
-      cancelText: "No",
-      onOk() {
-        onDeleteTransactor(id);
-      },
-    });
+  const handleSeach = async (value: string) => {
+    try {
+      if (!value) return;
+      fetch({ name: value });
+    } catch (error: any) {
+      console.log(error);
+      notification.error({
+        message: "Error",
+        description: error?.message,
+      });
+    }
   };
 
   const entityTypeCapitalized =
@@ -144,6 +144,7 @@ export const TransactorListComponent: React.FC<
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ width: "250px" }}
+          onPressEnter={() => handleSeach(searchTerm)}
         />
         <Space>
           <Button
@@ -163,24 +164,39 @@ export const TransactorListComponent: React.FC<
 
       <Table
         columns={columns}
-        dataSource={filteredEntities}
+        dataSource={entities}
         rowKey="id"
         locale={{ emptyText: `No ${entityType}s found` }}
+        bordered
+        size="small"
+        loading={loading}
+        pagination={pagination}
+        onChange={(pagination) => {
+          fetch({ page: pagination.current, limit: pagination.pageSize });
+        }}
       />
 
-      <TransactorFormModal
-        visible={showAddModal}
-        entity={currentTransactor}
-        type={entityType}
-        onSave={handleAddTransactor}
-        onCancel={() => setShowAddModal(false)}
-      />
+      {showAddModal && (
+        <TransactorFormModal
+          visible={showAddModal}
+          entity={currentTransactor}
+          type={entityType}
+          onSave={async (values) =>
+            currentTransactor
+              ? onEditTransactor(currentTransactor?.id, values)
+              : onAddTransactor(values)
+          }
+          onCancel={() => setShowAddModal(false)}
+        />
+      )}
 
-      <ViewTransactorModal
-        visible={showViewModal}
-        entity={currentTransactor}
-        onClose={() => setShowViewModal(false)}
-      />
+      {showViewModal && (
+        <ViewTransactorModal
+          visible={showViewModal}
+          entity={currentTransactor}
+          onClose={() => setShowViewModal(false)}
+        />
+      )}
     </div>
   );
 };
