@@ -9,3 +9,12 @@ services:
     ports:
       - "80:80"
     restart: unless-stopped
+    environment: #temporary for local testing
+      - VITE_API_URL=http://backend:3001
+    networks:
+      - nexus-network
+
+networks: #temporary for local testing
+  nexus-network:
+    name: nexus-network
+    external: true

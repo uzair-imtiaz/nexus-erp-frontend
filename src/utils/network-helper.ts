@@ -3,8 +3,7 @@ import axiosRetry from "axios-retry";
 import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
-  baseURL:
-    "http://localhost:3001/api",
+  baseURL: `${import.meta.env.VITE_API_URL}/api`,
   timeout: 35000,
   withCredentials: true,
   headers: {
@@ -15,9 +14,16 @@ const axiosInstance = axios.create({
 // 🔁 Retry failed requests (network errors, 5xx)
 axiosRetry(axiosInstance, {
   retries: 3,
-  retryDelay: axiosRetry.exponentialDelay,
-  retryCondition: (error) =>
-    axiosRetry.isNetworkOrIdempotentRequestError(error),
+  retryDelay: (retryCount) => {
+    return retryCount * 1000;
+  },
+  retryCondition: (error) => {
+    return (
+      axiosRetry.isNetworkOrIdempotentRequestError(error) ||
+      error.code === "ECONNABORTED" ||
+      error.message === "Network Error"
+    );
+  },
 });
 
 // 🛠 Inject token into headers
