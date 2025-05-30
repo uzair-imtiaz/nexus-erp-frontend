@@ -1,5 +1,6 @@
 import {
   BarChartOutlined,
+  BookOutlined,
   CloseOutlined,
   DashboardOutlined,
   ExperimentOutlined,
@@ -7,6 +8,7 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuOutlined,
+  ProfileOutlined,
   SettingOutlined,
   ShoppingCartOutlined,
 } from "@ant-design/icons";
@@ -53,6 +55,16 @@ const AppLayout = () => {
       key: "/purchase-sale",
       icon: <ShoppingCartOutlined />,
       label: "Purchase/Sale",
+    },
+    {
+      key: "/expenses",
+      icon: <ProfileOutlined />,
+      label: "Expenses",
+    },
+    {
+      key: "/journal",
+      icon: <BookOutlined />,
+      label: "Journal",
     },
     {
       key: "/reports",

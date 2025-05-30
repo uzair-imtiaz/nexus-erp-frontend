@@ -25,6 +25,7 @@ import AddAccountModal from "./create-account-modal";
 import "./index.css";
 import { columnsConfig, getRowClassName } from "./utils";
 import { formatCurrency } from "../../utils";
+import { Account } from "./types";
 
 const { Title, Text } = Typography;
 
@@ -34,7 +35,7 @@ const ChartOfAccounts: React.FC = () => {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [accountToEdit, setAccountToEdit] = useState(null);
+  const [accountToEdit, setAccountToEdit] = useState<Account | null>(null);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
 
   const handleSearch = (value: string) => {
@@ -174,7 +175,7 @@ const ChartOfAccounts: React.FC = () => {
       title: "Actions",
       dataIndex: "actions",
       key: "actions",
-      render: (_, record) => (
+      render: (_: any, record: Account) => (
         <Space>
           <Button
             size="small"
