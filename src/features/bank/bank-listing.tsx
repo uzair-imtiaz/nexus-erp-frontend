@@ -53,6 +53,7 @@ export const BankTable = ({
       dataSource={data}
       loading={loading}
       rowKey="id"
+      size="small"
       pagination={pagination}
       onChange={(pagination) => {
         fetchItems({ page: pagination.current, limit: pagination.pageSize });

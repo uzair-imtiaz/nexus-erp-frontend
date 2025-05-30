@@ -248,6 +248,7 @@ const Inventory = () => {
         columns={columns}
         dataSource={items}
         rowKey="id"
+        size="small"
         pagination={{
           current: pagination?.page,
           pageSize: pagination?.limit,
