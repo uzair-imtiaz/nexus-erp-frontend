@@ -76,11 +76,6 @@ const AppLayout = () => {
       icon: <SettingOutlined />,
       label: "Core",
     },
-    // {
-    //   key: '/settings',
-    //   icon: <SettingOutlined />,
-    //   label: 'Settings',
-    // },
   ];
 
   const handleLogout = async () => {

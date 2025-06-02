@@ -12,10 +12,10 @@ import Login from "./features/auth/LoginForm";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import RegisterForm from "./features/auth/RegisterForm";
 import Core from "./features/core";
-import Journal from "./features/journal";
-import Expenses from "./features/expenses";
-import JournalEntry from "./features/journal/add-journal";
+import ExpenseListing from "./features/expenses";
 import AddExpenses from "./features/expenses/add-expenses";
+import Journal from "./features/journal";
+import JournalEntry from "./features/journal/add-journal";
 
 const theme = {
   token: {
@@ -41,8 +41,9 @@ function App() {
               <Route path="purchase-sale" element={<PurchaseSale />} />
               <Route path="journal" element={<Journal />}></Route>
               <Route path="journal/new" element={<JournalEntry />} />
-              <Route path="expenses" element={<Expenses />} />
+              <Route path="expenses" element={<ExpenseListing />} />
               <Route path="expenses/new" element={<AddExpenses />} />
+              <Route path="expenses/:id" element={<AddExpenses />} />
               <Route path="core" element={<Core />} />
               <Route path="reports" element={<Reports />} />
               <Route path="core/banks" element={<Reports />} />
