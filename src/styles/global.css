@@ -13,11 +13,10 @@
 }
 
 /* Form components text color */
-.ant-input,
-.ant-input-number-input,
+.ant-input:not(:placeholder-shown),
+.ant-input-number-input:not(:placeholder-shown),
 .ant-select-selection-item,
-.ant-select-selection-placeholder,
-.ant-picker-input > input {
+.ant-picker-input > input:not(:placeholder-shown) {
   color: #006169 !important;
   font-weight: 600 !important;
 }
