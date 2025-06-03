@@ -5,7 +5,7 @@ import {
   deleteBank,
   getBanks,
   updateBank,
-} from "../../services/bank.services";
+} from "../../services/bank-services";
 import { BankFormModal } from "./bank-form";
 import { BankTable } from "./bank-listing";
 import { buildQueryString } from "../../utils";

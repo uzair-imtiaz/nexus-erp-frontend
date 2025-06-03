@@ -23,7 +23,7 @@ import {
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getBanks } from "../../services/bank.services";
+import { getBanks } from "../../services/bank-services";
 import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
 import {
   deleteExpenseApi,
@@ -99,15 +99,6 @@ const ExpenseListing = () => {
     [filters, pagination.limit]
   );
 
-  // Debounced search effect
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetch(1);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [filters]);
-
   // Initial load
   useEffect(() => {
     const fetchData = async () => {
@@ -118,7 +109,11 @@ const ExpenseListing = () => {
         ]);
         if (BanksRes?.success && NominalRes?.success) {
           setBanks(BanksRes?.data);
-          setNominals(NominalRes?.data);
+          setNominals(
+            NominalRes?.data.filter(
+              (nominal: any) => !nominal.pathName?.includes("General Reserves")
+            )
+          );
         } else {
           notification.error({
             message: "Error",
@@ -371,7 +366,12 @@ const ExpenseListing = () => {
           Search
         </Button>
 
-        <Button type="primary" icon={<PlusOutlined />} size="middle">
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          size="middle"
+          onClick={() => navigate("/expenses/new")}
+        >
           Add New Expense
         </Button>
       </Space>

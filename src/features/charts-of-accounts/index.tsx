@@ -175,6 +175,7 @@ const ChartOfAccounts: React.FC = () => {
       title: "Actions",
       dataIndex: "actions",
       key: "actions",
+      width: 90,
       render: (_: any, record: Account) => (
         <Space>
           <Button

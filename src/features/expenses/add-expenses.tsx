@@ -8,11 +8,12 @@ import {
   notification,
   Select,
   Table,
+  Typography,
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 import { ExpenseRow } from "./types";
-import { getBanks } from "../../services/bank.services";
+import { getBanks } from "../../services/bank-services";
 import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
 import { ACCOUNT_TYPE } from "../charts-of-accounts/utils";
 import {
@@ -44,6 +45,7 @@ const AddExpenses = () => {
   ]);
 
   const navigate = useNavigate();
+  const { Title } = Typography;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,7 +57,11 @@ const AddExpenses = () => {
         ]);
         if (BanksRes?.success && NominalRes?.success) {
           setBanks(BanksRes?.data);
-          setNominals(NominalRes?.data);
+          setNominals(
+            NominalRes?.data.filter(
+              (nominal: any) => !nominal.pathName?.includes("General Reserves")
+            )
+          );
         } else {
           notification.error({
             message: "Error",
@@ -257,6 +263,7 @@ const AddExpenses = () => {
 
   return (
     <div>
+      <Title level={3}>Add Expense</Title>
       <Flex gap={16} style={{ marginBottom: 24 }}>
         <Select
           placeholder="Select Bank"
