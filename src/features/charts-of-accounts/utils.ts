@@ -27,6 +27,7 @@ export const columnsConfig = [
     title: "Name",
     dataIndex: "name",
     key: "name",
+    width: "18%",
   },
   {
     title: "Type",
@@ -47,21 +48,24 @@ export const columnsConfig = [
     render: (text: string) => text.split("/").join(" > "),
   },
   {
-    title: "Credit Amount",
-    dataIndex: "creditAmount",
-    key: "creditAmount",
-    render: (text: number) => formatCurrency(text),
-  },
-  {
     title: "Debit Amount",
     dataIndex: "debitAmount",
     key: "debitAmount",
+    width: "12%",
     render: (text: number) => formatCurrency(text),
   },
   {
-    title: "Amount",
-    dataIndex: "amount",
-    key: "amount",
+    title: "Credit Amount",
+    dataIndex: "creditAmount",
+    key: "creditAmount",
+    width: "12%",
+    render: (text: number) => formatCurrency(text),
+  },
+  {
+    title: "Balance",
+    dataIndex: "balance",
+    key: "balance",
+    width: "12%",
     render: (_, record: any) =>
       formatCurrency(record?.debitAmount - record?.creditAmount),
   },
