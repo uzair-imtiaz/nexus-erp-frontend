@@ -279,10 +279,10 @@ const ChartOfAccounts: React.FC = () => {
                   <Text strong>Balance</Text>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={4}>
-                  <Text strong>{formatCurrency(totalCredit)}</Text>
+                  <Text strong>{formatCurrency(totalDebit)}</Text>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={5}>
-                  <Text strong>{formatCurrency(totalDebit)}</Text>
+                  <Text strong>{formatCurrency(totalCredit)}</Text>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={6}>
                   <Text strong>{formatCurrency(totalDebit - totalCredit)}</Text>

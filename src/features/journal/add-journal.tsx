@@ -73,11 +73,12 @@ const JournalEntry = () => {
     {
       title: "Nominal Account",
       dataIndex: "nominalAccount",
+      width: 250,
       render: (value: string | null, record: JournalEntryRow) => (
         <Select
           placeholder="Select Account"
           value={value}
-          style={{ width: 200 }}
+          style={{ width: 250 }}
           onChange={(val: string) =>
             handleChange(val, record.key, "nominalAccount")
           }
@@ -88,16 +89,6 @@ const JournalEntry = () => {
             </Option>
           ))}
         </Select>
-      ),
-    },
-    {
-      title: "Projects",
-      dataIndex: "project",
-      render: (value: string, record: JournalEntryRow) => (
-        <Input
-          value={value}
-          onChange={(e) => handleChange(e.target.value, record.key, "project")}
-        />
       ),
     },
     {

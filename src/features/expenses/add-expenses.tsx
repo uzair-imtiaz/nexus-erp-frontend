@@ -59,7 +59,9 @@ const AddExpenses = () => {
           setBanks(BanksRes?.data);
           setNominals(
             NominalRes?.data.filter(
-              (nominal: any) => !nominal.pathName?.includes("General Reserves")
+              (nominal: any) =>
+                !nominal.pathName?.includes("General Reserves") &&
+                nominal.entityType !== "bank"
             )
           );
         } else {

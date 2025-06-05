@@ -98,7 +98,13 @@ export const TransactorFormModal: React.FC<TransactorFormModalProps> = ({
               <Input />
             </Form.Item>
 
-            <Form.Item label="Contact Person" name="personName">
+            <Form.Item
+              label="Contact Person"
+              name="personName"
+              rules={[
+                { required: true, message: "Please enter the contact person!" },
+              ]}
+            >
               <Input />
             </Form.Item>
 
