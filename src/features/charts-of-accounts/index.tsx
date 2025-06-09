@@ -25,6 +25,7 @@ import AddAccountModal from "./create-account-modal";
 import "./index.css";
 import { columnsConfig, getRowClassName } from "./utils";
 import { formatCurrency } from "../../utils";
+import { Account } from "./types";
 
 const { Title, Text } = Typography;
 
@@ -34,7 +35,7 @@ const ChartOfAccounts: React.FC = () => {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [accountToEdit, setAccountToEdit] = useState(null);
+  const [accountToEdit, setAccountToEdit] = useState<Account | null>(null);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
 
   const handleSearch = (value: string) => {
@@ -174,7 +175,8 @@ const ChartOfAccounts: React.FC = () => {
       title: "Actions",
       dataIndex: "actions",
       key: "actions",
-      render: (_, record) => (
+      width: 90,
+      render: (_: any, record: Account) => (
         <Space>
           <Button
             size="small"
@@ -277,10 +279,10 @@ const ChartOfAccounts: React.FC = () => {
                   <Text strong>Balance</Text>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={4}>
-                  <Text strong>{formatCurrency(totalCredit)}</Text>
+                  <Text strong>{formatCurrency(totalDebit)}</Text>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={5}>
-                  <Text strong>{formatCurrency(totalDebit)}</Text>
+                  <Text strong>{formatCurrency(totalCredit)}</Text>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={6}>
                   <Text strong>{formatCurrency(totalDebit - totalCredit)}</Text>

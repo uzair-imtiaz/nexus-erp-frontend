@@ -7,7 +7,7 @@ import {
 } from "../utils/network-helper";
 
 export const getBanks = async (query?: string) => {
-  const response: responseMetadata = await getCallback(`/banks${query}`);
+  const response: responseMetadata = await getCallback(`/banks${query ?? ""}`);
   return response;
 };
 

@@ -22,7 +22,7 @@ import { deleteInventory, getInventories } from "../../apis";
 import AddEditItemModal from "./add-edit-modal/add-edit-modal";
 import { InventoryItem } from "./types";
 import ViewItemModal from "./view-item-modal/view-modal";
-import { buildQueryString } from "../../utils";
+import { buildQueryString, formatCurrency } from "../../utils";
 
 const Inventory = () => {
   const { Option } = Select;
@@ -150,8 +150,7 @@ const Inventory = () => {
     {
       title: "Stock Value",
       key: "stockValue",
-      render: (_, record) =>
-        `${(record.baseRate * record.quantity).toFixed(2)}`,
+      render: (_, record) => formatCurrency(record?.amount),
     },
     {
       title: "Actions",
@@ -248,6 +247,7 @@ const Inventory = () => {
         columns={columns}
         dataSource={items}
         rowKey="id"
+        size="small"
         pagination={{
           current: pagination?.page,
           pageSize: pagination?.limit,

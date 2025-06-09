@@ -1,5 +1,6 @@
 import {
   BarChartOutlined,
+  BookOutlined,
   CloseOutlined,
   DashboardOutlined,
   ExperimentOutlined,
@@ -7,6 +8,7 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuOutlined,
+  ProfileOutlined,
   SettingOutlined,
   ShoppingCartOutlined,
 } from "@ant-design/icons";
@@ -55,6 +57,16 @@ const AppLayout = () => {
       label: "Purchase/Sale",
     },
     {
+      key: "/expenses",
+      icon: <ProfileOutlined />,
+      label: "Expenses",
+    },
+    {
+      key: "/journal",
+      icon: <BookOutlined />,
+      label: "Journal",
+    },
+    {
       key: "/reports",
       icon: <BarChartOutlined />,
       label: "Reports",
@@ -64,11 +76,6 @@ const AppLayout = () => {
       icon: <SettingOutlined />,
       label: "Core",
     },
-    // {
-    //   key: '/settings',
-    //   icon: <SettingOutlined />,
-    //   label: 'Settings',
-    // },
   ];
 
   const handleLogout = async () => {
