@@ -1,6 +1,19 @@
+import { ReactNode } from "react";
+
 export interface NominalAccount {
-  label: string;
-  value: string;
+  id: string;
+  name: string;
+  code: string;
+  type: string;
+}
+
+export interface NominalAccountGroup {
+  label: string | ReactNode;
+  title: string;
+  options: {
+    label: string;
+    value: string;
+  }[];
 }
 
 export interface JournalEntryRow {
@@ -14,9 +27,8 @@ export interface JournalEntryRow {
 
 export interface Journal {
   id: string;
-  journal_id: string;
   date: string;
-  ref_no: string;
+  ref: string;
   total: number;
   entries: JournalEntry[];
   description?: string;
@@ -25,7 +37,7 @@ export interface Journal {
 
 export interface JournalEntry {
   id: string;
-  nominal_account: { name: string; code: string } | null;
+  nominalAccount: { name: string; code: string } | null;
   debit: number;
   credit: number;
   description: string;
@@ -33,7 +45,7 @@ export interface JournalEntry {
 
 export interface Filters {
   nominal_ids?: string[];
-  ref_no?: string;
+  ref?: string;
   dateRange?: [dayjs.Dayjs, dayjs.Dayjs] | null;
 }
 
