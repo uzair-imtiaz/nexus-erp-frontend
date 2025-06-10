@@ -45,7 +45,6 @@ const ChartOfAccounts: React.FC = () => {
       return;
     }
 
-    // Find all accounts that match the search
     const findMatchingAccounts = (
       accounts: any[],
       searchValue: string,
@@ -64,15 +63,15 @@ const ChartOfAccounts: React.FC = () => {
           account.name.toLowerCase().includes(searchValue.toLowerCase()) ||
           account.code?.toLowerCase().includes(searchValue.toLowerCase())
         ) {
-          // matches.push(account.id);
+          matches.push(account.id);
           allParentIds = [...allParentIds, ...currentParentIds];
         }
 
-        if (account.children) {
+        if (account.children && account.children.length) {
           const childResults = findMatchingAccounts(
             account.children,
             searchValue,
-            currentParentIds
+            [...currentParentIds, account.id] // pass down the chain
           );
           matches = [...matches, ...childResults.matches];
           allParentIds = [...allParentIds, ...childResults.parentIds];
@@ -82,9 +81,8 @@ const ChartOfAccounts: React.FC = () => {
       return { matches, parentIds: allParentIds };
     };
 
-    const { matches, parentIds } = findMatchingAccounts(accounts, value);
-    // Combine matching IDs with their parent IDs and remove duplicates
-    const allIdsToExpand = [...new Set([...matches, ...parentIds])];
+    const { matches: _, parentIds } = findMatchingAccounts(accounts, value);
+    const allIdsToExpand = [...new Set(parentIds)];
     setExpandedKeys(allIdsToExpand);
   };
 
