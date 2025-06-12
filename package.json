@@ -18,6 +18,7 @@
     "axios-retry": "^4.5.0",
     "dayjs": "^1.11.13",
     "js-cookie": "^3.0.5",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
+    "@types/lodash": "^4.17.17",
     "@types/node": "^22.15.3",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",

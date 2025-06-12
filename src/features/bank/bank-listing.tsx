@@ -1,5 +1,6 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Popconfirm, Space, Table } from "antd";
+import dayjs from "dayjs";
 
 export const BankTable = ({
   data,
@@ -23,7 +24,12 @@ export const BankTable = ({
       dataIndex: "currentBalance",
       key: "currentBalance",
     },
-    { title: "Opening Date", dataIndex: "openingDate", key: "openingDate" },
+    {
+      title: "Opening Date",
+      dataIndex: "openingDate",
+      key: "openingDate",
+      render: (openingDate: any) => dayjs(openingDate).format("DD-MMM-YY"),
+    },
     {
       title: "Actions",
       render: (_: any, record: any) => (

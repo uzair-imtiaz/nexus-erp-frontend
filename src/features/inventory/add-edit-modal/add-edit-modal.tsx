@@ -1,5 +1,6 @@
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import {
+  AutoComplete,
   Button,
   Col,
   Divider,
@@ -18,6 +19,7 @@ import { useState } from "react";
 import { createInventory, updateInventory } from "../../../apis";
 import { responseMetadata } from "../../../apis/types";
 import { AddEditItemModalProps } from "./types";
+import { suggestedUnits } from "../constants/index.constants";
 
 const { Option } = Select;
 
@@ -28,20 +30,35 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
   onSuccess,
 }) => {
   const [form] = Form.useForm();
-  const [multiUnits, setMultiUnits] = useState(item?.multiUnits || []);
-  const [newUnit, setNewUnit] = useState({ name: "", factor: null });
+  const [multiUnits, setMultiUnits] = useState<Record<string, number>>(
+    item?.multiUnits || {}
+  );
+  const [newUnit, setNewUnit] = useState<{
+    name: string;
+    factor: number | null;
+  }>({ name: "", factor: null });
   const [loading, setLoading] = useState(false);
 
   const handleAddUnit = () => {
-    if (newUnit.name && newUnit.factor) {
-      setMultiUnits([...multiUnits, newUnit]);
-      setNewUnit({ name: "", factor: null });
+    if (!newUnit.name.trim()) {
+      notification.warning({ message: "Unit name is required" });
+      return;
     }
+    if (newUnit.factor == null || isNaN(newUnit.factor)) {
+      notification.warning({ message: "Conversion factor is required" });
+      return;
+    }
+    if (multiUnits[newUnit.name]) {
+      notification.warning({ message: "This unit is already added" });
+      return;
+    }
+    setMultiUnits({ ...multiUnits, [newUnit.name]: newUnit.factor });
+    setNewUnit({ name: "", factor: null });
   };
 
-  const handleRemoveUnit = (index: number) => {
-    const updated = [...multiUnits];
-    updated.splice(index, 1);
+  const handleRemoveUnit = (name: string) => {
+    const updated = { ...multiUnits };
+    delete updated[name];
     setMultiUnits(updated);
   };
 
@@ -51,10 +68,7 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
       const values = await form.validateFields();
       const finalData = {
         ...values,
-        multiUnits: multiUnits.map((unit) => ({
-          name: unit.name,
-          factor: Number(unit.factor),
-        })),
+        multiUnits,
         quantity: Number(values.quantity),
         baseRate: Number(values.baseRate),
       };
@@ -68,7 +82,7 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
         });
       }
       form.resetFields();
-      setMultiUnits([]);
+      setMultiUnits({});
       notification.success({
         message: "Success",
         description: response.message,
@@ -103,16 +117,21 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
     {
       title: "Actions",
       key: "actions",
-      render: (_, __, index) => (
+      render: (_, record) => (
         <Button
           icon={<DeleteOutlined />}
           danger
-          onClick={() => handleRemoveUnit(index)}
+          onClick={() => handleRemoveUnit(record.name)}
           type="link"
         />
       ),
     },
   ];
+
+  const unitDataSource = Object.entries(multiUnits).map(([name, factor]) => ({
+    name,
+    factor,
+  }));
 
   return (
     <Modal
@@ -200,10 +219,10 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
 
         {multiUnits.length > 0 && (
           <Table
-            dataSource={multiUnits}
+            dataSource={unitDataSource}
             columns={unitColumns}
             pagination={false}
-            rowKey={(record, index) => index}
+            rowKey={(record) => record.name}
             size="small"
           />
         )}
@@ -211,11 +230,19 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
         <Space style={{ width: "100%" }} size="large">
           <Typography.Text strong>Add Unit</Typography.Text>
           <Space.Compact style={{ width: "100%" }} size="middle">
-            <Input
+            <AutoComplete
+              options={suggestedUnits
+                .filter((u) => !multiUnits[u]) // remove already added units
+                .map((unit) => ({ value: unit }))}
               placeholder="Unit Name"
               value={newUnit.name}
-              onChange={(e) => setNewUnit({ ...newUnit, name: e.target.value })}
+              onChange={(val) => setNewUnit({ ...newUnit, name: val })}
               style={{ width: "33%" }}
+              filterOption={(inputValue, option) =>
+                option?.value
+                  ?.toLowerCase()
+                  .includes(inputValue.toLowerCase()) ?? false
+              }
             />
             <InputNumber
               placeholder="Conversion Factor"
