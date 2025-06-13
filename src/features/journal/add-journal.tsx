@@ -2,25 +2,32 @@ import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   Button,
   DatePicker,
+  Divider,
   Flex,
+  Form,
   Input,
   InputNumber,
+  notification,
   Select,
   Space,
   Table,
 } from "antd";
 import dayjs from "dayjs";
-import { useState } from "react";
-import { JournalEntryRow, NominalAccount } from "./types";
+import { useEffect, useState } from "react";
+import { JournalEntryRow, NominalAccount, NominalAccountGroup } from "./types";
+import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
+import { addJournalApi } from "../../services/journals.services";
+import { useNavigate } from "react-router-dom";
 
-const { Option } = Select;
+const { Option, OptGroup } = Select;
 
-const nominalAccounts: NominalAccount[] = [
-  { label: "Accruals (110101)", value: "110101" },
-  { label: "Accrued Income (220701)", value: "220701" },
-];
+interface ApiError {
+  message: string;
+  errorFields?: { name: string[]; errors: string[] }[];
+}
 
 const JournalEntry = () => {
+  const [form] = Form.useForm();
   const [data, setData] = useState<JournalEntryRow[]>([
     {
       key: 1,
@@ -31,8 +38,62 @@ const JournalEntry = () => {
       credit: 0,
     },
   ]);
-  const [date, setDate] = useState(dayjs());
-  const [refNo, setRefNo] = useState("");
+  const [nominals, setNominals] = useState<NominalAccountGroup[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchNominals = async () => {
+      try {
+        const [l2, l3, l4] = await Promise.all([
+          getAccountByTypeApi("accountType"),
+          getAccountByTypeApi("account"),
+          getAccountByTypeApi("subAccount"),
+        ]);
+        if (!l2.success || !l3.success || !l4.success) {
+          return notification.error({
+            message: "Error",
+            description: "Something went wrong",
+          });
+        }
+        setNominals([
+          {
+            label: "Level 2",
+            title: "Level 2",
+            options: l2.data?.map((l: NominalAccount) => ({
+              label: `${l.name} (${l.code})`,
+              value: l.id,
+            })),
+          },
+          {
+            label: <span>Level 3</span>,
+            title: "Level 3",
+            options: l3.data?.map((l: NominalAccount) => ({
+              label: `${l.name} (${l.code})`,
+              value: l.id,
+            })),
+          },
+          {
+            label: <span>Level 4</span>,
+            title: "Level 4",
+            options: l4.data?.map((l: NominalAccount) => ({
+              label: `${l.name} (${l.code})`,
+              value: l.id,
+            })),
+          },
+        ]);
+      } catch (error) {
+        const apiError = error as ApiError;
+        notification.error({
+          message: "Error",
+          description: apiError.message || "Something went wrong",
+        });
+      }
+    };
+
+    fetchNominals();
+  }, []);
 
   const handleChange = (
     value: string | number,
@@ -66,6 +127,10 @@ const JournalEntry = () => {
     ]);
   };
 
+  const removeRow = (key: number) => {
+    setData(data.filter((item) => item.key !== key));
+  };
+
   const totalDebit = data.reduce((sum, r) => sum + (r.debit || 0), 0);
   const totalCredit = data.reduce((sum, r) => sum + (r.credit || 0), 0);
 
@@ -75,20 +140,38 @@ const JournalEntry = () => {
       dataIndex: "nominalAccount",
       width: 250,
       render: (value: string | null, record: JournalEntryRow) => (
-        <Select
-          placeholder="Select Account"
-          value={value}
-          style={{ width: 250 }}
-          onChange={(val: string) =>
-            handleChange(val, record.key, "nominalAccount")
-          }
+        <Form.Item
+          name={["details", record.key, "nominalAccount"]}
+          rules={[{ required: true, message: "Please select an account" }]}
+          style={{ margin: 0 }}
         >
-          {nominalAccounts.map((acc) => (
-            <Option key={acc.value} value={acc.value}>
-              {acc.label}
-            </Option>
-          ))}
-        </Select>
+          <Select
+            placeholder="Select Account"
+            value={value}
+            style={{ width: 250 }}
+            onChange={(val: string) =>
+              handleChange(val, record.key, "nominalAccount")
+            }
+          >
+            {nominals.map((group) => (
+              <OptGroup
+                key={group.title}
+                label={
+                  <div>
+                    <span style={{ fontWeight: 600 }}>{group.label}</span>
+                    <Divider style={{ margin: "4px 0" }} />
+                  </div>
+                }
+              >
+                {group.options.map((acc: any) => (
+                  <Option key={acc.value} value={acc.value}>
+                    {acc.label}
+                  </Option>
+                ))}
+              </OptGroup>
+            ))}
+          </Select>
+        </Form.Item>
       ),
     },
     {
@@ -106,6 +189,7 @@ const JournalEntry = () => {
     {
       title: "Debit",
       dataIndex: "debit",
+      width: "120",
       render: (value: number, record: JournalEntryRow) => (
         <InputNumber
           min={0}
@@ -119,6 +203,7 @@ const JournalEntry = () => {
     {
       title: "Credit",
       dataIndex: "credit",
+      width: "120",
       render: (value: number, record: JournalEntryRow) => (
         <InputNumber
           min={0}
@@ -144,15 +229,75 @@ const JournalEntry = () => {
     },
   ];
 
+  const handleSave = async () => {
+    try {
+      const values = await form.validateFields();
+      setLoading(true);
+      const payload = {
+        ref: values.ref,
+        date: values.date,
+        description: values.description,
+        details: data.map((d) => ({
+          nominalAccountId: d.nominalAccount,
+          description: d.description,
+          debit: d.debit,
+          credit: d.credit,
+        })),
+      };
+      const response = await addJournalApi(payload);
+      if (!response?.success) {
+        notification.error({
+          message: "Error",
+          description: response?.message,
+        });
+        return;
+      }
+      notification.success({
+        message: "Success",
+        description: "Journal Entry created successfully",
+      });
+      navigate("/journal");
+    } catch (error) {
+      const apiError = error as ApiError;
+      if (apiError.errorFields) {
+        notification.error({
+          message: "Validation Error",
+          description: "Please fill in all required fields",
+        });
+      } else {
+        notification.error({
+          message: "Error",
+          description: apiError.message || "Something went wrong",
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div style={{ padding: 24 }}>
+    <Form form={form} layout="vertical" style={{ padding: 24 }}>
       <Space style={{ marginBottom: 16 }}>
-        <DatePicker value={date} onChange={setDate} />
-        <Input
-          placeholder="Ref No"
-          value={refNo}
-          onChange={(e) => setRefNo(e.target.value)}
-        />
+        <Form.Item
+          name="date"
+          label="Date"
+          rules={[{ required: true, message: "Please select a date" }]}
+          initialValue={dayjs()}
+        >
+          <DatePicker />
+        </Form.Item>
+        <Form.Item
+          name="ref"
+          label="Ref No"
+          rules={[
+            { required: true, message: "Please enter a reference number" },
+          ]}
+        >
+          <Input placeholder="Ref No" />
+        </Form.Item>
+        <Form.Item name="description" label="Description">
+          <Input placeholder="Description" />
+        </Form.Item>
       </Space>
 
       <Table
@@ -163,7 +308,7 @@ const JournalEntry = () => {
         size="small"
         summary={() => (
           <Table.Summary.Row>
-            <Table.Summary.Cell index={0} colSpan={3}>
+            <Table.Summary.Cell index={0} colSpan={2}>
               <strong>Total</strong>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={1}>
@@ -172,7 +317,9 @@ const JournalEntry = () => {
             <Table.Summary.Cell index={2}>
               <strong>{totalCredit.toFixed(2)}</strong>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={2} />
+            <Table.Summary.Cell index={3}>
+              <strong>{(totalDebit - totalCredit).toFixed(2)}</strong>
+            </Table.Summary.Cell>
           </Table.Summary.Row>
         )}
       />
@@ -183,15 +330,19 @@ const JournalEntry = () => {
         </Button>
 
         <Flex gap={12}>
-          <Button>Cancel</Button>
-          <Button type="primary">Save</Button>
+          <Button onClick={() => navigate("/journal")}>Cancel</Button>
+          <Button
+            type="primary"
+            disabled={totalDebit !== totalCredit}
+            onClick={handleSave}
+            loading={loading}
+          >
+            Save
+          </Button>
         </Flex>
       </Flex>
-    </div>
+    </Form>
   );
 };
 
 export default JournalEntry;
-function removeRow(key: number): void {
-  throw new Error("Function not implemented.");
-}

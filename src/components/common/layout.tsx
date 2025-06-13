@@ -52,9 +52,9 @@ const AppLayout = () => {
       label: "Formulation",
     },
     {
-      key: "/purchase-sale",
+      key: "/transactions",
       icon: <ShoppingCartOutlined />,
-      label: "Purchase/Sale",
+      label: "Transactions",
     },
     {
       key: "/expenses",

@@ -80,7 +80,7 @@ const ViewItemModal: React.FC<ViewItemModalProps> = ({
         </Descriptions.Item>
       </Descriptions>
 
-      {item?.multiUnits?.length > 0 && (
+      {item?.multiUnits && Object.keys(item.multiUnits).length > 0 && (
         <>
           <Divider />
           <div style={{ marginBottom: 16 }}>
@@ -88,10 +88,13 @@ const ViewItemModal: React.FC<ViewItemModalProps> = ({
           </div>
           <Table
             columns={columns}
-            dataSource={item.multiUnits.map((unit, index) => ({
-              ...unit,
-              key: index,
-            }))}
+            dataSource={Object.entries(item.multiUnits).map(
+              ([name, factor], index) => ({
+                key: index,
+                name,
+                factor,
+              })
+            )}
             pagination={false}
             size="small"
           />

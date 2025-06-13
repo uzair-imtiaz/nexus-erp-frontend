@@ -1,8 +1,8 @@
 import {
+  DeleteOutlined,
   DownOutlined,
-  FileTextOutlined,
+  EditOutlined,
   PlusOutlined,
-  PrinterOutlined,
   ReloadOutlined,
   RightOutlined,
   SearchOutlined,
@@ -12,6 +12,7 @@ import {
   DatePicker,
   Input,
   notification,
+  Popconfirm,
   Select,
   Space,
   Table,
@@ -24,22 +25,23 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getJournalsApi } from "../../services/journals.services";
 import { buildQueryString, formatCurrency } from "../../utils";
-import { Filters, Journal, Pagination } from "./types";
+import { Filters, Journal, JournalEntry, Pagination } from "./types";
+import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
 
-const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const JournalsListing = () => {
   const [filters, setFilters] = useState<Filters>({
     nominal_ids: undefined,
-    ref_no: undefined,
+    ref: undefined,
     dateRange: null,
   });
   const [loading, setLoading] = useState(false);
+  const [nominals, setNominals] = useState<any>([]);
   const [data, setData] = useState<Journal[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
-    limit: 25,
+    limit: 20,
     total: 0,
     totalPages: 0,
     nextPage: null,
@@ -54,11 +56,11 @@ const JournalsListing = () => {
     async (page = 1) => {
       try {
         setLoading(true);
-        const { nominal_ids, ref_no, dateRange } = filters;
+        const { nominal_ids, ref, dateRange } = filters;
 
         const queryString = buildQueryString({
           nominal_ids: nominal_ids?.join(","),
-          ref_no,
+          ref,
           date_from: dateRange?.[0]?.format("YYYY-MM-DD") || null,
           date_to: dateRange?.[1]?.format("YYYY-MM-DD") || null,
           page,
@@ -91,6 +93,25 @@ const JournalsListing = () => {
 
   // Initial load
   useEffect(() => {
+    const fetchNominals = async () => {
+      try {
+        const response = await getAccountByTypeApi("subAccount");
+        if (!response.success) {
+          return notification.error({
+            message: "Error",
+            description: response.message,
+          });
+        }
+        setNominals(response.data);
+      } catch (error: any) {
+        notification.error({
+          message: "Error",
+          description: error?.message,
+        });
+      }
+    };
+
+    fetchNominals();
     fetch();
   }, []);
 
@@ -101,105 +122,85 @@ const JournalsListing = () => {
   const clearFilters = useCallback(() => {
     setFilters({
       nominal_ids: undefined,
-      ref_no: undefined,
+      ref: undefined,
       dateRange: null,
     });
   }, []);
-
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case "posted":
-        return "green";
-      case "draft":
-        return "orange";
-      case "cancelled":
-        return "red";
-      default:
-        return "default";
-    }
-  };
 
   // Memoized columns
   const columns = useMemo(
     () => [
       {
         title: "Journal ID",
-        dataIndex: "journal_id",
-        width: 120,
+        dataIndex: "id",
+        width: 80,
         fixed: "left" as const,
         render: (text: string) => (
           <Tag color="blue" style={{ fontFamily: "monospace" }}>
             {text}
           </Tag>
         ),
-        sorter: true,
+        sorter: (a: Journal, b: Journal) => Number(a.id) - Number(b.id),
       },
       {
         title: "Date",
         dataIndex: "date",
         width: 120,
-        render: (text: string) => (
-          <Tooltip title={dayjs(text).format("DD/MM/YYYY HH:mm")}>
-            {dayjs(text).format("DD/MM/YYYY")}
-          </Tooltip>
-        ),
-        sorter: true,
-      },
-      {
-        title: "Ref. No.",
-        dataIndex: "ref_no",
-        width: 140,
-        render: (text: string) => (
-          <span style={{ fontFamily: "monospace", fontWeight: 500 }}>
-            {text || "No Ref"}
-          </span>
-        ),
-      },
-      {
-        title: "Entries",
-        width: 100,
-        render: (record: Journal) => (
-          <Tag color="purple">{record.entries?.length || 0} entries</Tag>
-        ),
-      },
-      {
-        title: "Description",
-        dataIndex: "description",
-        ellipsis: {
-          showTitle: false,
-        },
-        render: (text: string) => (
-          <Tooltip placement="topLeft" title={text}>
-            {text || "No description"}
-          </Tooltip>
-        ),
+        render: (text: string) => dayjs(text).format("DD-MM-YYYY"),
+        sorter: (a: Journal, b: Journal) =>
+          dayjs(a.date).valueOf() - dayjs(b.date).valueOf(),
       },
       {
         title: "Total",
         dataIndex: "total",
         width: 140,
         align: "right" as const,
-        render: (amount: number) => (
-          <span style={{ fontWeight: 600, color: "#1890ff" }}>
-            {formatCurrency(amount)}
-          </span>
-        ),
-        sorter: true,
+        render: (_: any, record: Journal) => {
+          const amount = record.details.reduce(
+            (total, entry) =>
+              Number(total) + Number(entry.debit) - Number(entry.credit),
+            0
+          );
+          return (
+            <span style={{ fontWeight: 600, color: "#1890ff" }}>
+              {formatCurrency(amount)}
+            </span>
+          );
+        },
+        sorter: (a: Journal, b: Journal) => {
+          const totalA = a.details.reduce(
+            (total: number, entry: JournalEntry) =>
+              Number(total) + Number(entry.debit) - Number(entry.credit),
+            0
+          );
+          const totalB = b.details.reduce(
+            (total: number, entry: JournalEntry) =>
+              Number(total) + Number(entry.debit) - Number(entry.credit),
+            0
+          );
+          return totalA - totalB;
+        },
       },
       {
         title: "Action",
+        dataIndex: "action",
         width: 120,
-        fixed: "right" as const,
-        render: (record: Journal) => (
-          <Space size="small">
-            <Tooltip title="View Details">
-              <Button type="text" icon={<FileTextOutlined />} size="small" />
-            </Tooltip>
-            <Tooltip title="Print">
-              <Button type="text" icon={<PrinterOutlined />} size="small" />
-            </Tooltip>
-          </Space>
-        ),
+        align: "right" as const,
+        render: (_: any, record: Journal) => {
+          return (
+            <Space size="small" align="end">
+              <Button
+                size="small"
+                type="link"
+                icon={<EditOutlined />}
+                onClick={() => {}}
+              />
+              <Popconfirm title="Are you sure you want to delete this journal?">
+                <Button danger type="link" icon={<DeleteOutlined />} />
+              </Popconfirm>
+            </Space>
+          );
+        },
       },
     ],
     []
@@ -209,22 +210,17 @@ const JournalsListing = () => {
     () => [
       {
         title: "Nominal Account",
-        dataIndex: "nominal_account",
-        render: (account: { name: string; code: string } | null) => (
-          <div>
-            <Tag color="green">{account?.code || "N/A"}</Tag>
-            <br />
-            <span style={{ fontSize: "12px", color: "#666" }}>
-              {account?.name || "No Account"}
-            </span>
-          </div>
+        dataIndex: "nominalAccount",
+        width: 300,
+        render: (account: { name: string } | null) => (
+          <Tag color="green">{account?.name || "No Account"}</Tag>
         ),
       },
       {
         title: "Debit",
         dataIndex: "debit",
         width: 120,
-        align: "right" as const,
+        // align: "right" as const,
         render: (amount: number) => (
           <span
             style={{
@@ -232,7 +228,7 @@ const JournalsListing = () => {
               color: amount > 0 ? "#52c41a" : "#d9d9d9",
             }}
           >
-            {amount > 0 ? `$${amount.toLocaleString()}` : "-"}
+            {formatCurrency(amount)}
           </span>
         ),
       },
@@ -240,7 +236,6 @@ const JournalsListing = () => {
         title: "Credit",
         dataIndex: "credit",
         width: 120,
-        align: "right" as const,
         render: (amount: number) => (
           <span
             style={{
@@ -248,7 +243,7 @@ const JournalsListing = () => {
               color: amount > 0 ? "#ff7875" : "#d9d9d9",
             }}
           >
-            {amount > 0 ? `$${amount.toLocaleString()}` : "-"}
+            {formatCurrency(amount)}{" "}
           </span>
         ),
       },
@@ -269,11 +264,7 @@ const JournalsListing = () => {
   );
 
   const hasActiveFilters = useMemo(() => {
-    return !!(
-      filters.nominal_ids?.length ||
-      filters.ref_no ||
-      filters.dateRange
-    );
+    return !!(filters.nominal_ids?.length || filters.ref || filters.dateRange);
   }, [filters]);
 
   const handleTableChange = (
@@ -300,16 +291,17 @@ const JournalsListing = () => {
           allowClear
           maxTagCount={2}
         >
-          <Option value="nominal1">Cash Account</Option>
-          <Option value="nominal2">Bank Account</Option>
-          <Option value="nominal3">Revenue Account</Option>
-          <Option value="nominal4">Expense Account</Option>
+          {nominals.map((nominal) => (
+            <Select.Option key={nominal.id} value={nominal.id}>
+              {nominal.name} ({nominal.code})
+            </Select.Option>
+          ))}
         </Select>
 
         <Input
           placeholder="Ref No."
-          value={filters.ref_no}
-          onChange={(e) => handleFilterChange("ref_no", e.target.value)}
+          value={filters.ref}
+          onChange={(e) => handleFilterChange("ref", e.target.value)}
           style={{ width: 140 }}
           allowClear
         />
@@ -361,6 +353,8 @@ const JournalsListing = () => {
         columns={columns}
         dataSource={data}
         loading={loading}
+        rowKey="id"
+        size="small"
         pagination={{
           current: pagination.page,
           pageSize: pagination.limit,
@@ -371,33 +365,17 @@ const JournalsListing = () => {
             `Showing ${range[0]} to ${range[1]} of ${total} entries`,
           size: "small",
         }}
-        rowKey="id"
         expandable={{
           expandedRowRender: (record) => (
-            <div
-              style={{
-                margin: "0 24px",
-                backgroundColor: "#fafafa",
-                padding: "16px",
-                borderRadius: "6px",
-              }}
-            >
-              <Typography.Text
-                strong
-                style={{ marginBottom: 12, display: "block" }}
-              >
-                Journal Entries:
-              </Typography.Text>
-              <Table
-                columns={entryColumns}
-                dataSource={record.entries}
-                pagination={false}
-                rowKey="id"
-                size="small"
-              />
-            </div>
+            <Table
+              columns={entryColumns}
+              dataSource={record.details}
+              pagination={false}
+              rowKey="id"
+              size="small"
+            />
           ),
-          rowExpandable: (record) => record.entries?.length > 0,
+          rowExpandable: (record) => record.details?.length > 0,
           expandIcon: ({ expanded, onExpand, record }) =>
             expanded ? (
               <DownOutlined
@@ -413,7 +391,6 @@ const JournalsListing = () => {
         }}
         scroll={{ x: "max-content" }}
         onChange={handleTableChange}
-        size="middle"
       />
     </div>
   );

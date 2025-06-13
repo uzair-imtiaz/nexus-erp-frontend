@@ -7,7 +7,7 @@ import {
 } from "../utils/network-helper";
 
 export const getCustomersApi = async (
-  query?: string
+  query: string = ""
 ): Promise<responseMetadata> => {
   const response: responseMetadata = await getCallback(`customer${query}`);
   return response;
