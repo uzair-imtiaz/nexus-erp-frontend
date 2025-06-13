@@ -5,7 +5,6 @@ import AppLayout from "./components/common/layout";
 import Dashboard from "./components/Dashboard";
 import Formulation from "./components/Formulation";
 import Production from "./components/Production";
-import PurchaseSale from "./components/PurchaseSale";
 import Reports from "./components/Reports";
 import Login from "./features/auth/LoginForm";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
@@ -16,6 +15,8 @@ import AddExpenses from "./features/expenses/add-expenses";
 import Inventory from "./features/inventory/inventory";
 import Journal from "./features/journal";
 import JournalEntry from "./features/journal/add-journal";
+import SaleForm from "./features/transactions/sale-form";
+import TransactionsPage from "./features/transactions/transactions";
 
 const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
@@ -42,7 +43,8 @@ function App() {
               <Route path="core/inventory" element={<Inventory />} />
               <Route path="production" element={<Production />} />
               <Route path="formulation" element={<Formulation />} />
-              <Route path="purchase-sale" element={<PurchaseSale />} />
+              <Route path="transactions" element={<TransactionsPage />} />
+              <Route path="sales/new" element={<SaleForm />} />
               <Route path="journal" element={<Journal />} />
               <Route path="journal/new" element={<JournalEntry />} />
               <Route path="expenses" element={<ExpenseListing />} />

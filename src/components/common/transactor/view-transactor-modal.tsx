@@ -2,6 +2,7 @@ import { Button, Descriptions, Divider, Modal, Typography } from "antd";
 import React from "react";
 import { ViewTransactorModalProps } from "./types";
 import dayjs from "dayjs";
+import { formatCurrency } from "../../../utils";
 
 export const ViewTransactorModal: React.FC<ViewTransactorModalProps> = ({
   visible,
@@ -46,7 +47,7 @@ export const ViewTransactorModal: React.FC<ViewTransactorModalProps> = ({
         <div>
           <Typography.Text type="secondary">Opening Balance</Typography.Text>
           <Typography.Title level={5}>
-            ${entity.openingBalance.toFixed(2)}
+            {formatCurrency(entity.openingBalance)}
           </Typography.Title>
         </div>
         <div>

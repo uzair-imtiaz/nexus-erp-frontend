@@ -217,7 +217,7 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
 
         <Divider orientation="left">Multi Units</Divider>
 
-        {multiUnits.length > 0 && (
+        {unitDataSource.length > 0 && (
           <Table
             dataSource={unitDataSource}
             columns={unitColumns}
