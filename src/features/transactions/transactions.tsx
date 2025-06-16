@@ -92,6 +92,16 @@ const TransactionsPage = () => {
           loading={loading}
           pagination={pagination}
           fetch={fetchTransactions}
+          menuOptions={[
+            {
+              key: "purchase",
+              label: "Purchase",
+            },
+            {
+              key: "purchase-return",
+              label: "Purchase Return",
+            },
+          ]}
         />
       </TabPane>
       <TabPane
@@ -108,6 +118,16 @@ const TransactionsPage = () => {
           loading={loading}
           pagination={pagination}
           fetch={fetchTransactions}
+          menuOptions={[
+            {
+              key: "sale",
+              label: "Sale",
+            },
+            {
+              key: "sale-return",
+              label: "Sale Return",
+            },
+          ]}
         />
       </TabPane>
     </Tabs>
