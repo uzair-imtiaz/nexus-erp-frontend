@@ -1,10 +1,21 @@
-import { Button, Flex, Popconfirm, Space, Table, Tooltip } from "antd";
+import {
+  Button,
+  Flex,
+  Popconfirm,
+  Space,
+  Table,
+  Tooltip,
+  Dropdown,
+} from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Download, Edit, Eye, Plus, Trash2, Upload } from "lucide-react";
+import { DownOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Transaction, TransactionType } from "./types";
 import ViewTransactionModal from "./view-transaction";
+import { formatCurrency } from "../../../utils";
+import type { MenuProps } from "antd";
 
 interface TransactionsTableProps {
   type: TransactionType;
@@ -15,6 +26,7 @@ interface TransactionsTableProps {
     queryParams?: Record<string, any>
   ) => void;
   pagination?: any;
+  menuOptions: MenuProps["items"];
 }
 
 const TransactionsTable: React.FC<TransactionsTableProps> = ({
@@ -22,13 +34,17 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
   transactions,
   pagination,
   loading = false,
+  menuOptions,
   fetch,
 }) => {
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [currentTransaction, setCurrentTransaction] =
     useState<Transaction | null>(null);
-
   const navigate = useNavigate();
+
+  const handleMenuClick: MenuProps["onClick"] = ({ key }) => {
+    navigate(`/${key.split("-")[0]}s/new?type=${key}`);
+  };
 
   const handleEdit = (transaction: Transaction) => {
     // TODO: Implement edit functionality
@@ -42,9 +58,10 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
 
   const columnsConfig = (type: TransactionType): ColumnsType<Transaction> => [
     {
-      title: "Transaction ID",
+      title: "ID",
       dataIndex: "id",
-      sorter: (a, b) => a.id.localeCompare(b.id),
+      width: 90,
+      sorter: (a, b) => Number(a.id) - Number(b.id),
     },
     {
       title: "Date",
@@ -59,31 +76,15 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
     },
     {
       title: type === "purchase" ? "Vendor" : "Customer",
-      dataIndex: ["entity", "name"],
-      render: (type: string) => type.charAt(0).toUpperCase() + type.slice(1),
-    },
-    {
-      title: "Amount",
-      dataIndex: "amount",
-      render: (total: number) => `$${total.toFixed(2)}`,
-      sorter: (a, b) => a.amount - b.amount,
-    },
-    {
-      title: "Discount",
-      dataIndex: "discount",
-      render: (discount: number) => `$${discount.toFixed(2)}`,
-      sorter: (a, b) => a.discount - b.discount,
-    },
-    {
-      title: "Tax",
-      dataIndex: "tax",
-      render: (tax: number) => `$${tax.toFixed(2)}`,
-      sorter: (a, b) => a.tax - b.tax,
+      dataIndex: [type === "purchase" ? "vendor" : "customer"],
+      render: (type: any) =>
+        type?.name?.charAt?.(0)?.toUpperCase?.() + type?.name?.slice?.(1),
     },
     {
       title: "Net Amount",
-      dataIndex: "netAmount",
-      render: (record) => record.amount - record.discount + record.tax,
+      dataIndex: "totalAmount",
+      render: (total: number) => formatCurrency(total),
+      sorter: (a, b) => a.totalAmount - b.totalAmount,
     },
     {
       title: "Actions",
@@ -121,13 +122,14 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
       {/* Controls */}
       <Flex wrap gap={2} justify="end">
         <Space>
-          <Button
-            type="primary"
-            icon={<Plus size={16} />}
-            onClick={() => navigate(`/${type}s/new`)}
+          <Dropdown
+            menu={{ items: menuOptions, onClick: handleMenuClick }}
+            placement="bottomRight"
           >
-            Add New {type === "purchase" ? "Purchase" : "Sale"}
-          </Button>
+            <Button type="primary" icon={<Plus size={16} />}>
+              Add New <DownOutlined />
+            </Button>
+          </Dropdown>
           <Button icon={<Download size={16} />}>Download</Button>
           <Button icon={<Upload size={16} />}>Import</Button>
         </Space>

@@ -40,7 +40,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   loading,
 }) => {
   const isEditing = !!transaction;
-  const transType = type.charAt(0).toUpperCase() + type.slice(1);
+  const transType =
+    type?.split("-")[0]?.charAt(0).toUpperCase() + type.slice(1);
 
   const [form] = Form.useForm();
   const [items, setItems] = useState(transaction ? transaction.items : []);
@@ -64,6 +65,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
         onSave({
           ...values,
           items,
+          type,
         });
       })
       .catch(() => {

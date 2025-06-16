@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import TransactionForm from "../../components/common/transaction/transaction-form";
 import { useEffect, useState } from "react";
 import { addSaleApi, getSaleApi } from "../../services/sales.services";
@@ -8,11 +8,14 @@ import { getInventories } from "../../apis";
 
 const SaleForm = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const [sale, setSale] = useState();
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [inventory, setInventory] = useState([]);
+
+  const transactionType = searchParams.get("type") || "sale";
 
   const navigate = useNavigate();
   const fetchCustomers = async () => {
@@ -86,10 +89,11 @@ const SaleForm = () => {
   const handleSaleSubmit = async (data: any) => {
     try {
       setSubmitLoading(true);
-      const { entity, ...rest } = data;
+      const { entity, type, ...rest } = data;
       const payload = {
         ...rest,
         customerId: entity,
+        type: type.includes("return") ? "RETURN" : "SALE",
       };
       const response = await addSaleApi(payload);
       if (response?.success) {
@@ -119,7 +123,7 @@ const SaleForm = () => {
     <TransactionForm
       transaction={sale}
       submitLoading={submitLoading}
-      type="sale"
+      type={transactionType as "sale" | "sale-return"}
       onSave={handleSaleSubmit}
       loading={loading}
       parties={customers}

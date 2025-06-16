@@ -17,6 +17,7 @@ import Journal from "./features/journal";
 import JournalEntry from "./features/journal/add-journal";
 import SaleForm from "./features/transactions/sale-form";
 import TransactionsPage from "./features/transactions/transactions";
+import PurchaseForm from "./features/transactions/purchase-form";
 
 const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
@@ -45,6 +46,7 @@ function App() {
               <Route path="formulation" element={<Formulation />} />
               <Route path="transactions" element={<TransactionsPage />} />
               <Route path="sales/new" element={<SaleForm />} />
+              <Route path="purchases/new" element={<PurchaseForm />} />
               <Route path="journal" element={<Journal />} />
               <Route path="journal/new" element={<JournalEntry />} />
               <Route path="expenses" element={<ExpenseListing />} />
