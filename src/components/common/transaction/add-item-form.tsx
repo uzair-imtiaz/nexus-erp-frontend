@@ -8,9 +8,10 @@ const { Text } = Typography;
 interface AddSaleItemFormProps {
   onAdd: (item: TransactionItem) => void;
   list: any[];
+  type: "sale" | "purchase" | "sale-return" | "purchase-return";
 }
 
-const AddSaleItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list }) => {
+const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
   const [form] = Form.useForm();
   const [multiUnitOptions, setMultiUnitOptions] = useState<
     Record<string, number>
@@ -21,7 +22,9 @@ const AddSaleItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list }) => {
     const selectedProduct = list.find((item) => item.id === productId);
     if (selectedProduct) {
       form.setFieldsValue({
-        rate: selectedProduct.amount / selectedProduct.quantity,
+        rate:
+          selectedProduct.amount / selectedProduct.quantity ||
+          selectedProduct.baseRate,
         unit: selectedProduct.baseUnit,
       });
       setMultiUnitOptions(selectedProduct.multiUnits || {});
@@ -132,7 +135,11 @@ const AddSaleItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list }) => {
       </Form.Item>
 
       <Form.Item name="rate" rules={[{ required: true, message: "Rate" }]}>
-        <InputNumber placeholder="Rate" min={1} disabled />
+        <InputNumber
+          placeholder="Rate"
+          min={1}
+          disabled={!type.includes("purchase")}
+        />
       </Form.Item>
 
       <Form.Item>
@@ -148,4 +155,4 @@ const AddSaleItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list }) => {
   );
 };
 
-export default AddSaleItemForm;
+export default AddItemForm;
