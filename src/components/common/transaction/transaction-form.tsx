@@ -14,7 +14,7 @@ import {
 import Title from "antd/es/typography/Title";
 import dayjs from "dayjs";
 import React, { useState } from "react";
-import AddSaleItemForm from "./add-item-form";
+import AddItemForm from "./add-item-form";
 import ItemTable from "./item-table";
 import { Transaction } from "./types";
 
@@ -140,9 +140,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           <Text strong style={{ display: "block", marginBottom: 8 }}>
             Add Sale Item
           </Text>
-          <AddSaleItemForm
+          <AddItemForm
             onAdd={(item) => setItems([...items, item])}
             list={inventory}
+            type={type}
           />
 
           {!!items?.length && (
