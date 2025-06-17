@@ -27,6 +27,7 @@ import { getJournalsApi } from "../../services/journals.services";
 import { buildQueryString, formatCurrency } from "../../utils";
 import { Filters, Journal, JournalEntry, Pagination } from "./types";
 import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
+import InfiniteScrollSearchSelect from "../../components/common/infinite-select/infinite-select";
 
 const { RangePicker } = DatePicker;
 
@@ -92,26 +93,32 @@ const JournalsListing = () => {
   );
 
   // Initial load
-  useEffect(() => {
-    const fetchNominals = async () => {
-      try {
-        const response = await getAccountByTypeApi("subAccount");
-        if (!response.success) {
-          return notification.error({
-            message: "Error",
-            description: response.message,
-          });
-        }
-        setNominals(response.data);
-      } catch (error: any) {
+  const fetchNominals = async (pageNum?: number, search?: string) => {
+    try {
+      const query = buildQueryString({
+        search: search || "",
+        page: pageNum || 1,
+        limit: 8,
+      });
+      const response = await getAccountByTypeApi("subAccount", query);
+      if (!response.success) {
         notification.error({
           message: "Error",
-          description: error?.message,
+          description: response.message,
         });
+        return { data: [], pagination: { nextPage: null } };
       }
-    };
-
-    fetchNominals();
+      return response;
+    } catch (error: any) {
+      notification.error({
+        message: "Error",
+        description: error?.message,
+      });
+      return { data: [], pagination: { nextPage: null } };
+    }
+  };
+  useEffect(() => {
+    // fetchNominals();
     fetch();
   }, []);
 
@@ -282,21 +289,10 @@ const JournalsListing = () => {
       <Title level={3}>Journals</Title>
 
       <Space size="middle" wrap style={{ marginBottom: 16 }}>
-        <Select
-          mode="multiple"
-          placeholder="Select Nominals"
-          style={{ width: 240 }}
-          value={filters.nominal_ids}
-          onChange={(value) => handleFilterChange("nominal_ids", value)}
-          allowClear
-          maxTagCount={2}
-        >
-          {nominals.map((nominal) => (
-            <Select.Option key={nominal.id} value={nominal.id}>
-              {nominal.name} ({nominal.code})
-            </Select.Option>
-          ))}
-        </Select>
+        <InfiniteScrollSearchSelect
+          fetch={fetchNominals}
+          placeholder="Select Nominal"
+        />
 
         <Input
           placeholder="Ref No."
