@@ -23,6 +23,7 @@ import AddEditItemModal from "./add-edit-modal/add-edit-modal";
 import { InventoryItem } from "./types";
 import ViewItemModal from "./view-item-modal/view-modal";
 import { buildQueryString, formatCurrency } from "../../utils";
+import { downloadSampleFile, importFile } from "../../services/file.services";
 
 const Inventory = () => {
   const { Option } = Select;
@@ -111,6 +112,40 @@ const Inventory = () => {
       notification.error({
         message: "Error",
         description: error?.message,
+      });
+    }
+  };
+
+  const handleDownloadSample = async () => {
+    try {
+      await downloadSampleFile("inventory");
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: "Failed to download sample file",
+      });
+    }
+  };
+
+  const handleImport = async (file: File) => {
+    try {
+      const response = await importFile("inventory", file);
+      if (response.success) {
+        notification.success({
+          message: "Success",
+          description: "File imported successfully",
+        });
+        fetchItems(); // Refresh the list
+      } else {
+        notification.error({
+          message: "Error",
+          description: response.message || "Failed to import file",
+        });
+      }
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: "Failed to import file",
       });
     }
   };
@@ -238,8 +273,27 @@ const Inventory = () => {
           >
             Add New Item
           </Button>
-          <Button icon={<DownloadOutlined />}>Export</Button>
-          <Button icon={<UploadOutlined />}>Import</Button>
+          <Button icon={<DownloadOutlined />} onClick={handleDownloadSample}>
+            Download Sample
+          </Button>
+          <input
+            type="file"
+            accept=".csv"
+            style={{ display: "none" }}
+            id="import-file"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                handleImport(file);
+              }
+            }}
+          />
+          <Button
+            icon={<UploadOutlined />}
+            onClick={() => document.getElementById("import-file")?.click()}
+          >
+            Import
+          </Button>
         </Space>
       </Space>
 
