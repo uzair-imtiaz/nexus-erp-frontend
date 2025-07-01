@@ -21,6 +21,14 @@ export const getAccountByTypeApi = async (type: string) => {
   return response;
 };
 
+export const getByTypeUnderTopLevel = async (
+  topLevel: string,
+  type: string
+) => {
+  const response = await getCallback(`/accounts/${topLevel}/${type}`);
+  return response;
+};
+
 export const updateAccountApi = async (id: number, data: any) => {
   const response: responseMetadata = await putCallback(`/accounts/${id}`, data);
   return response;

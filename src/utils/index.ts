@@ -89,3 +89,18 @@ export const formatOptionsForSelect = ({
     name: item.name,
   }));
 };
+
+export const recalculateCostFiPercent = (items: any[]) => {
+  const totalQuantity = items.reduce(
+    (sum, item) => sum + (parseFloat(item.quantity) || 0),
+    0
+  );
+
+  return items.map((item) => ({
+    ...item,
+    costFiPercent:
+      totalQuantity > 0
+        ? ((parseFloat(item.quantity) || 0) / totalQuantity) * 100
+        : 0,
+  }));
+};
