@@ -134,7 +134,10 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
         </Form.Item>
       </Form.Item>
 
-      <Form.Item name="rate" rules={[{ required: true, message: "Rate" }]}>
+      <Form.Item
+        name="rate"
+        rules={[{ required: true, message: "Enter rate" }]}
+      >
         <InputNumber
           placeholder="Rate"
           min={1}

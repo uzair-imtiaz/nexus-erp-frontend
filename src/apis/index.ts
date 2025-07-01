@@ -6,7 +6,7 @@ import {
 } from "../utils/network-helper";
 import { responseMetadata } from "./types";
 
-export const getInventories = async (query?: string) => {
+export const getInventories = async (query: string = "") => {
   const response: responseMetadata = await getCallback(`/inventory${query}`);
   return response;
 };

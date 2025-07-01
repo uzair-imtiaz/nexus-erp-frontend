@@ -3,7 +3,6 @@ import { ConfigProvider, Spin } from "antd";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/common/layout";
 import Dashboard from "./components/Dashboard";
-import Formulation from "./components/Formulation";
 import Production from "./components/Production";
 import Reports from "./components/Reports";
 import Login from "./features/auth/LoginForm";
@@ -12,12 +11,14 @@ import RegisterForm from "./features/auth/RegisterForm";
 import Core from "./features/core";
 import ExpenseListing from "./features/expenses";
 import AddExpenses from "./features/expenses/add-expenses";
+import AddEditFormulation from "./features/formulation/add-formulation";
+import Formulation from "./features/formulation/formulation-listing";
 import Inventory from "./features/inventory/inventory";
 import Journal from "./features/journal";
 import JournalEntry from "./features/journal/add-journal";
+import PurchaseForm from "./features/transactions/purchase-form";
 import SaleForm from "./features/transactions/sale-form";
 import TransactionsPage from "./features/transactions/transactions";
-import PurchaseForm from "./features/transactions/purchase-form";
 
 const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
@@ -43,7 +44,9 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="core/inventory" element={<Inventory />} />
               <Route path="production" element={<Production />} />
-              <Route path="formulation" element={<Formulation />} />
+              <Route path="formulations" element={<Formulation />} />
+              <Route path="formulations/new" element={<AddEditFormulation />} />
+              <Route path="formulations/:id" element={<AddEditFormulation />} />
               <Route path="transactions" element={<TransactionsPage />} />
               <Route path="sales/new" element={<SaleForm />} />
               <Route path="purchases/new" element={<PurchaseForm />} />

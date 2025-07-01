@@ -47,7 +47,7 @@ const AppLayout = () => {
       label: "Production",
     },
     {
-      key: "/formulation",
+      key: "/formulations",
       icon: <FileTextOutlined />,
       label: "Formulation",
     },
