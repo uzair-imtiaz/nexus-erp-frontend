@@ -10,7 +10,7 @@ services:
       - "80:80"
     restart: unless-stopped
     environment: #temporary for local testing
-      - VITE_API_URL=http://backend:3001
+      - APP_API_URL=https://api.mintsbook.com
     networks:
       - nexus-network
 
