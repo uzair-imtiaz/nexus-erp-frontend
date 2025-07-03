@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import axiosRetry from "axios-retry";
 import Cookies from "js-cookie";
+import { redirectToLogin } from ".";
 
 const axiosInstance = axios.create({
   baseURL:
@@ -58,8 +59,11 @@ axiosInstance.interceptors.response.use(
     if (response?.status === 401 || response?.status === 403) {
       Cookies.remove("accessToken");
       Cookies.remove("tenant");
-      window.location.href = "/signin";
-      return Promise.reject(new Error("Unauthorized"));
+      redirectToLogin();
+      return Promise.resolve({
+        success: false,
+        message: "Unauthorized",
+      });
     }
     return Promise.reject(error);
   }

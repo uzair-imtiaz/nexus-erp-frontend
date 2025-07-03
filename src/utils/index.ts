@@ -104,3 +104,9 @@ export const recalculateCostFiPercent = (items: any[]) => {
         : 0,
   }));
 };
+
+export const redirectToLogin = () => {
+  if (window.location.pathname !== "/login") {
+    window.location.replace("/login");
+  }
+};

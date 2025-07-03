@@ -6,7 +6,6 @@ import {
   Checkbox,
   Form,
   Input,
-  message,
   notification,
   Space,
   Typography,
@@ -34,22 +33,35 @@ const LoginForm = () => {
     try {
       setLoading(true);
       setError("");
+      console.log("calling");
       const response = await login(values);
-      if (!response.success) {
+      if (!response?.success) {
         setError(response.message);
         setLoading(false);
-        message.error(response.message);
+        notification.error({
+          message: "Error",
+          description: "Invalid Credentials",
+        });
         return;
       }
-      message.success(response.message);
+      notification.success({
+        message: "Success",
+        description: response.message,
+      });
       navigate("/");
     } catch (error: any) {
-      setError(error?.message);
+      setError(error);
+      notification.error({
+        message: "Error",
+        description: "Invalid Credentials",
+      });
     } finally {
       setLoading(false);
       setError("");
     }
   };
+
+  console.log("error", error);
 
   const onFinishFailed = (errorInfo) => {
     setError("Please check your inputs and try again.");
