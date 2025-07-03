@@ -10,7 +10,7 @@ services:
       - "80:80"
     restart: unless-stopped
     environment: #temporary for local testing
-      - APP_API_URL=https://api.mintsbook.com
+      - VITE_APP_API_URL=https://api.mintsbook.com
     networks:
       - nexus-network
 
