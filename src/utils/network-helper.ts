@@ -3,7 +3,10 @@ import axiosRetry from "axios-retry";
 import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/api`,
+  baseURL:
+    import.meta.env.MODE === "production"
+      ? `${import.meta.env.APP_API_URL}/api`
+      : "http://localhost:3001/api",
   timeout: 35000,
   withCredentials: true,
   headers: {
