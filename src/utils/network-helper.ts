@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 const axiosInstance = axios.create({
   baseURL:
     import.meta.env.MODE === "production"
-      ? `${import.meta.env.APP_API_URL}/api`
+      ? `${import.meta.env.VITE_APP_API_URL}/api`
       : "http://localhost:3001/api",
   timeout: 35000,
   withCredentials: true,
