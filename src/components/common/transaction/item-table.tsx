@@ -16,12 +16,16 @@ const ItemTable: React.FC<ItemTableProps> = ({ items, onRemove }) => {
     return items.map((item, idx) => ({
       ...item,
       key: idx,
-      amount: item.quantity * item.rate - item.discount + item.tax,
+      amount:
+        item.quantity * item.rate - (item.discount || 0) + (item.tax || 0),
     }));
   }, [items]);
 
   const totalAmount = useMemo(() => {
-    return dataSource.reduce((total, item) => total + item.amount, 0);
+    return dataSource.reduce(
+      (total, item) => total + parseInt(item.amount || 0),
+      0
+    );
   }, [dataSource]);
 
   const columns = useMemo(
@@ -46,19 +50,19 @@ const ItemTable: React.FC<ItemTableProps> = ({ items, onRemove }) => {
         title: "Rate",
         dataIndex: "rate",
         key: "rate",
-        render: (rate: number) => rate.toFixed(2),
+        render: (rate: number) => parseInt(rate).toFixed(2),
       },
       {
         title: "Discount",
         dataIndex: "discount",
         key: "discount",
-        render: (discount: number) => discount.toFixed(2),
+        render: (discount: number) => parseInt(discount || 0).toFixed(2),
       },
       {
         title: "Tax",
         dataIndex: "tax",
         key: "tax",
-        render: (tax: number) => tax.toFixed(2),
+        render: (tax: number) => parseInt(tax || 0).toFixed(2),
       },
       {
         title: "Amount",

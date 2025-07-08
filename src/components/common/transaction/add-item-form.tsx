@@ -52,6 +52,7 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
         };
         onAdd(newItem);
         form.resetFields();
+        setSelectedBaseUnit("");
       })
       .catch(() => {
         // Ignore validation errors
@@ -103,35 +104,33 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
       </Form.Item>
 
       <Form.Item name="unit" rules={[{ required: true, message: "Unit" }]}>
-        <Form.Item name="unit" rules={[{ required: true, message: "Unit" }]}>
-          <Select style={{ width: 150 }} placeholder="Unit">
-            {Object.entries(multiUnitOptions).map(([unitName, factor]) => (
-              <Select.Option
-                key={unitName}
-                value={unitName}
-                onChange={(unitName: string) => {
-                  const factor = multiUnitOptions[unitName] || 1;
-                  const selectedProduct = list.find(
-                    (item) => item.id === form.getFieldValue("product")
-                  );
-                  if (selectedProduct) {
-                    const baseRate =
-                      selectedProduct.amount / selectedProduct.quantity;
-                    form.setFieldsValue({ rate: baseRate * factor });
-                  }
-                }}
-              >
-                <Tooltip
-                  title={`1 ${unitName} = ${factor} ${selectedBaseUnit}`}
-                >
-                  <Text>
-                    {unitName} ({factor} {selectedBaseUnit})
-                  </Text>
-                </Tooltip>
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
+        <Select
+          style={{ width: 150 }}
+          placeholder="Unit"
+          onChange={(unitName: string) => {
+            form.setFieldsValue({ unit: unitName });
+            const factor = multiUnitOptions[unitName] || 1;
+            console.log("factor", factor);
+            const selectedProduct = list.find(
+              (item) => item.id === form.getFieldValue("product")
+            );
+            if (selectedProduct) {
+              const baseRate =
+                selectedProduct.amount / selectedProduct.quantity;
+              form.setFieldsValue({ rate: baseRate * factor });
+            }
+          }}
+        >
+          {Object.entries(multiUnitOptions).map(([unitName, factor]) => (
+            <Select.Option key={unitName} value={unitName}>
+              <Tooltip title={`1 ${unitName} = ${factor} ${selectedBaseUnit}`}>
+                <Text>
+                  {unitName} ({factor} {selectedBaseUnit})
+                </Text>
+              </Tooltip>
+            </Select.Option>
+          ))}
+        </Select>
       </Form.Item>
 
       <Form.Item
@@ -140,7 +139,7 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
       >
         <InputNumber
           placeholder="Rate"
-          min={1}
+          precision={2}
           disabled={!type.includes("purchase")}
         />
       </Form.Item>

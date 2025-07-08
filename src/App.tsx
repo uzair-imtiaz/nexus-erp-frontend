@@ -49,7 +49,9 @@ function App() {
               <Route path="formulations/:id" element={<AddEditFormulation />} />
               <Route path="transactions" element={<TransactionsPage />} />
               <Route path="sales/new" element={<SaleForm />} />
+              <Route path="sales/:id" element={<SaleForm />} />
               <Route path="purchases/new" element={<PurchaseForm />} />
+              <Route path="purchases/:id" element={<PurchaseForm />} />
               <Route path="journal" element={<Journal />} />
               <Route path="journal/new" element={<JournalEntry />} />
               <Route path="expenses" element={<ExpenseListing />} />
