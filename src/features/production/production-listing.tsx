@@ -1,51 +1,94 @@
 import {
+  CheckCircleOutlined,
   DeleteOutlined,
   DownloadOutlined,
   EditOutlined,
-  EyeOutlined,
   PlusOutlined,
   SearchOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { Button, Flex, Input, notification, Popconfirm, Space } from "antd";
+import {
+  Button,
+  Flex,
+  Input,
+  notification,
+  Popconfirm,
+  Space,
+  Tag,
+} from "antd";
 import { ColumnsType } from "antd/es/table";
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/common/table/data-table";
 import {
-  deleteFormulationApi,
-  getFormulationsApi,
-} from "../../services/formulation.services";
+  changeProductionStatusApi,
+  deleteProductionApi,
+  getProductionsApi,
+} from "../../services/production.services";
 import { buildQueryString, formatCurrency } from "../../utils";
-import { FormulationItem } from "./types";
-import ViewFormulationModal from "./view-modal";
+import { ProductionItem } from "./types";
 
-const Formulation: React.FC = () => {
-  const [formulations, setFormulations] = useState<FormulationItem[]>([]);
+const Production: React.FC = () => {
+  const [productions, setProductions] = useState<ProductionItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState({
-    open: false,
-    formulation: null,
-  });
   const [pagination, setPagination] = useState();
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchFormulations();
+    fetchProductions();
   }, []);
 
-  const formulationColumns: ColumnsType<FormulationItem> = [
+  const handleStatusChange = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await changeProductionStatusApi(id);
+      if (response?.success) {
+        notification.success({ message: response?.message });
+        const newProductions = productions.map((production) => {
+          if (production.id === id) {
+            return {
+              ...production,
+              status: response?.data.status,
+            };
+          }
+          return production;
+        });
+        setProductions(newProductions);
+      } else {
+        notification.error({
+          message: "Error",
+          description: response?.message,
+        });
+      }
+    } catch {
+      notification.error({
+        message: "Error",
+        description: "Something went wrong",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const productionColumns: ColumnsType<ProductionItem> = [
     {
-      title: "Formulation Code",
+      title: "Production Code",
       dataIndex: "code",
       key: "code",
     },
     {
-      title: "Formulation Name",
-      dataIndex: "name",
-      key: "name",
+      title: "Production Date",
+      dataIndex: "date",
+      key: "date",
+      render: (date: string) => dayjs(date).format("DD MMM, YYYY"),
+    },
+    {
+      title: "Formulation",
+      dataIndex: ["formulation", "name"],
+      key: "formulation",
     },
     {
       title: "Total Cost",
@@ -55,26 +98,33 @@ const Formulation: React.FC = () => {
       sorter: (a, b) => a.totalCost - b.totalCost,
     },
     {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => (
+        <Tag color={status === "Completed" ? "#87d068" : "#2db7f5"}>
+          {status}
+        </Tag>
+      ),
+    },
+    {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
         <Flex>
-          <Button
-            type="text"
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() =>
-              setIsViewModalOpen({
-                open: true,
-                formulation: record,
-              })
-            }
-          />
+          {record.status !== "Completed" && (
+            <Button
+              type="text"
+              size="small"
+              icon={<CheckCircleOutlined />}
+              onClick={handleStatusChange}
+            />
+          )}
           <Button
             type="link"
             size="small"
             icon={<EditOutlined />}
-            onClick={() => navigate(`/formulations/${record?.id}`)}
+            onClick={() => navigate(`/productions/${record?.id}`)}
           />
           <Popconfirm
             title="Delete this record?"
@@ -89,14 +139,14 @@ const Formulation: React.FC = () => {
     },
   ];
 
-  const fetchFormulations = async (queryParams?: Record<string, any>) => {
+  const fetchProductions = async (queryParams?: Record<string, any>) => {
     try {
       setLoading(true);
       const { page, limit, search } = queryParams || {};
       const query = buildQueryString({ page, limit, search });
-      const response = await getFormulationsApi(query);
+      const response = await getProductionsApi(query);
       if (response?.success) {
-        setFormulations(response?.data);
+        setProductions(response?.data);
         setPagination(response?.pagination);
         return response;
       } else {
@@ -117,10 +167,10 @@ const Formulation: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await deleteFormulationApi(id);
+      const response = await deleteProductionApi(id);
       if (response?.success) {
         notification.success({ message: response?.message });
-        await fetchFormulations();
+        await fetchProductions();
       } else {
         notification.error({
           message: "Error",
@@ -136,7 +186,7 @@ const Formulation: React.FC = () => {
   };
 
   const handleSearch = async (searchTerm: string) => {
-    await fetchFormulations({
+    await fetchProductions({
       search: searchTerm,
       page: pagination?.page,
       limit: pagination?.limit,
@@ -156,7 +206,7 @@ const Formulation: React.FC = () => {
         <Space wrap>
           <Input
             prefix={<SearchOutlined />}
-            placeholder="Search formulations..."
+            placeholder="Search productions..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ width: 250 }}
@@ -169,7 +219,7 @@ const Formulation: React.FC = () => {
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => {
-              navigate("/formulations/new");
+              navigate("/production/new");
             }}
           >
             Add New Item
@@ -179,24 +229,16 @@ const Formulation: React.FC = () => {
         </Space>
       </Space>
       <DataTable
-        data={formulations}
-        columns={formulationColumns}
-        emptyText="No formulations found."
+        data={productions}
+        columns={productionColumns}
+        emptyText="No productions found."
         loading={loading}
         pagination={pagination}
         setPagination={setPagination}
-        fetchItems={fetchFormulations}
+        fetchItems={fetchProductions}
       />
-      {isViewModalOpen.open && (
-        <ViewFormulationModal
-          formulation={isViewModalOpen.formulation}
-          onCancel={() =>
-            setIsViewModalOpen((prev) => ({ ...prev, open: !prev.open }))
-          }
-        />
-      )}
     </div>
   );
 };
 
-export default Formulation;
+export default Production;

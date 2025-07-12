@@ -3,7 +3,6 @@ import { ConfigProvider, Spin } from "antd";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/common/layout";
 import Dashboard from "./components/Dashboard";
-import Production from "./components/Production";
 import Reports from "./components/Reports";
 import Login from "./features/auth/LoginForm";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
@@ -19,6 +18,8 @@ import JournalEntry from "./features/journal/add-journal";
 import PurchaseForm from "./features/transactions/purchase-form";
 import SaleForm from "./features/transactions/sale-form";
 import TransactionsPage from "./features/transactions/transactions";
+import Production from "./features/production/production-listing";
+import ProductionForm from "./features/production/production-form";
 
 const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
@@ -41,9 +42,10 @@ function App() {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<AppLayout />}>
-              <Route index element={<Dashboard />} />
+              {/* <Route index element={<Dashboard />} /> */}
               <Route path="core/inventory" element={<Inventory />} />
               <Route path="production" element={<Production />} />
+              <Route path="production/new" element={<ProductionForm />} />
               <Route path="formulations" element={<Formulation />} />
               <Route path="formulations/new" element={<AddEditFormulation />} />
               <Route path="formulations/:id" element={<AddEditFormulation />} />

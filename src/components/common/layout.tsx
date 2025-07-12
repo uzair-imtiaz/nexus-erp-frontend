@@ -36,11 +36,11 @@ const AppLayout = () => {
   };
 
   const menuItems = [
-    {
-      key: "/",
-      icon: <DashboardOutlined />,
-      label: "Dashboard",
-    },
+    // {
+    //   key: "/",
+    //   icon: <DashboardOutlined />,
+    //   label: "Dashboard",
+    // },
     {
       key: "/production",
       icon: <ExperimentOutlined />,
@@ -66,11 +66,11 @@ const AppLayout = () => {
       icon: <BookOutlined />,
       label: "Journal",
     },
-    {
-      key: "/reports",
-      icon: <BarChartOutlined />,
-      label: "Reports",
-    },
+    // {
+    //   key: "/reports",
+    //   icon: <BarChartOutlined />,
+    //   label: "Reports",
+    // },
     {
       key: "/core",
       icon: <SettingOutlined />,
