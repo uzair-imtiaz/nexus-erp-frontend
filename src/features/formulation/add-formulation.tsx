@@ -38,6 +38,7 @@ const AddEditFormulation = () => {
   const [finishedGoods, setFinishedGoods] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const [form] = Form.useForm();
   const {
@@ -50,7 +51,6 @@ const AddEditFormulation = () => {
 
   const rmFactor = Form.useWatch("rmFactor", form) || 1;
   const isEditing = !!id;
-  console.log("id", id);
 
   useEffect(() => {
     const recalculateQtyRequired = (items, setItems) => {
@@ -297,6 +297,7 @@ const AddEditFormulation = () => {
 
     const productsPayload = finishedGoods.map((item) => ({
       product_id: parseInt(item.productId ?? item.id),
+      name: item?.name,
       description: item.description || "",
       qtyFiPercent: parseFloat(item.qtyFiPercent) || 0,
       unit: item.unit || "",
@@ -307,14 +308,18 @@ const AddEditFormulation = () => {
 
     const ingredientsPayload = ingredients.map((item) => ({
       inventory_item_id: parseInt(item.productId ?? item.id),
+      name: item?.name,
       description: item.description || "",
       quantityRequired: parseFloat(item.qtyRequired) || 0,
       perUnit: parseFloat(item.perUnit) || 0,
       unit: item.unit || "",
+      availableQuantity: parseFloat(item.quantity) || 0,
+      amount: parseFloat(item.amount) || 0,
     }));
 
     const expensesPayload = expenses.map((item) => ({
       expense_account_id: parseInt(item.expenseId ?? item.id),
+      name: item?.name,
       quantityRequired: parseFloat(item.qtyRequired) || 0,
       details: item.details || "",
       perUnit: parseFloat(item.perUnit) || 0,
@@ -332,6 +337,7 @@ const AddEditFormulation = () => {
     };
 
     try {
+      setSubmitLoading(true);
       let response;
       if (isEditing) {
         response = await updateFormulationApi(id, payload);
@@ -355,6 +361,8 @@ const AddEditFormulation = () => {
         message: "Error",
         description: error?.message,
       });
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -453,7 +461,7 @@ const AddEditFormulation = () => {
 
         <Space className="mt-6">
           <Button onClick={onClose}>Cancel</Button>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={submitLoading}>
             {isEditing ? "Update" : "Save"}
           </Button>
         </Space>

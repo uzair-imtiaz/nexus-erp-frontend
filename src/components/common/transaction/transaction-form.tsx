@@ -13,7 +13,7 @@ import {
 } from "antd";
 import Title from "antd/es/typography/Title";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AddItemForm from "./add-item-form";
 import ItemTable from "./item-table";
 import { Transaction } from "./types";
@@ -44,8 +44,18 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     type?.split("-")[0]?.charAt(0).toUpperCase() + type.slice(1);
 
   const [form] = Form.useForm();
-  const [items, setItems] = useState(transaction ? transaction.items : []);
+  const [items, setItems] = useState([]);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (transaction) {
+      form.setFieldValue("date", dayjs(transaction.date));
+      form.setFieldValue("entity", transaction.customer?.id);
+      form.setFieldValue("ref", transaction.ref);
+      form.setFieldValue("notes", transaction.notes);
+      setItems(transaction?.inventories);
+    }
+  }, [transaction]);
 
   const handleRemoveItem = (index: number) => {
     const updatedItems = [...items];
@@ -96,15 +106,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       </div>
 
       <div style={{ padding: 24 }}>
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{
-            date: transaction ? dayjs(transaction.date) : dayjs(),
-            entity: transaction?.entity,
-            notes: transaction?.notes || "",
-          }}
-        >
+        <Form form={form} layout="vertical">
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item

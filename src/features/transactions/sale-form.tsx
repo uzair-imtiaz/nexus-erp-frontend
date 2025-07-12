@@ -108,7 +108,6 @@ const SaleForm = () => {
           description: response.message,
         });
       }
-      console.log("data", data);
     } catch (error: any) {
       notification.error({
         message: "Error",

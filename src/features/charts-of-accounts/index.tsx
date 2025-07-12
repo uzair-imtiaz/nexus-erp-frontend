@@ -14,7 +14,7 @@ import {
   Table,
   Typography,
 } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   createAccountApi,
   deleteAccountApi,
@@ -29,6 +29,19 @@ import { Account } from "./types";
 
 const { Title, Text } = Typography;
 
+const getAllKeys = (data) => {
+  let keys = [];
+
+  data.forEach((item) => {
+    keys.push(item.id);
+    if (item.children && item.children.length > 0) {
+      keys = keys.concat(getAllKeys(item.children));
+    }
+  });
+
+  return keys;
+};
+
 const ChartOfAccounts: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -37,6 +50,8 @@ const ChartOfAccounts: React.FC = () => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [accountToEdit, setAccountToEdit] = useState<Account | null>(null);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
+
+  const allKeys = useMemo(() => getAllKeys(accounts), [accounts]);
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -204,6 +219,14 @@ const ChartOfAccounts: React.FC = () => {
     },
   ];
 
+  const handleExpandAll = () => {
+    if (expandedKeys.length > 0) {
+      setExpandedKeys([]);
+    } else {
+      setExpandedKeys(allKeys);
+    }
+  };
+
   return (
     <>
       {showAddModal && (
@@ -241,6 +264,15 @@ const ChartOfAccounts: React.FC = () => {
           allowClear
         />
       </div>
+
+      <Button
+        type="primary"
+        size="small"
+        onClick={handleExpandAll}
+        style={{ marginBottom: 8, float: "right" }}
+      >
+        {expandedKeys.length > 0 ? "Collapse All" : "Expand All"}
+      </Button>
 
       <Table
         rowKey="id"
