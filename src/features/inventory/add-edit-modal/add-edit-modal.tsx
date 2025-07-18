@@ -88,7 +88,7 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
         description: response.message,
       });
       onClose();
-      onSuccess(response.data);
+      onSuccess(response.data, !!item?.code);
     } catch (error: any) {
       console.error("Form validation failed:", error);
       notification.error({
