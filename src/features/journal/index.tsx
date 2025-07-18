@@ -151,10 +151,15 @@ const JournalsListing = () => {
           dayjs(a.date).valueOf() - dayjs(b.date).valueOf(),
       },
       {
+        title: "Description",
+        dataIndex: "description",
+        width: 200,
+      },
+      {
         title: "Total",
         dataIndex: "total",
         width: 140,
-        align: "right" as const,
+        // align: "right" as const,
         render: (_: any, record: Journal) => {
           const amount = record.details.reduce(
             (total, entry) =>
@@ -181,27 +186,27 @@ const JournalsListing = () => {
           return totalA - totalB;
         },
       },
-      {
-        title: "Action",
-        dataIndex: "action",
-        width: 120,
-        align: "right" as const,
-        render: (_: any, record: Journal) => {
-          return (
-            <Space size="small" align="end">
-              <Button
-                size="small"
-                type="link"
-                icon={<EditOutlined />}
-                onClick={() => {}}
-              />
-              <Popconfirm title="Are you sure you want to delete this journal?">
-                <Button danger type="link" icon={<DeleteOutlined />} />
-              </Popconfirm>
-            </Space>
-          );
-        },
-      },
+      // {
+      //   title: "Action",
+      //   dataIndex: "action",
+      //   width: 120,
+      //   align: "right" as const,
+      //   render: (_: any, record: Journal) => {
+      //     return (
+      //       <Space size="small" align="end">
+      //         <Button
+      //           size="small"
+      //           type="link"
+      //           icon={<EditOutlined />}
+      //           onClick={() => {}}
+      //         />
+      //         <Popconfirm title="Are you sure you want to delete this journal?">
+      //           <Button danger type="link" icon={<DeleteOutlined />} />
+      //         </Popconfirm>
+      //       </Space>
+      //     );
+      //   },
+      // },
     ],
     []
   );
