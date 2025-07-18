@@ -1,7 +1,5 @@
 import {
-  DeleteOutlined,
   DownOutlined,
-  EditOutlined,
   PlusOutlined,
   ReloadOutlined,
   RightOutlined,
@@ -12,7 +10,6 @@ import {
   DatePicker,
   Input,
   notification,
-  Popconfirm,
   Select,
   Space,
   Table,
@@ -23,10 +20,10 @@ import {
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
 import { getJournalsApi } from "../../services/journals.services";
 import { buildQueryString, formatCurrency } from "../../utils";
 import { Filters, Journal, JournalEntry, Pagination } from "./types";
-import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
 
 const { RangePicker } = DatePicker;
 
