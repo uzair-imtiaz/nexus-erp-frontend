@@ -169,7 +169,7 @@ const Inventory = () => {
             onClick={() => handleEditItem(record)}
             size="small"
           />
-          <Popconfirm
+          {/* <Popconfirm
             title="Are you sure?"
             onConfirm={() => handleDeleteItem(record.id)}
             okText="Yes"
@@ -182,7 +182,7 @@ const Inventory = () => {
               danger
               disabled={record?.systemGenerated}
             />
-          </Popconfirm>
+          </Popconfirm> */}
         </Flex>
       ),
     },
@@ -267,8 +267,13 @@ const Inventory = () => {
           onClose={() => {
             setShowAddModal(false);
           }}
-          onSuccess={(item) => {
-            setItems((items) => [...items, item]);
+          onSuccess={(item, isEdit) => {
+            setItems((prevItems) => {
+              if (isEdit) {
+                return prevItems.map((i) => (i.id === item.id ? item : i));
+              }
+              return [...prevItems, item];
+            });
           }}
         />
       )}

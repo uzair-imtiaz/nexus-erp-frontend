@@ -2,7 +2,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { ConfigProvider, Spin } from "antd";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/common/layout";
-import Dashboard from "./components/Dashboard";
+// import Dashboard from "./components/Dashboard";
 import Reports from "./components/Reports";
 import Login from "./features/auth/LoginForm";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
