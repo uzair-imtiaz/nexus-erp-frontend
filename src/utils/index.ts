@@ -1,18 +1,19 @@
 import { InfiniteScrollParams, SelectOption } from "./types";
 
-export function buildQueryString(
-  params: Record<string, string | number | boolean | undefined | null>
-): string {
+export function buildQueryString(params: Record<string, any>): string {
   const query = Object.entries(params)
     .filter(
       ([, value]) => value !== undefined && value !== null && value !== ""
     )
-    .map(
-      ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
+    .flatMap(([key, value]) =>
+      Array.isArray(value)
+        ? value.map(
+            (val) =>
+              `${encodeURIComponent(key)}=${encodeURIComponent(String(val))}`
+          )
+        : [`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`]
     )
     .join("&");
-
   return query ? `?${query}` : "";
 }
 

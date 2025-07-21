@@ -6,6 +6,7 @@ export interface InventoryItem {
   quantity: number;
   stockValue: number;
   baseRate: number;
+  sellingRate: number;
   code: string;
   multiUnits: Record<string, number>;
 }

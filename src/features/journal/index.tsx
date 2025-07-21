@@ -1,7 +1,5 @@
 import {
-  DeleteOutlined,
   DownOutlined,
-  EditOutlined,
   PlusOutlined,
   ReloadOutlined,
   RightOutlined,
@@ -12,7 +10,6 @@ import {
   DatePicker,
   Input,
   notification,
-  Popconfirm,
   Select,
   Space,
   Table,
@@ -23,10 +20,10 @@ import {
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
 import { getJournalsApi } from "../../services/journals.services";
 import { buildQueryString, formatCurrency } from "../../utils";
 import { Filters, Journal, JournalEntry, Pagination } from "./types";
-import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
 
 const { RangePicker } = DatePicker;
 
@@ -59,7 +56,7 @@ const JournalsListing = () => {
         const { nominal_ids, ref, dateRange } = filters;
 
         const queryString = buildQueryString({
-          nominal_ids: nominal_ids?.join(","),
+          nominal_account_ids: nominal_ids,
           ref,
           date_from: dateRange?.[0]?.format("YYYY-MM-DD") || null,
           date_to: dateRange?.[1]?.format("YYYY-MM-DD") || null,
@@ -151,10 +148,15 @@ const JournalsListing = () => {
           dayjs(a.date).valueOf() - dayjs(b.date).valueOf(),
       },
       {
+        title: "Description",
+        dataIndex: "description",
+        width: 200,
+      },
+      {
         title: "Total",
         dataIndex: "total",
         width: 140,
-        align: "right" as const,
+        // align: "right" as const,
         render: (_: any, record: Journal) => {
           const amount = record.details.reduce(
             (total, entry) =>
@@ -181,27 +183,27 @@ const JournalsListing = () => {
           return totalA - totalB;
         },
       },
-      {
-        title: "Action",
-        dataIndex: "action",
-        width: 120,
-        align: "right" as const,
-        render: (_: any, record: Journal) => {
-          return (
-            <Space size="small" align="end">
-              <Button
-                size="small"
-                type="link"
-                icon={<EditOutlined />}
-                onClick={() => {}}
-              />
-              <Popconfirm title="Are you sure you want to delete this journal?">
-                <Button danger type="link" icon={<DeleteOutlined />} />
-              </Popconfirm>
-            </Space>
-          );
-        },
-      },
+      // {
+      //   title: "Action",
+      //   dataIndex: "action",
+      //   width: 120,
+      //   align: "right" as const,
+      //   render: (_: any, record: Journal) => {
+      //     return (
+      //       <Space size="small" align="end">
+      //         <Button
+      //           size="small"
+      //           type="link"
+      //           icon={<EditOutlined />}
+      //           onClick={() => {}}
+      //         />
+      //         <Popconfirm title="Are you sure you want to delete this journal?">
+      //           <Button danger type="link" icon={<DeleteOutlined />} />
+      //         </Popconfirm>
+      //       </Space>
+      //     );
+      //   },
+      // },
     ],
     []
   );
@@ -285,11 +287,21 @@ const JournalsListing = () => {
         <Select
           mode="multiple"
           placeholder="Select Nominals"
-          style={{ width: 240 }}
+          style={{ width: 300 }}
           value={filters.nominal_ids}
           onChange={(value) => handleFilterChange("nominal_ids", value)}
           allowClear
-          maxTagCount={2}
+          maxTagCount={"responsive"}
+          maxTagPlaceholder={(omittedValues) => (
+            <Tooltip
+              styles={{ root: { pointerEvents: "none" } }}
+              title={omittedValues.map(({ label }) => (
+                <div>{label}</div>
+              ))}
+            >
+              <span>+{omittedValues.length} more...</span>
+            </Tooltip>
+          )}
         >
           {nominals.map((nominal) => (
             <Select.Option key={nominal.id} value={nominal.id}>
