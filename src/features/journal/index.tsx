@@ -56,7 +56,7 @@ const JournalsListing = () => {
         const { nominal_ids, ref, dateRange } = filters;
 
         const queryString = buildQueryString({
-          nominal_ids: nominal_ids?.join(","),
+          nominal_account_ids: nominal_ids,
           ref,
           date_from: dateRange?.[0]?.format("YYYY-MM-DD") || null,
           date_to: dateRange?.[1]?.format("YYYY-MM-DD") || null,
@@ -287,11 +287,21 @@ const JournalsListing = () => {
         <Select
           mode="multiple"
           placeholder="Select Nominals"
-          style={{ width: 240 }}
+          style={{ width: 300 }}
           value={filters.nominal_ids}
           onChange={(value) => handleFilterChange("nominal_ids", value)}
           allowClear
-          maxTagCount={2}
+          maxTagCount={"responsive"}
+          maxTagPlaceholder={(omittedValues) => (
+            <Tooltip
+              styles={{ root: { pointerEvents: "none" } }}
+              title={omittedValues.map(({ label }) => (
+                <div>{label}</div>
+              ))}
+            >
+              <span>+{omittedValues.length} more...</span>
+            </Tooltip>
+          )}
         >
           {nominals.map((nominal) => (
             <Select.Option key={nominal.id} value={nominal.id}>

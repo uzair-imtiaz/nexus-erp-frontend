@@ -2,7 +2,6 @@ import {
   BarChartOutlined,
   BookOutlined,
   CloseOutlined,
-  DashboardOutlined,
   ExperimentOutlined,
   FileTextOutlined,
   LogoutOutlined,
@@ -66,11 +65,32 @@ const AppLayout = () => {
       icon: <BookOutlined />,
       label: "Journal",
     },
-    // {
-    //   key: "/reports",
-    //   icon: <BarChartOutlined />,
-    //   label: "Reports",
-    // },
+    {
+      icon: <BarChartOutlined />,
+      label: "Reports",
+      children: [
+        {
+          key: "/reports/trial-balance",
+          icon: <BarChartOutlined />,
+          label: "Trial Balance",
+        },
+        {
+          key: "/reports/journal-ledger",
+          icon: <BookOutlined />,
+          label: "Journal Ledger",
+        },
+        {
+          key: "/reports/profit-loss",
+          icon: <ProfileOutlined />,
+          label: "Profit & Loss",
+        },
+        {
+          key: "/reports/balance-sheet",
+          icon: <FileTextOutlined />,
+          label: "Balance Sheet (As At)",
+        },
+      ],
+    },
     {
       key: "/core",
       icon: <SettingOutlined />,

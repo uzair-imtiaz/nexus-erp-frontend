@@ -2,8 +2,6 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { ConfigProvider, Spin } from "antd";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/common/layout";
-// import Dashboard from "./components/Dashboard";
-import Reports from "./components/Reports";
 import Login from "./features/auth/LoginForm";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import RegisterForm from "./features/auth/RegisterForm";
@@ -20,6 +18,7 @@ import SaleForm from "./features/transactions/sale-form";
 import TransactionsPage from "./features/transactions/transactions";
 import Production from "./features/production/production-listing";
 import ProductionForm from "./features/production/production-form";
+import TrialBalance from "./features/reports/trial-balance";
 
 const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
@@ -60,9 +59,7 @@ function App() {
               <Route path="expenses/new" element={<AddExpenses />} />
               <Route path="expenses/:id" element={<AddExpenses />} />
               <Route path="core" element={<Core />} />
-              <Route path="reports" element={<Reports />} />
-              <Route path="core/banks" element={<Reports />} />
-              {/* <Route path="settings" element={<Settings />} /> */}
+              <Route path="reports/trial-balance" element={<TrialBalance />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Route>
