@@ -72,8 +72,11 @@ const ViewItemModal: React.FC<ViewItemModalProps> = ({
         <Descriptions.Item label="Quantity Available">
           {item.quantity} {item.baseUnit}
         </Descriptions.Item>
-        <Descriptions.Item label="Current Rate">
+        <Descriptions.Item label="Buying Rate">
           Rs. {item.baseRate.toFixed(2)} per {item.baseUnit}
+        </Descriptions.Item>
+        <Descriptions.Item label="Selling Rate">
+          Rs. {item.sellingRate.toFixed(2)} per {item.baseUnit}
         </Descriptions.Item>
         <Descriptions.Item label="Stock Value">
           Rs. {(item.quantity * item.baseRate).toFixed(2)}

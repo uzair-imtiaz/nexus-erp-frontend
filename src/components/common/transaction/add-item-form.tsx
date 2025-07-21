@@ -22,10 +22,9 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
     const selectedProduct = list.find((item) => item.id === productId);
     if (selectedProduct) {
       form.setFieldsValue({
-        rate:
-          selectedProduct.amount / selectedProduct.quantity ||
-          selectedProduct.baseRate,
+        rate: selectedProduct?.sellingRate,
         unit: selectedProduct.baseUnit,
+        buyingRate: selectedProduct?.baseRate,
       });
       setMultiUnitOptions(selectedProduct.multiUnits || {});
       setSelectedBaseUnit(selectedProduct.baseUnit);
@@ -40,14 +39,16 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
           id: values.product,
           quantity: values.quantity,
           unit: values.unit,
-          rate: values.rate,
+          rate: values.sellingRate,
           discount:
             values.discount ??
-            (values.discountPercent / 100) * values.rate * values.quantity ??
+            (values.discountPercent / 100) *
+              values.sellingRate *
+              values.quantity ??
             0,
           tax:
             values.tax ??
-            (values.taxPercent / 100) * values.rate * values.quantity ??
+            (values.taxPercent / 100) * values.sellingRate * values.quantity ??
             0,
         };
         onAdd(newItem);
@@ -133,15 +134,15 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
         </Select>
       </Form.Item>
 
+      <Form.Item name={"buyingRate"}>
+        <InputNumber placeholder="Buying Rate" precision={2} disabled />
+      </Form.Item>
+
       <Form.Item
         name="rate"
         rules={[{ required: true, message: "Enter rate" }]}
       >
-        <InputNumber
-          placeholder="Rate"
-          precision={2}
-          disabled={!type.includes("purchase")}
-        />
+        <InputNumber placeholder="Selling Rate" precision={2} />
       </Form.Item>
 
       <Form.Item>

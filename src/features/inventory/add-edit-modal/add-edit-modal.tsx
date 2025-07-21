@@ -71,6 +71,7 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
         multiUnits,
         quantity: Number(values.quantity),
         baseRate: Number(values.baseRate),
+        sellingRate: Number(values.sellingRate),
       };
       const response: responseMetadata = item?.code
         ? await updateInventory(item.id, finalData)
@@ -154,6 +155,7 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
           baseUnit: item?.baseUnit || "",
           quantity: item?.quantity || 0,
           baseRate: item?.baseRate || 0,
+          sellingRate: item?.sellingRate || 0,
           code: item?.code || "",
         }}
       >
@@ -174,7 +176,6 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
             >
               <Input />
             </Form.Item>
-
             <Form.Item
               label="Category"
               name="category"
@@ -185,6 +186,9 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
                 <Option value="Semi-Finished Goods">Semi-Finished Goods</Option>
                 <Option value="Finished Goods">Finished Goods</Option>
               </Select>
+            </Form.Item>
+            <Form.Item label="Selling Rate" name="sellingRate" initialValue={0}>
+              <InputNumber min={0} step={1} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
 
