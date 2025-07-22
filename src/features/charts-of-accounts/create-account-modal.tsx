@@ -42,7 +42,7 @@ const AddAccountModal = ({
     setLoadingParents(true);
     try {
       const response = await getAccountByTypeApi(allowedParents);
-      setParentOptions(response.data || []);
+      setParentOptions(response.data);
     } catch (err) {
       console.error("Failed to fetch parent accounts", err);
       setParentOptions([]);
@@ -98,13 +98,15 @@ const AddAccountModal = ({
               placeholder="Select parent account"
               loading={loadingParents}
               disabled={loadingParents}
-            >
-              {parentOptions.map((acc) => (
-                <Option key={acc.id} value={acc.id}>
-                  {acc.name} ({acc.code})
-                </Option>
-              ))}
-            </Select>
+              allowClear
+              showSearch
+              options={parentOptions.map((acc: any) => ({
+                value: acc.id,
+                label: `${acc.name} (${acc.code})`,
+                name: acc.name,
+              }))}
+              optionFilterProp="label"
+            />
           </Form.Item>
         )}
 
