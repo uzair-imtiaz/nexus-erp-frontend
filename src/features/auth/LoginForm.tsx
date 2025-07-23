@@ -57,11 +57,8 @@ const LoginForm = () => {
       });
     } finally {
       setLoading(false);
-      setError("");
     }
   };
-
-  console.log("error", error);
 
   const onFinishFailed = (errorInfo) => {
     setError("Please check your inputs and try again.");

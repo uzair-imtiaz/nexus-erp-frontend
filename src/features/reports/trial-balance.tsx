@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
+import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import {
-  notification,
-  Table,
-  Typography,
+  Button,
+  Col,
   DatePicker,
+  notification,
+  Row,
   Select,
   Spin,
-  Row,
-  Col,
-  Button,
+  Table,
   Tooltip,
+  Typography,
 } from "antd";
 import dayjs from "dayjs";
+import React, { useEffect, useState } from "react";
+import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
 import { getTrialBalanceReport } from "../../services/reports.services";
 import { buildQueryString, formatCurrency } from "../../utils";
-import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
-import { SearchOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -95,13 +95,9 @@ const TrialBalance: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchReportData();
-  }, []);
-
-  useEffect(() => {
     const fetchNominalAccounts = async () => {
       try {
-        const response = await getAccountByTypeApi("account");
+        const response = await getAccountByTypeApi("subAccount");
         if (response.success) {
           setAccountOptions(
             response.data.map((account: any) => ({
@@ -124,6 +120,7 @@ const TrialBalance: React.FC = () => {
       }
     };
 
+    fetchReportData();
     fetchNominalAccounts();
   }, []);
 
@@ -137,6 +134,7 @@ const TrialBalance: React.FC = () => {
       <Row gutter={[16, 16]} className="mb-4">
         <Col xs={16} md={8}>
           <RangePicker
+            value={dateRange}
             onChange={(dates) =>
               setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs])
             }
@@ -170,6 +168,16 @@ const TrialBalance: React.FC = () => {
             loading={loading}
           />
         </Col>
+        <Button
+          className="mr-2"
+          icon={<ReloadOutlined />}
+          onClick={() => {
+            setDateRange(null);
+            setNominalAccounts([]);
+          }}
+        >
+          Clear
+        </Button>
         <Button
           type="primary"
           onClick={fetchReportData}

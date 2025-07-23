@@ -19,6 +19,7 @@ import TransactionsPage from "./features/transactions/transactions";
 import Production from "./features/production/production-listing";
 import ProductionForm from "./features/production/production-form";
 import TrialBalance from "./features/reports/trial-balance";
+import JournalLedger from "./features/reports/journal-ledger";
 
 const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
@@ -59,7 +60,12 @@ function App() {
               <Route path="expenses/new" element={<AddExpenses />} />
               <Route path="expenses/:id" element={<AddExpenses />} />
               <Route path="core" element={<Core />} />
-              <Route path="reports/trial-balance" element={<TrialBalance />} />
+              <Route path="reports">
+                <Route path="trial-balance" element={<TrialBalance />} />
+                <Route path="journal-ledger" element={<JournalLedger />} />
+                {/* <Route path="balance-sheet" element={<BalanceSheet />} /> */}
+              </Route>
+
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Route>
