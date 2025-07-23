@@ -14,17 +14,17 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { JournalEntryRow, NominalAccount, NominalAccountGroup } from "./types";
+import {
+  ApiError,
+  JournalEntryRow,
+  NominalAccount,
+  NominalAccountGroup,
+} from "./types";
 import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
 import { addJournalApi } from "../../services/journals.services";
 import { useNavigate } from "react-router-dom";
 
 const { Option, OptGroup } = Select;
-
-interface ApiError {
-  message: string;
-  errorFields?: { name: string[]; errors: string[] }[];
-}
 
 const JournalEntry = () => {
   const [form] = Form.useForm();

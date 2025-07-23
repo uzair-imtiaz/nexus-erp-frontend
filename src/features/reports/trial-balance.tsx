@@ -95,10 +95,6 @@ const TrialBalance: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchReportData();
-  }, []);
-
-  useEffect(() => {
     const fetchNominalAccounts = async () => {
       try {
         const response = await getAccountByTypeApi("subAccount");
@@ -124,6 +120,7 @@ const TrialBalance: React.FC = () => {
       }
     };
 
+    fetchReportData();
     fetchNominalAccounts();
   }, []);
 

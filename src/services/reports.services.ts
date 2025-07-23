@@ -7,3 +7,10 @@ export const getTrialBalanceReport = async (query?: string) => {
   );
   return response;
 };
+
+export const getJournalLedgerReport = async (query?: string) => {
+  const response: responseMetadata = await getCallback(
+    `/reports/journal-ledger${query}`
+  );
+  return response;
+};

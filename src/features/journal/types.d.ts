@@ -16,6 +16,11 @@ export interface NominalAccountGroup {
   }[];
 }
 
+export interface ApiError {
+  message: string;
+  errorFields?: { name: string[]; errors: string[] }[];
+}
+
 export interface JournalEntryRow {
   key: number;
   nominalAccount: string | null;

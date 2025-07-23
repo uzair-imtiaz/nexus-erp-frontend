@@ -3,6 +3,7 @@ import {
   AutoComplete,
   Button,
   Col,
+  DatePicker,
   Divider,
   Form,
   Input,
@@ -20,6 +21,7 @@ import { createInventory, updateInventory } from "../../../apis";
 import { responseMetadata } from "../../../apis/types";
 import { AddEditItemModalProps } from "./types";
 import { suggestedUnits } from "../constants/index.constants";
+import dayjs from "dayjs";
 
 const { Option } = Select;
 
@@ -215,6 +217,15 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
               rules={[{ required: true, message: "Rate is required" }]}
             >
               <InputNumber min={0} step={1} style={{ width: "100%" }} />
+            </Form.Item>
+
+            <Form.Item
+              name="openingDate"
+              label="Opening Date"
+              rules={[{ required: true, message: "Opening date is required" }]}
+              initialValue={dayjs()}
+            >
+              <DatePicker style={{ width: "100%" }} />
             </Form.Item>
           </Col>
         </Row>
