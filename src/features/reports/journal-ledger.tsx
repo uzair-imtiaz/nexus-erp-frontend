@@ -87,13 +87,16 @@ const JournalLedger = () => {
   const fetchReportData = async () => {
     try {
       setLoading(true);
-      const query: any = { balance_forward: balanceForward };
+      const query: any = {};
       if (dateRange) {
         query.date_from = dateRange[0].format("YYYY-MM-DD");
         query.date_to = dateRange[1].format("YYYY-MM-DD");
       }
       if (selectedAccounts.length > 0) {
         query.nominal_account_ids = selectedAccounts;
+      }
+      if (balanceForward) {
+        query.balance_forward = true;
       }
 
       const queryString = buildQueryString(query);
