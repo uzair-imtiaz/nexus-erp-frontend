@@ -321,6 +321,8 @@ const ExpenseListing = () => {
           style={{ width: 200 }}
           value={filters.bank_id}
           onChange={(value) => handleFilterChange("bank_id", value)}
+          showSearch
+          optionFilterProp="children"
           allowClear
         >
           {banks.map((bank) => (
@@ -338,9 +340,7 @@ const ExpenseListing = () => {
           onChange={(value) => handleFilterChange("nominal_account_ids", value)}
           allowClear
           showSearch
-          filterOption={(input, option) =>
-            (option?.name ?? "").toLowerCase().includes(input.toLowerCase())
-          }
+          optionFilterProp="children"
         >
           {nominals.map((nominal) => (
             <Option key={nominal.id} value={nominal.id}>

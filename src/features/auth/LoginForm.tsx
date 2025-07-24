@@ -33,7 +33,6 @@ const LoginForm = () => {
     try {
       setLoading(true);
       setError("");
-      console.log("calling");
       const response = await login(values);
       if (!response?.success) {
         setError(response.message);

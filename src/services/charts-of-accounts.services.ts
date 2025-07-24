@@ -16,8 +16,10 @@ export const createAccountApi = async (payload: any) => {
   return response;
 };
 
-export const getAccountByTypeApi = async (type: string) => {
-  const response: responseMetadata = await getCallback(`/accounts/${type}`);
+export const getAccountByTypeApi = async (type: string, query: string = "") => {
+  const response: responseMetadata = await getCallback(
+    `/accounts/${type}${query}`
+  );
   return response;
 };
 

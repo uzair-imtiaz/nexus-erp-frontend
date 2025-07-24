@@ -68,7 +68,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       .validateFields()
       .then((values) => {
         if (items.length === 0) {
-          setError("Please add at least one sale item.");
+          setError(`Please add at least one ${type} item.`);
           return;
         }
         setError(null);
@@ -140,7 +140,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           <Divider />
 
           <Text strong style={{ display: "block", marginBottom: 8 }}>
-            Add Sale Item
+            Add {type} Item
           </Text>
           <AddItemForm
             onAdd={(item) => setItems([...items, item])}
