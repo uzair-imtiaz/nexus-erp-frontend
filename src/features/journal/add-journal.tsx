@@ -2,29 +2,22 @@ import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   Button,
   DatePicker,
-  Divider,
   Flex,
   Form,
   Input,
   InputNumber,
   notification,
-  Select,
   Space,
   Table,
 } from "antd";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
-import {
-  ApiError,
-  JournalEntryRow,
-  NominalAccount,
-  NominalAccountGroup,
-} from "./types";
-import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
-import { addJournalApi } from "../../services/journals.services";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const { Option, OptGroup } = Select;
+import PaginatedSelect from "../../components/common/paginated-select/paginated-select";
+import { getAccounts } from "../../services/charts-of-accounts.services";
+import { addJournalApi } from "../../services/journals.services";
+import { ACCOUNT_TYPE } from "../charts-of-accounts/utils";
+import { ApiError, JournalEntryRow } from "./types";
 
 const JournalEntry = () => {
   const [form] = Form.useForm();
@@ -38,62 +31,9 @@ const JournalEntry = () => {
       credit: 0,
     },
   ]);
-  const [nominals, setNominals] = useState<NominalAccountGroup[]>([]);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchNominals = async () => {
-      try {
-        const [l2, l3, l4] = await Promise.all([
-          getAccountByTypeApi("accountType"),
-          getAccountByTypeApi("account"),
-          getAccountByTypeApi("subAccount"),
-        ]);
-        if (!l2.success || !l3.success || !l4.success) {
-          return notification.error({
-            message: "Error",
-            description: "Something went wrong",
-          });
-        }
-        setNominals([
-          {
-            label: "Level 2",
-            title: "Level 2",
-            options: l2.data?.map((l: NominalAccount) => ({
-              label: `${l.name} (${l.code})`,
-              value: l.id,
-            })),
-          },
-          {
-            label: <span>Level 3</span>,
-            title: "Level 3",
-            options: l3.data?.map((l: NominalAccount) => ({
-              label: `${l.name} (${l.code})`,
-              value: l.id,
-            })),
-          },
-          {
-            label: <span>Level 4</span>,
-            title: "Level 4",
-            options: l4.data?.map((l: NominalAccount) => ({
-              label: `${l.name} (${l.code})`,
-              value: l.id,
-            })),
-          },
-        ]);
-      } catch (error) {
-        const apiError = error as ApiError;
-        notification.error({
-          message: "Error",
-          description: apiError.message || "Something went wrong",
-        });
-      }
-    };
-
-    fetchNominals();
-  }, []);
 
   const handleChange = (
     value: string | number,
@@ -145,32 +85,17 @@ const JournalEntry = () => {
           rules={[{ required: true, message: "Please select an account" }]}
           style={{ margin: 0 }}
         >
-          <Select
-            placeholder="Select Account"
+          <PaginatedSelect
+            api={getAccounts}
+            apiParams={{ types: ACCOUNT_TYPE[3].value }}
+            queryParamName="name"
+            placeholder="Select Nominals"
+            style={{ width: 240 }}
             value={value}
-            style={{ width: 250 }}
             onChange={(val: string) =>
               handleChange(val, record.key, "nominalAccount")
             }
-          >
-            {nominals.map((group) => (
-              <OptGroup
-                key={group.title}
-                label={
-                  <div>
-                    <span style={{ fontWeight: 600 }}>{group.label}</span>
-                    <Divider style={{ margin: "4px 0" }} />
-                  </div>
-                }
-              >
-                {group.options.map((acc: any) => (
-                  <Option key={acc.value} value={acc.value}>
-                    {acc.label}
-                  </Option>
-                ))}
-              </OptGroup>
-            ))}
-          </Select>
+          />
         </Form.Item>
       ),
     },

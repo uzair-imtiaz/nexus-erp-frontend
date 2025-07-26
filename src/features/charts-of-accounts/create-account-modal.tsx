@@ -1,6 +1,7 @@
 import { Button, Form, Input, Modal, Select } from "antd";
 import { useEffect, useState } from "react";
-import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
+import PaginatedSelect from "../../components/common/paginated-select/paginated-select";
+import { getAccounts } from "../../services/charts-of-accounts.services";
 import { ACCOUNT_TYPE, PARENT_MAP } from "./utils";
 
 const { Option } = Select;
@@ -14,14 +15,11 @@ const AddAccountModal = ({
 }) => {
   const [form] = Form.useForm();
   const [selectedType, setSelectedType] = useState<string>();
-  const [parentOptions, setParentOptions] = useState<any[]>([]);
-  const [loadingParents, setLoadingParents] = useState(false);
 
   useEffect(() => {
     if (!accountData) return;
     form.setFieldsValue(accountData);
     setSelectedType(accountData.type);
-    fetchParentAccounts(accountData.type);
   }, []);
 
   const handleSave = () => {
@@ -35,31 +33,9 @@ const AddAccountModal = ({
       });
   };
 
-  const fetchParentAccounts = async (childType: string) => {
-    const allowedParents = PARENT_MAP[childType];
-    if (!allowedParents) return;
-
-    setLoadingParents(true);
-    try {
-      const response = await getAccountByTypeApi(allowedParents);
-      setParentOptions(response.data);
-    } catch (err) {
-      console.error("Failed to fetch parent accounts", err);
-      setParentOptions([]);
-    } finally {
-      setLoadingParents(false);
-    }
-  };
-
   const handleTypeChange = (type: string) => {
     setSelectedType(type);
     form.setFieldsValue({ parentId: undefined });
-
-    if (type === "accountGroup") {
-      setParentOptions([]);
-      return;
-    }
-    fetchParentAccounts(type);
   };
 
   return (
@@ -94,18 +70,12 @@ const AddAccountModal = ({
               { required: true, message: "Please select a parent account" },
             ]}
           >
-            <Select
-              placeholder="Select parent account"
-              loading={loadingParents}
-              disabled={loadingParents}
-              allowClear
-              showSearch
-              options={parentOptions.map((acc: any) => ({
-                value: acc.id,
-                label: `${acc.name} (${acc.code})`,
-                name: acc.name,
-              }))}
-              optionFilterProp="label"
+            <PaginatedSelect
+              api={getAccounts}
+              apiParams={{ types: PARENT_MAP[selectedType] }}
+              queryParamName="name"
+              placeholder="Select Parent Account"
+              value={form.getFieldValue("parentId")}
             />
           </Form.Item>
         )}

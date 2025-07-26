@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Form, InputNumber, Select, Button, Typography, Tooltip } from "antd";
 import { Plus } from "lucide-react";
 import { TransactionItem } from "./types";
@@ -18,6 +18,8 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
   >({});
   const [selectedBaseUnit, setSelectedBaseUnit] = useState<string>("");
 
+  const productSelectRef = useRef<any>(null);
+
   const handleProductSelect = (productId: string) => {
     const selectedProduct = list.find((item) => item.id === productId);
     if (selectedProduct) {
@@ -32,49 +34,43 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
   };
 
   const handleAddItem = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        const newItem: TransactionItem = {
-          id: values.product,
-          quantity: values.quantity,
-          unit: values.unit,
-          rate: values.sellingRate,
-          discount:
-            values.discount ??
-            (values.discountPercent / 100) *
-              values.sellingRate *
-              values.quantity ??
-            0,
-          tax:
-            values.tax ??
-            (values.taxPercent / 100) * values.sellingRate * values.quantity ??
-            0,
-        };
-        onAdd(newItem);
-        form.resetFields();
-        setSelectedBaseUnit("");
-      })
-      .catch(() => {
-        // Ignore validation errors
-      });
+    form.validateFields().then((values) => {
+      const newItem: TransactionItem = {
+        id: values.product,
+        quantity: values.quantity,
+        unit: values.unit,
+        rate: values.rate,
+        discount:
+          values.discount ??
+          (values.discountPercent / 100) * values.rate * values.quantity ??
+          0,
+        tax:
+          values.tax ??
+          (values.taxPercent / 100) * values.rate * values.quantity ??
+          0,
+      };
+      onAdd(newItem);
+      form.resetFields();
+      setSelectedBaseUnit("");
+      setTimeout(() => {
+        productSelectRef.current?.focus();
+      }, 0);
+    });
   };
 
   return (
-    <Form
-      form={form}
-      layout="inline"
-      // onValuesChange={handleValuesChange}
-      style={{ marginBottom: 16 }}
-    >
+    <Form form={form} layout="inline" style={{ marginBottom: 16 }}>
       <Form.Item
+        label="Product"
         name="product"
         rules={[{ required: true, message: "Select product" }]}
       >
         <Select
+          ref={productSelectRef}
           placeholder="Product"
           style={{ width: 160 }}
           onChange={handleProductSelect}
+          showSearch
         >
           {list.map((item) => (
             <Select.Option key={item.id} value={item.id}>
@@ -84,34 +80,52 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
         </Select>
       </Form.Item>
 
-      <Form.Item name="quantity" rules={[{ required: true, message: "Qty" }]}>
+      <Form.Item
+        label="Qty"
+        name="quantity"
+        rules={[{ required: true, message: "Qty" }]}
+      >
         <InputNumber placeholder="Qty" min={1} />
       </Form.Item>
 
-      <Form.Item name="tax">
+      <Form.Item
+        label={type === "purchase" ? "Purchase Rate" : "Selling Rate"}
+        name="rate"
+        rules={[{ required: true, message: "Enter rate" }]}
+      >
+        <InputNumber
+          placeholder={type === "purchase" ? "Purchase Rate" : "Selling Rate"}
+          precision={2}
+        />
+      </Form.Item>
+
+      <Form.Item label="Tax" name="tax">
         <InputNumber placeholder="Tax" min={0} />
       </Form.Item>
 
-      <Form.Item name="taxPercent">
+      <Form.Item label="Tax %" name="taxPercent">
         <InputNumber placeholder="Tax %" min={0} />
       </Form.Item>
 
-      <Form.Item name="discount">
+      <Form.Item label="Discount" name="discount">
         <InputNumber placeholder="Discount" min={0} />
       </Form.Item>
 
-      <Form.Item name="discountPercent">
+      <Form.Item label="Disc. %" name="discountPercent">
         <InputNumber placeholder="Disc. %" min={0} />
       </Form.Item>
 
-      <Form.Item name="unit" rules={[{ required: true, message: "Unit" }]}>
+      <Form.Item
+        label="Unit"
+        name="unit"
+        rules={[{ required: true, message: "Unit" }]}
+      >
         <Select
           style={{ width: 150 }}
           placeholder="Unit"
           onChange={(unitName: string) => {
             form.setFieldsValue({ unit: unitName });
             const factor = multiUnitOptions[unitName] || 1;
-            console.log("factor", factor);
             const selectedProduct = list.find(
               (item) => item.id === form.getFieldValue("product")
             );
@@ -134,25 +148,17 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
         </Select>
       </Form.Item>
 
-      <Form.Item name={"buyingRate"}>
+      <Form.Item label="Buying Rate" name={"buyingRate"}>
         <InputNumber placeholder="Buying Rate" precision={2} disabled />
-      </Form.Item>
-
-      <Form.Item
-        name="rate"
-        rules={[{ required: true, message: "Enter rate" }]}
-      >
-        <InputNumber placeholder="Selling Rate" precision={2} />
       </Form.Item>
 
       <Form.Item>
         <Button
-          type="primary"
-          icon={<Plus size={14} />}
+          shape="circle"
+          style={{ marginTop: 29 }}
+          icon={<Plus />}
           onClick={handleAddItem}
-        >
-          Add
-        </Button>
+        />
       </Form.Item>
     </Form>
   );

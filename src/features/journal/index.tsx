@@ -10,7 +10,6 @@ import {
   DatePicker,
   Input,
   notification,
-  Select,
   Space,
   Table,
   Tag,
@@ -20,9 +19,11 @@ import {
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
+import PaginatedSelect from "../../components/common/paginated-select/paginated-select";
+import { getAccounts } from "../../services/charts-of-accounts.services";
 import { getJournalsApi } from "../../services/journals.services";
 import { buildQueryString, formatCurrency } from "../../utils";
+import { ACCOUNT_TYPE } from "../charts-of-accounts/utils";
 import { Filters, Journal, JournalEntry, Pagination } from "./types";
 
 const { RangePicker } = DatePicker;
@@ -34,7 +35,6 @@ const JournalsListing = () => {
     dateRange: null,
   });
   const [loading, setLoading] = useState(false);
-  const [nominals, setNominals] = useState<any>([]);
   const [data, setData] = useState<Journal[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
@@ -90,25 +90,6 @@ const JournalsListing = () => {
 
   // Initial load
   useEffect(() => {
-    const fetchNominals = async () => {
-      try {
-        const response = await getAccountByTypeApi("subAccount");
-        if (!response.success) {
-          return notification.error({
-            message: "Error",
-            description: response.message,
-          });
-        }
-        setNominals(response.data);
-      } catch (error: any) {
-        notification.error({
-          message: "Error",
-          description: error?.message,
-        });
-      }
-    };
-
-    fetchNominals();
     fetch();
   }, []);
 
@@ -284,13 +265,12 @@ const JournalsListing = () => {
       <Title level={3}>Journals</Title>
 
       <Space size="middle" wrap style={{ marginBottom: 16 }}>
-        <Select
+        <PaginatedSelect
+          api={getAccounts}
+          apiParams={{ types: ACCOUNT_TYPE[3].value }}
+          queryParamName="name"
           mode="multiple"
           placeholder="Select Nominals"
-          style={{ width: 300 }}
-          value={filters.nominal_ids}
-          onChange={(value) => handleFilterChange("nominal_ids", value)}
-          allowClear
           maxTagCount={"responsive"}
           maxTagPlaceholder={(omittedValues) => (
             <Tooltip
@@ -302,13 +282,10 @@ const JournalsListing = () => {
               <span>+{omittedValues.length} more...</span>
             </Tooltip>
           )}
-        >
-          {nominals.map((nominal) => (
-            <Select.Option key={nominal.id} value={nominal.id}>
-              {nominal.name} ({nominal.code})
-            </Select.Option>
-          ))}
-        </Select>
+          style={{ width: 300 }}
+          value={filters.nominal_ids}
+          onChange={(value) => handleFilterChange("nominal_ids", value)}
+        />
 
         <Input
           placeholder="Ref No."
