@@ -200,7 +200,7 @@ const ExpenseListing = () => {
               icon={<EditOutlined />}
               onClick={() => navigate(`/expenses/${record.id}`)}
             />
-            <Popconfirm
+            {/* <Popconfirm
               title="Are you sure?"
               onConfirm={() => onDeleteExpense(record?.id)}
               okText="Yes"
@@ -212,7 +212,7 @@ const ExpenseListing = () => {
                 icon={<DeleteOutlined />}
                 danger
               />
-            </Popconfirm>
+            </Popconfirm> */}
           </Flex>
         ),
       },

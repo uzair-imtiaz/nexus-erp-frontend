@@ -40,14 +40,14 @@ export const BankTable = ({
             icon={<EditOutlined />}
             type="link"
           />
-          <Popconfirm
+          {/* <Popconfirm
             title="Are you sure?"
             onConfirm={() => onDelete(record.id)}
             okText="Yes"
             cancelText="No"
           >
             <Button danger size="small" icon={<DeleteOutlined />} type="link" />
-          </Popconfirm>
+          </Popconfirm> */}
         </Space>
       ),
     },

@@ -20,6 +20,7 @@ import Production from "./features/production/production-listing";
 import ProductionForm from "./features/production/production-form";
 import TrialBalance from "./features/reports/trial-balance";
 import JournalLedger from "./features/reports/journal-ledger";
+import ProfitLossReport from "./features/reports/pnl-report";
 
 const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
@@ -63,7 +64,7 @@ function App() {
               <Route path="reports">
                 <Route path="trial-balance" element={<TrialBalance />} />
                 <Route path="journal-ledger" element={<JournalLedger />} />
-                {/* <Route path="balance-sheet" element={<BalanceSheet />} /> */}
+                <Route path="profit-loss" element={<ProfitLossReport />} />
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />
