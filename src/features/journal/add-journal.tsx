@@ -139,19 +139,19 @@ const JournalEntry = () => {
         />
       ),
     },
-    {
-      title: "Action",
-      render: (_: any, record: JournalEntryRow) => (
-        <Space>
-          <Button
-            size="small"
-            danger
-            onClick={() => removeRow(record.key)}
-            icon={<DeleteOutlined />}
-          />
-        </Space>
-      ),
-    },
+    // {
+    //   title: "Action",
+    //   render: (_: any, record: JournalEntryRow) => (
+    //     <Space>
+    //       <Button
+    //         size="small"
+    //         danger
+    //         onClick={() => removeRow(record.key)}
+    //         icon={<DeleteOutlined />}
+    //       />
+    //     </Space>
+    //   ),
+    // },
   ];
 
   const handleSave = async () => {
