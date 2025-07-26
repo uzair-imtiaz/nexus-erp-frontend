@@ -119,6 +119,7 @@ const JournalsListing = () => {
           </Tag>
         ),
         sorter: (a: Journal, b: Journal) => Number(a.id) - Number(b.id),
+        defaultSortOrder: "descend",
       },
       {
         title: "Date",
