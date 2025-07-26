@@ -13,7 +13,6 @@ import {
   Flex,
   notification,
   Popconfirm,
-  Select,
   Space,
   Table,
   Tag,
@@ -21,10 +20,11 @@ import {
   Typography,
 } from "antd";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PaginatedSelect from "../../components/common/paginated-select/paginated-select";
 import { getBanks } from "../../services/bank-services";
-import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
+import { getAccounts } from "../../services/charts-of-accounts.services";
 import {
   deleteExpenseApi,
   getExpensesApi,
@@ -33,7 +33,6 @@ import { buildQueryString, formatCurrency } from "../../utils";
 import { ACCOUNT_TYPE } from "../charts-of-accounts/utils";
 import { Expense, Filters, Pagination } from "./types";
 
-const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const ExpenseListing = () => {
@@ -43,8 +42,6 @@ const ExpenseListing = () => {
     dateRange: null,
     search: undefined,
   });
-  const [banks, setBanks] = useState<any>([]);
-  const [nominals, setNominals] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<Expense[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
@@ -98,41 +95,6 @@ const ExpenseListing = () => {
     },
     [filters, pagination.limit]
   );
-
-  // Initial load
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [BanksRes, NominalRes] = await Promise.all([
-          getBanks(),
-          getAccountByTypeApi(ACCOUNT_TYPE[3].value),
-        ]);
-        if (BanksRes?.success && NominalRes?.success) {
-          setBanks(BanksRes?.data);
-          setNominals(
-            NominalRes?.data.filter(
-              (nominal: any) =>
-                !nominal.pathName?.includes("General Reserves") &&
-                nominal.entityType !== "bank"
-            )
-          );
-        } else {
-          notification.error({
-            message: "Error",
-            description: "Error fetching data",
-          });
-        }
-      } catch (error: any) {
-        notification.error({
-          message: "Error",
-          description: error?.message,
-        });
-      }
-    };
-
-    fetch();
-    fetchData();
-  }, []);
 
   const onDeleteExpense = async (id) => {
     try {
@@ -316,38 +278,37 @@ const ExpenseListing = () => {
       <Title level={3}>Expenses Management</Title>
 
       <Space size="middle" wrap style={{ marginBottom: 16 }}>
-        <Select
-          placeholder="Select Bank"
-          style={{ width: 200 }}
+        <PaginatedSelect
+          api={getBanks}
+          queryParamName="name"
+          placeholder="Select Bank Account"
+          style={{ width: 250 }}
+          labelExtractor={(item) => `${item.name}`}
           value={filters.bank_id}
           onChange={(value) => handleFilterChange("bank_id", value)}
-          showSearch
-          optionFilterProp="children"
-          allowClear
-        >
-          {banks.map((bank) => (
-            <Option key={bank.id} value={bank.id}>
-              {bank.name}
-            </Option>
-          ))}
-        </Select>
+        />
 
-        <Select
+        <PaginatedSelect
+          api={getAccounts}
+          apiParams={{ types: [ACCOUNT_TYPE[3].value] }}
+          queryParamName="name"
           mode="multiple"
           placeholder="Select Nominals"
+          maxTagCount={"responsive"}
+          maxTagPlaceholder={(omittedValues) => (
+            <Tooltip
+              styles={{ root: { pointerEvents: "none" } }}
+              title={omittedValues.map(({ label }) => (
+                <div>{label}</div>
+              ))}
+            >
+              <span>+{omittedValues.length} more...</span>
+            </Tooltip>
+          )}
           style={{ width: 240 }}
           value={filters.nominal_account_ids}
           onChange={(value) => handleFilterChange("nominal_account_ids", value)}
-          allowClear
-          showSearch
-          optionFilterProp="children"
-        >
-          {nominals.map((nominal) => (
-            <Option key={nominal.id} value={nominal.id}>
-              {nominal.name}
-            </Option>
-          ))}
-        </Select>
+        />
 
         <RangePicker
           value={filters.dateRange}

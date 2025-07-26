@@ -5,28 +5,23 @@ import {
   Checkbox,
   Col,
   DatePicker,
-  Divider,
   Empty,
   Input,
   notification,
   Row,
-  Select,
   Table,
   Tooltip,
 } from "antd";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
-import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
-import {
-  ApiError,
-  NominalAccount,
-  NominalAccountGroup,
-} from "../journal/types";
-import { buildQueryString, formatCurrency } from "../../utils";
+import { useState } from "react";
+import PaginatedSelect from "../../components/common/paginated-select/paginated-select";
+import { getAccounts } from "../../services/charts-of-accounts.services";
 import { getJournalLedgerReport } from "../../services/reports.services";
+import { buildQueryString, formatCurrency } from "../../utils";
+import { ACCOUNT_TYPE } from "../charts-of-accounts/utils";
+import { NominalAccountGroup } from "../journal/types";
 
 const { RangePicker } = DatePicker;
-const { OptGroup, Option } = Select;
 
 const columns = [
   //   {
@@ -120,57 +115,29 @@ const JournalLedger = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const [l2, l3, l4] = await Promise.all([
-          getAccountByTypeApi("accountType"),
-          getAccountByTypeApi("account"),
-          getAccountByTypeApi("subAccount"),
-        ]);
-        if (!l2.success || !l3.success || !l4.success) {
-          return notification.error({
-            message: "Error",
-            description: "Something went wrong",
-          });
-        }
-        setAccounts([
-          {
-            label: "Level 2",
-            title: "Level 2",
-            options: l2.data?.map((l: NominalAccount) => ({
-              label: `${l.name} (${l.code})`,
-              value: l.id,
-            })),
-          },
-          {
-            label: <span>Level 3</span>,
-            title: "Level 3",
-            options: l3.data?.map((l: NominalAccount) => ({
-              label: `${l.name} (${l.code})`,
-              value: l.id,
-            })),
-          },
-          {
-            label: <span>Level 4</span>,
-            title: "Level 4",
-            options: l4.data?.map((l: NominalAccount) => ({
-              label: `${l.name} (${l.code})`,
-              value: l.id,
-            })),
-          },
-        ]);
-      } catch (error) {
-        const apiError = error as ApiError;
-        notification.error({
-          message: "Error",
-          description: apiError.message || "Something went wrong",
-        });
-      }
-    };
+  const groupOptions = (options) => {
+    const groups = {};
 
-    fetchAccounts();
-  }, []);
+    options.forEach((option) => {
+      const level = option.path.split("/").length;
+      if (!groups[level]) {
+        groups[level] = [];
+      }
+      groups[level].push(option);
+    });
+
+    const groupedOptions = Object.entries(groups).map(([level, groups]) => ({
+      label: <span>Level {level}</span>,
+      title: `Level ${level}`,
+      options: groups.map((group) => ({
+        label: `${group.name} (${group.code})`,
+        value: group.id,
+        key: group.id,
+      })),
+    }));
+
+    return groupedOptions;
+  };
 
   const totalCredit = data.reduce((acc, item) => acc + item.credit, 0);
   const totalDebit = data.reduce((acc, item) => acc + item.debit, 0);
@@ -188,12 +155,6 @@ const JournalLedger = () => {
               B/FWD
             </Checkbox>
           </Col>
-          {/* <Col span={4}>
-            <Select defaultValue="This Month" style={{ width: "100%" }}>
-              <Select.Option value="this_month">This Month</Select.Option>
-              <Select.Option value="last_month">Last Month</Select.Option>
-            </Select>
-          </Col> */}
           <Col span={6}>
             <RangePicker
               defaultValue={[dayjs("2025-07-01"), dayjs("2025-07-31")]}
@@ -205,18 +166,18 @@ const JournalLedger = () => {
             />
           </Col>
           <Col span={6}>
-            <Select
+            <PaginatedSelect
+              api={getAccounts}
+              apiParams={{
+                types: ACCOUNT_TYPE.map((t) => t.value),
+                limit: Number.MAX_SAFE_INTEGER,
+              }}
+              queryParamName="name"
               mode="multiple"
-              placeholder="Select Account"
-              style={{ width: 250 }}
-              onChange={setSelectedAccounts}
+              append={false}
+              optionsGrouper={groupOptions}
+              placeholder="Select Nominals"
               maxTagCount={"responsive"}
-              allowClear
-              filterOption={(input, option) =>
-                option?.label
-                  ?.toLowerCase?.()
-                  ?.includes?.(input?.toLowerCase?.())
-              }
               maxTagPlaceholder={(omittedValues) => (
                 <Tooltip
                   styles={{ root: { pointerEvents: "none" } }}
@@ -227,27 +188,9 @@ const JournalLedger = () => {
                   <span>+{omittedValues.length} more...</span>
                 </Tooltip>
               )}
-              options={accounts}
-              loading={loading}
-            >
-              {accounts.map((group) => (
-                <OptGroup
-                  key={group.title}
-                  label={
-                    <div>
-                      <span style={{ fontWeight: 600 }}>{group.label}</span>
-                      <Divider style={{ margin: "4px 0" }} />
-                    </div>
-                  }
-                >
-                  {group.options.map((acc: any) => (
-                    <Option key={acc.value} value={acc.value}>
-                      {acc.label}
-                    </Option>
-                  ))}
-                </OptGroup>
-              ))}
-            </Select>
+              style={{ width: 300 }}
+              onChange={setSelectedAccounts}
+            />
           </Col>
         </Row>
         <Row className="mt-4">

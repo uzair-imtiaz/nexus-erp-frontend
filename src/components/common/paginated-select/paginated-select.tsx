@@ -1,13 +1,19 @@
-import { Select, Spin } from "antd";
+import { notification, Select, Spin } from "antd";
 import { debounce } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { buildQueryString } from "../../../utils";
 
 const PaginatedSelect = ({
-  fetchOptions, // (page, searchValue) => Promise<{ options: [], hasMore: boolean }>
+  api,
+  apiParams = {},
+  queryParamName = "name",
+  valueExtractor = (item) => item.id,
+  labelExtractor = (item) => `${item.name} (${item.code})`,
+  debounceTimeout = 500,
   value,
   onChange,
-  debounceTimeout = 500,
-  ...restProps 
+  optionsGrouper = null,
+  ...restProps
 }) => {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,7 +21,6 @@ const PaginatedSelect = ({
   const [page, setPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
 
-  // Use a ref to track the internal loading state without causing fetchData to re-create
   const loadingRef = useRef(false);
 
   const fetchData = useCallback(
@@ -25,77 +30,101 @@ const PaginatedSelect = ({
         return;
       }
 
-      loadingRef.current = true; 
-      setLoading(true); 
+      loadingRef.current = true;
+      setLoading(true);
       try {
-        const { options: newOptions, hasMore: newHasMore } = await fetchOptions(
-          currentPage,
-          currentSearchValue
-        );
+        const queryParams = {
+          page: currentPage,
+          [queryParamName]: currentSearchValue,
+          ...apiParams,
+        };
+        const query = buildQueryString(queryParams);
 
-        setOptions((prev) => (append ? [...prev, ...newOptions] : newOptions));
-        setHasMore(newHasMore); // Update hasMore state
+        const response = await api(query);
+        if (!response?.success) {
+          notification.error({
+            message: "Error",
+            description: response?.message,
+          });
+        }
+
+        let mappedOptions;
+        if (optionsGrouper) {
+          mappedOptions = optionsGrouper(response?.data);
+        } else {
+          const fetchedData = response?.data;
+          mappedOptions = fetchedData.map((item) => ({
+            value: valueExtractor(item),
+            label: labelExtractor(item),
+            key: valueExtractor(item),
+          }));
+        }
+        const newHasMore = response?.pagination?.nextPage;
+
+        setOptions((prev) =>
+          append ? [...prev, ...mappedOptions] : mappedOptions
+        );
+        setHasMore(newHasMore);
       } catch (error) {
         console.error("Failed to fetch options:", error);
+        setOptions([]);
+        setHasMore(false);
       } finally {
-        loadingRef.current = false; 
-        setLoading(false); 
+        loadingRef.current = false;
+        setLoading(false);
       }
     },
-    [fetchOptions]
-  ); 
+    [api, apiParams, queryParamName, valueExtractor, labelExtractor]
+  );
 
   useEffect(() => {
     setPage(1);
     setOptions([]);
     setHasMore(true);
 
-    fetchData(1, searchValue, false);
-  }, [searchValue, fetchData]); 
+    if (!loadingRef.current) fetchData(1, searchValue, false);
+  }, [searchValue, apiParams, queryParamName]);
 
   const debouncedSearch = useRef(
     debounce((val) => {
-      setSearchValue(val); 
+      setSearchValue(val);
     }, debounceTimeout)
   ).current;
 
-  // Handler for search input changes
   const handleSearch = useCallback(
     (val) => {
       debouncedSearch(val);
     },
     [debouncedSearch]
-  ); // Dependency: debouncedSearch (stable due to useRef)
+  );
 
-  // Handler for dropdown scroll events (for infinite scrolling)
   const handlePopupScroll = useCallback(
     (e) => {
       const { target } = e;
-      debugger; // Check if scrolled to the bottom of the dropdown
       if (
         target.scrollTop + target.offsetHeight >= target.scrollHeight - 20 &&
         hasMore &&
         !loadingRef.current
       ) {
-        // If at bottom, there are more items, and not currently loading (check ref), fetch next page
         setPage((prevPage) => {
           const nextPage = prevPage + 1;
-          fetchData(nextPage, searchValue, true); // Append new options to existing ones
+          fetchData(nextPage, searchValue, true);
           return nextPage;
         });
       }
     },
     [hasMore, searchValue, fetchData]
-  ); // Dependencies: states that affect scroll logic and fetchData
+  );
 
   return (
     <Select
-      showSearch // Enable search functionality
-      value={value} // Controlled component value
-      onChange={onChange} // Controlled component onChange handler
-      onSearch={handleSearch} // Custom search handler (debounced)
-      onPopupScroll={handlePopupScroll} // Custom scroll handler for infinite scroll
-      filterOption={false} // Disable Ant Design's built-in filtering, as we handle it via `fetchOptions`
+      showSearch
+      value={value}
+      onChange={onChange}
+      onSearch={handleSearch}
+      onPopupScroll={handlePopupScroll}
+      filterOption={false}
+      allowClear
       notFoundContent={
         loading && page === 1 ? (
           <Spin size="small" />
@@ -105,12 +134,9 @@ const PaginatedSelect = ({
           "No data"
         )
       }
-      options={options} // Options displayed in the dropdown
-      loading={loading && page === 1} // AntD's loading prop for the main input spinner (only for initial load/search)
-      // The `loading` prop for Select itself shows a spinner in the input field.
-      // We only want this for the initial load or a new search.
-      // For infinite scroll loading, `notFoundContent` handles the spinner.
-      {...restProps} // Pass through any other props like placeholder, disabled, etc.
+      options={options}
+      loading={loading && page === 1}
+      {...restProps}
     />
   );
 };

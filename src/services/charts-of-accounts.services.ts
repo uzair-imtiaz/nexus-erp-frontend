@@ -16,9 +16,9 @@ export const createAccountApi = async (payload: any) => {
   return response;
 };
 
-export const getAccountByTypeApi = async (type: string, query: string = "") => {
+export const getAccounts = async (query: string = "") => {
   const response: responseMetadata = await getCallback(
-    `/accounts/${type}${query}`
+    `/accounts/non-hierarchical${query}`
   );
   return response;
 };

@@ -5,7 +5,6 @@ import {
   DatePicker,
   notification,
   Row,
-  Select,
   Spin,
   Table,
   Tooltip,
@@ -13,9 +12,11 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
-import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
+import PaginatedSelect from "../../components/common/paginated-select/paginated-select";
+import { getAccounts } from "../../services/charts-of-accounts.services";
 import { getTrialBalanceReport } from "../../services/reports.services";
 import { buildQueryString, formatCurrency } from "../../utils";
+import { ACCOUNT_TYPE } from "../charts-of-accounts/utils";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -57,9 +58,6 @@ const TrialBalance: React.FC = () => {
     null
   );
   const [nominalAccounts, setNominalAccounts] = useState<string[]>([]);
-  const [accountOptions, setAccountOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
 
   const fetchReportData = async () => {
     try {
@@ -95,33 +93,7 @@ const TrialBalance: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchNominalAccounts = async () => {
-      try {
-        const response = await getAccountByTypeApi("subAccount");
-        if (response.success) {
-          setAccountOptions(
-            response.data.map((account: any) => ({
-              value: account.id,
-              label: `${account.name} (${account.code})`,
-            }))
-          );
-        } else {
-          notification.error({
-            message: "Error",
-            description: response.message,
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching nominal accounts:", error);
-        notification.error({
-          message: "Error",
-          description: "Failed to fetch nominal accounts.",
-        });
-      }
-    };
-
     fetchReportData();
-    fetchNominalAccounts();
   }, []);
 
   const totalDebit = data.reduce((sum, row) => sum + (row.debit || 0), 0);
@@ -143,17 +115,13 @@ const TrialBalance: React.FC = () => {
           />
         </Col>
         <Col xs={24} md={6}>
-          <Select
+          <PaginatedSelect
+            api={getAccounts}
+            apiParams={{ types: ACCOUNT_TYPE[3].value }}
+            queryParamName="name"
             mode="multiple"
-            allowClear
-            placeholder="Filter by nominal accounts"
-            value={nominalAccounts}
-            onChange={setNominalAccounts}
-            style={{ width: "100%" }}
+            placeholder="Select Nominals"
             maxTagCount={"responsive"}
-            filterOption={(input, option) =>
-              option?.label.toLowerCase().includes(input.toLowerCase())
-            }
             maxTagPlaceholder={(omittedValues) => (
               <Tooltip
                 styles={{ root: { pointerEvents: "none" } }}
@@ -164,8 +132,9 @@ const TrialBalance: React.FC = () => {
                 <span>+{omittedValues.length} more...</span>
               </Tooltip>
             )}
-            options={accountOptions}
-            loading={loading}
+            style={{ width: 300 }}
+            value={nominalAccounts}
+            onChange={setNominalAccounts}
           />
         </Col>
         <Button

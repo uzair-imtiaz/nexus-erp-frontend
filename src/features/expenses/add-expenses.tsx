@@ -6,30 +6,26 @@ import {
   Input,
   InputNumber,
   notification,
-  Select,
   Table,
   Typography,
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
-import { ExpenseRow } from "./types";
+import { useNavigate, useParams } from "react-router-dom";
+import PaginatedSelect from "../../components/common/paginated-select/paginated-select";
 import { getBanks } from "../../services/bank-services";
-import { getAccountByTypeApi } from "../../services/charts-of-accounts.services";
-import { ACCOUNT_TYPE } from "../charts-of-accounts/utils";
+import { getAccounts } from "../../services/charts-of-accounts.services";
 import {
   addExpenseApi,
   getExpenseApi,
   updateExpenseApi,
 } from "../../services/expense.services";
-import { useNavigate, useParams } from "react-router-dom";
-
-const { Option } = Select;
+import { ACCOUNT_TYPE } from "../charts-of-accounts/utils";
+import { ExpenseRow } from "./types";
 
 const AddExpenses = () => {
   const { id } = useParams();
   const isEdit = !!id;
-  const [banks, setBanks] = useState<any[]>([]);
-  const [nominals, setNominals] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [selectedBank, setSelectedBank] = useState<any>(null);
@@ -46,42 +42,6 @@ const AddExpenses = () => {
 
   const navigate = useNavigate();
   const { Title } = Typography;
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [BanksRes, NominalRes] = await Promise.all([
-          getBanks(),
-          getAccountByTypeApi(ACCOUNT_TYPE[3].value),
-        ]);
-        if (BanksRes?.success && NominalRes?.success) {
-          setBanks(BanksRes?.data);
-          setNominals(
-            NominalRes?.data.filter(
-              (nominal: any) =>
-                !nominal.pathName?.includes("General Reserves") &&
-                nominal.entityType !== "bank"
-            )
-          );
-        } else {
-          notification.error({
-            message: "Error",
-            description: "Error fetching data",
-          });
-        }
-      } catch (error: any) {
-        notification.error({
-          message: "Error",
-          description: error?.message,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const fetchExpenseData = async () => {
@@ -168,22 +128,17 @@ const AddExpenses = () => {
       dataIndex: "nominalAccount",
       width: 300,
       render: (_: unknown, record: ExpenseRow) => (
-        <Select
-          loading={loading}
+        <PaginatedSelect
+          api={getAccounts}
+          apiParams={{ types: [ACCOUNT_TYPE[3].value] }}
+          queryParamName="name"
           placeholder="Select Nominal Account"
           style={{ width: 300 }}
           value={record.nominalAccount}
-          allowClear
           onChange={(value) =>
             handleChange(value, record.key, "nominalAccount")
           }
-        >
-          {nominals.map((nominal) => (
-            <Option key={nominal.id} value={nominal.id}>
-              {`${nominal.name}  (${nominal.code})`}
-            </Option>
-          ))}
-        </Select>
+        />
       ),
     },
     {
@@ -267,20 +222,15 @@ const AddExpenses = () => {
     <div>
       <Title level={3}>Add Expense</Title>
       <Flex gap={16} style={{ marginBottom: 24 }}>
-        <Select
-          placeholder="Select Bank"
+        <PaginatedSelect
+          api={getBanks}
+          queryParamName="name"
+          placeholder="Select Bank Account"
           style={{ width: 250 }}
-          allowClear
+          labelExtractor={(item) => `${item.name}`}
           value={selectedBank}
           onChange={(value) => setSelectedBank(value)}
-          loading={loading}
-        >
-          {banks.map((bank) => (
-            <Option key={bank.id} value={bank.id}>
-              {`${bank.name} (PKR ${bank.currentBalance})`}
-            </Option>
-          ))}
-        </Select>
+        />
 
         <Input
           style={{ width: 350 }}
