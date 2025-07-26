@@ -5,7 +5,7 @@ import { buildQueryString } from "../../../utils";
 
 const PaginatedSelect = ({
   api,
-  apiParams = {},
+  apiParams = null,
   queryParamName = "name",
   valueExtractor = (item) => item.id,
   labelExtractor = (item) => `${item.name} (${item.code})`,
@@ -36,7 +36,7 @@ const PaginatedSelect = ({
         const queryParams = {
           page: currentPage,
           [queryParamName]: currentSearchValue,
-          ...apiParams,
+          ...(apiParams ? apiParams : {}),
         };
         const query = buildQueryString(queryParams);
 
@@ -83,7 +83,7 @@ const PaginatedSelect = ({
     setHasMore(true);
 
     if (!loadingRef.current) fetchData(1, searchValue, false);
-  }, [searchValue, apiParams, queryParamName]);
+  }, [searchValue, apiParams]);
 
   const debouncedSearch = useRef(
     debounce((val) => {
