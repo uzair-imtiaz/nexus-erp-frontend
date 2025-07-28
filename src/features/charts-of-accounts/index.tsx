@@ -200,7 +200,7 @@ const ChartOfAccounts: React.FC = () => {
             icon={<EditOutlined />}
             type="link"
           />
-          <Popconfirm
+          {/* <Popconfirm
             title="Are you sure?"
             onConfirm={() => handleDelete(record.id)}
             okText="Yes"
@@ -213,7 +213,7 @@ const ChartOfAccounts: React.FC = () => {
               danger
               disabled={record?.systemGenerated}
             />
-          </Popconfirm>
+          </Popconfirm> */}
         </Space>
       ),
     },
