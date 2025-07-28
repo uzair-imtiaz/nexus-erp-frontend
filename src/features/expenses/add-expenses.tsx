@@ -131,6 +131,15 @@ const AddExpenses = () => {
         <PaginatedSelect
           api={getAccounts}
           apiParams={{ types: [ACCOUNT_TYPE[3].value] }}
+          optionsFormatter={(items: any[]) =>
+            items
+              .filter((item) => !item.code.endsWith("cr"))
+              .map((item) => ({
+                value: item.id,
+                label: `${item.name} (${item.code})`,
+                name: item.name,
+              }))
+          }
           queryParamName="name"
           placeholder="Select Nominal Account"
           style={{ width: 300 }}

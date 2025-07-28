@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Typography, Divider, Collapse, Table } from "antd";
+import { formatCurrency } from "../../utils";
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
@@ -43,11 +44,7 @@ const EntryTable: React.FC<{
         size="small"
       />
       <div className="flex justify-end font-semibold pr-4 pt-2">
-        <div>
-          Total Debit: {formatAmount(totals.debit)} &nbsp;|&nbsp; Total Credit:{" "}
-          {formatAmount(totals.credit)} &nbsp;|&nbsp; Balance:{" "}
-          {formatAmount(totals.debit - totals.credit)}
-        </div>
+        <div>Balance: {formatCurrency(totals.debit - totals.credit)}</div>
       </div>
     </>
   );
