@@ -126,14 +126,14 @@ const Production: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => navigate(`/productions/${record?.id}`)}
           />
-          <Popconfirm
+          {/* <Popconfirm
             title="Delete this record?"
             okText="Yes"
             cancelText="No"
             onConfirm={() => handleDelete(record?.id)}
           >
             <Button type="link" size="small" icon={<DeleteOutlined />} danger />
-          </Popconfirm>
+          </Popconfirm> */}
         </Flex>
       ),
     },

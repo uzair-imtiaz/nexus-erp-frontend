@@ -14,3 +14,10 @@ export const getJournalLedgerReport = async (query?: string) => {
   );
   return response;
 };
+
+export const getBalanceSheetReport = async (query?: string) => {
+  const response: responseMetadata = await getCallback(
+    `/reports/balance-sheet${query}`
+  );
+  return response;
+};
