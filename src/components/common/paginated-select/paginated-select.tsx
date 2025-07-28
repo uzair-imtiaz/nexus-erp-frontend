@@ -12,7 +12,7 @@ const PaginatedSelect = ({
   debounceTimeout = 500,
   value,
   onChange,
-  optionsGrouper = null,
+  optionsFormatter = null,
   ...restProps
 }) => {
   const [options, setOptions] = useState([]);
@@ -49,8 +49,8 @@ const PaginatedSelect = ({
         }
 
         let mappedOptions;
-        if (optionsGrouper) {
-          mappedOptions = optionsGrouper(response?.data);
+        if (optionsFormatter) {
+          mappedOptions = optionsFormatter(response?.data);
         } else {
           const fetchedData = response?.data;
           mappedOptions = fetchedData.map((item) => ({
