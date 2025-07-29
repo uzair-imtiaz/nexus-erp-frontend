@@ -20,7 +20,7 @@ import {
   Typography,
 } from "antd";
 import dayjs from "dayjs";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaginatedSelect from "../../components/common/paginated-select/paginated-select";
 import { getBanks } from "../../services/bank-services";
@@ -95,6 +95,10 @@ const ExpenseListing = () => {
     },
     [filters, pagination.limit]
   );
+
+  useEffect(() => {
+    fetch();
+  }, []);
 
   const onDeleteExpense = async (id) => {
     try {

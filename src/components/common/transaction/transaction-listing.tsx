@@ -87,6 +87,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
       sorter: (a, b) => a.totalAmount - b.totalAmount,
     },
     {
+      /*{
       title: "Actions",
       render: (_, record) => (
         <Space>
@@ -104,16 +105,17 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
               onClick={() => navigate(`/${type}s/${record.id}`)}
             />
           </Tooltip>
-          {/* <Tooltip title="Delete">
+           <Tooltip title="Delete">
             <Popconfirm
               title="Are you sure you want to delete this transaction?"
               onConfirm={() => handleDelete(record)}
             >
               <Button type="text" icon={<Trash2 size={16} />} danger />
             </Popconfirm>
-          </Tooltip> */}
+          </Tooltip> 
         </Space>
       ),
+    },*/
     },
   ];
 
