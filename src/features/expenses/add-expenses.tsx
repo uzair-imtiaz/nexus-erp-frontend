@@ -29,6 +29,7 @@ const AddExpenses = () => {
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [selectedBank, setSelectedBank] = useState<any>(null);
+  const [date, setDate] = useState<Dayjs>(dayjs());
   const [description, setDescription] = useState<string>("");
   const [rows, setRows] = useState<ExpenseRow[]>([
     {
@@ -113,17 +114,6 @@ const AddExpenses = () => {
 
   const columns = [
     {
-      title: "Date",
-      dataIndex: "date",
-      width: 180,
-      render: (_: unknown, record: ExpenseRow) => (
-        <DatePicker
-          value={record.date}
-          onChange={(date) => handleChange(date, record.key, "date")}
-        />
-      ),
-    },
-    {
       title: "Nominal Account",
       dataIndex: "nominalAccount",
       width: 300,
@@ -192,6 +182,7 @@ const AddExpenses = () => {
     try {
       setSubmitLoading(true);
       const payload = {
+        date: dayjs(date).format("YYYY-MM-DD"),
         bankId: selectedBank,
         description: description,
         details: rows.map((row) => ({
@@ -247,6 +238,12 @@ const AddExpenses = () => {
           value={description}
           allowClear
           onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <DatePicker
+          style={{ width: 250 }}
+          value={date}
+          onChange={(value) => setDate(value)}
         />
       </Flex>
 

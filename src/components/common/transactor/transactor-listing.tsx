@@ -91,7 +91,7 @@ export const TransactorListComponent: React.FC<
               setShowViewModal(true);
             }}
           />
-          <Button
+          {/* <Button
             type="text"
             icon={<EditOutlined />}
             size="small"
@@ -107,7 +107,7 @@ export const TransactorListComponent: React.FC<
             cancelText="No"
           >
             <Button size="small" icon={<DeleteOutlined />} type="link" danger />
-          </Popconfirm>
+          </Popconfirm> */}
         </Space>
       ),
     },
