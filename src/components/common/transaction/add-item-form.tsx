@@ -40,6 +40,7 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
         quantity: values.quantity,
         unit: values.unit,
         rate: values.rate,
+        buyingRate: values.buyingRate,
         discount:
           values.discount ??
           (values.discountPercent / 100) * values.rate * values.quantity ??

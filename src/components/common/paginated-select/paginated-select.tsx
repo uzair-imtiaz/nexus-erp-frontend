@@ -74,7 +74,7 @@ const PaginatedSelect = ({
         setLoading(false);
       }
     },
-    [api, apiParams, queryParamName, valueExtractor, labelExtractor]
+    []
   );
 
   useEffect(() => {
