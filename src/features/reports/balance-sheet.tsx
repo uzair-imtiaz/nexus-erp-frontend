@@ -72,7 +72,7 @@ const BalanceSheet = () => {
 
   return (
     <div>
-      <Title level={2}>Balance Sheet</Title>
+      <Title level={3}>Balance Sheet</Title>
 
       <Flex gap={12}>
         <DatePicker

@@ -15,6 +15,13 @@ export const getJournalLedgerReport = async (query?: string) => {
   return response;
 };
 
+export const getProfitLossReport = async (query?: string) => {
+  const response: responseMetadata = await getCallback(
+    `/reports/profit-and-loss${query}`
+  );
+  return response;
+};
+
 export const getBalanceSheetReport = async (query?: string) => {
   const response: responseMetadata = await getCallback(
     `/reports/balance-sheet${query}`
