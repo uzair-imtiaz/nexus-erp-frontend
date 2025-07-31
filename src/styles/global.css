@@ -406,11 +406,6 @@ body.theme-transition * {
   color: var(--accent-hover);
 }
 
-/* Override Ant Design sidebar background with gradient */
-.ant-layout-sider {
-  background: linear-gradient(to bottom, #1f1f1f 0%, #23272a 100%) !important;
-}
-
 /* Also override the menu background with gradient */
 .ant-layout-sider .ant-menu-dark {
   background: linear-gradient(to bottom, #1f1f1f 0%, #23272a 100%) !important;
