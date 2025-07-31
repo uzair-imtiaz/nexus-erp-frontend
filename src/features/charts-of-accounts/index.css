@@ -1,3 +1,4 @@
+/* Light theme colors */
 .tr-l1 {
   background-color: #c7e6ea;
 }
@@ -14,6 +15,54 @@
   background-color: #f5fcfe;
 }
 
+/* Dark theme colors */
+[data-theme="dark"] .tr-l1 {
+  background-color: #1a3a3a !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .tr-l2 {
+  background-color: #1f4242 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .tr-l3 {
+  background-color: #244a4a !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .tr-l4 {
+  background-color: #295252 !important;
+  color: #ffffff !important;
+}
+
+/* Ensure text is readable in dark mode */
+[data-theme="dark"] .tr-l1 .ant-table-cell,
+[data-theme="dark"] .tr-l2 .ant-table-cell,
+[data-theme="dark"] .tr-l3 .ant-table-cell,
+[data-theme="dark"] .tr-l4 .ant-table-cell {
+  color: #ffffff !important;
+}
+
+/* Hover states for dark mode */
+[data-theme="dark"] .tr-l1:hover,
+[data-theme="dark"] .tr-l2:hover,
+[data-theme="dark"] .tr-l3:hover,
+[data-theme="dark"] .tr-l4:hover {
+  background-color: #2a5a5a !important;
+}
+
 .not-expandible .ant-table-row-expand-icon {
   visibility: hidden;
+}
+
+/* Ensure proper contrast for expand/collapse icons in dark mode */
+[data-theme="dark"] .ant-table-row-expand-icon {
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+[data-theme="dark"] .ant-table-row-expand-icon:hover {
+  background-color: #1b4d3e !important;
+  border-color: #1b4d3e !important;
 }

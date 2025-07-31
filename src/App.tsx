@@ -1,6 +1,8 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import { ConfigProvider, Spin } from "antd";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
+import { lightTheme, darkTheme } from "./styles/theme";
 import AppLayout from "./components/common/layout";
 import Login from "./features/auth/LoginForm";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
@@ -27,14 +29,10 @@ const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
 Spin.setDefaultIndicator(loadingIcon);
 
-const theme = {
-  token: {
-    colorPrimary: "#1B4D3E",
-    borderRadius: 4,
-  },
-};
+const AppContent: React.FC = () => {
+  const { themeMode } = useTheme();
+  const theme = themeMode === "dark" ? darkTheme : lightTheme;
 
-function App() {
   return (
     <ConfigProvider theme={theme}>
       <BrowserRouter>
@@ -75,6 +73,14 @@ function App() {
         </Routes>
       </BrowserRouter>
     </ConfigProvider>
+  );
+};
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

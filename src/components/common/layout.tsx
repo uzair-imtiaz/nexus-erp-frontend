@@ -16,6 +16,8 @@ import Title from "antd/es/typography/Title";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../services/auth.services";
+import ThemeToggle from "./ThemeToggle";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const { Header, Sider, Content } = Layout;
 
@@ -25,6 +27,7 @@ const AppLayout = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { themeMode } = useTheme();
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -66,6 +69,7 @@ const AppLayout = () => {
       label: "Journal",
     },
     {
+      key: "reports",
       icon: <BarChartOutlined />,
       label: "Reports",
       children: [
@@ -108,8 +112,10 @@ const AppLayout = () => {
       }
       message.success(response.message);
       navigate("/login");
-    } catch (error: any) {
-      message.error(error.message);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
+      message.error(errorMessage);
       console.log(error);
     } finally {
       setLoading(false);
@@ -151,7 +157,7 @@ const AppLayout = () => {
           setCollapsed(broken);
         }}
         className="sidebar"
-        theme="light"
+        theme={themeMode}
         style={{
           overflow: "auto",
           height: "100vh",
@@ -161,7 +167,7 @@ const AppLayout = () => {
           bottom: 0,
           zIndex: 1000,
           boxShadow: "2px 0 8px rgba(0,0,0,0.1)",
-          backgroundColor: "#fff",
+          backgroundColor: themeMode === "dark" ? "#1f1f1f" : "#fff",
         }}
       >
         <div
@@ -181,7 +187,7 @@ const AppLayout = () => {
           />
         </div>
         <Menu
-          theme="light"
+          theme={themeMode}
           mode="inline"
           selectedKeys={[location.pathname]}
           style={{ borderRight: 0 }}
@@ -200,7 +206,7 @@ const AppLayout = () => {
       >
         <Header
           style={{
-            background: "#fff",
+            background: themeMode === "dark" ? "#1f1f1f" : "#fff",
             padding: "0 16px",
             display: "flex",
             alignItems: "center",
@@ -218,7 +224,15 @@ const AppLayout = () => {
           <Title level={5} style={{ margin: 0 }}>
             {getPageTitle()}
           </Title>
-          <div style={{ marginLeft: "auto" }}>
+          <div
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <ThemeToggle />
             <Button
               type="primary"
               icon={<LogoutOutlined />}
@@ -235,7 +249,7 @@ const AppLayout = () => {
           style={{
             margin: "24px 16px",
             padding: 24,
-            background: "#fff",
+            background: themeMode === "dark" ? "#1f1f1f" : "#fff",
             minHeight: 280,
           }}
         >
