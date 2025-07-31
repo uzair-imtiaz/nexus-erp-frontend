@@ -92,10 +92,6 @@ const TrialBalance: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    fetchReportData();
-  }, []);
-
   const totalDebit = data.reduce((sum, row) => sum + (row.debit || 0), 0);
   const totalCredit = data.reduce((sum, row) => sum + (row.credit || 0), 0);
 
@@ -157,29 +153,31 @@ const TrialBalance: React.FC = () => {
       </Row>
 
       <Spin spinning={loading}>
-        <Table
-          columns={columns}
-          dataSource={data}
-          pagination={false}
-          bordered
-          rowKey="key"
-          summary={() => (
-            <Table.Summary.Row>
-              <Table.Summary.Cell index={0}>
-                <strong>Total</strong>
-              </Table.Summary.Cell>
-              <Table.Summary.Cell index={1} align="right">
-                <strong>{formatCurrency(totalDebit)}</strong>
-              </Table.Summary.Cell>
-              <Table.Summary.Cell index={2} align="right">
-                <strong>{formatCurrency(totalCredit)}</strong>
-              </Table.Summary.Cell>
-            </Table.Summary.Row>
-          )}
-          rowClassName={(_, index) =>
-            index % 2 === 0 ? "bg-gray-50" : "bg-white"
-          }
-        />
+        {data.length > 0 && (
+          <Table
+            columns={columns}
+            dataSource={data}
+            pagination={false}
+            bordered
+            rowKey="key"
+            summary={() => (
+              <Table.Summary.Row>
+                <Table.Summary.Cell index={0}>
+                  <strong>Total</strong>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={1} align="right">
+                  <strong>{formatCurrency(totalDebit)}</strong>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={2} align="right">
+                  <strong>{formatCurrency(totalCredit)}</strong>
+                </Table.Summary.Cell>
+              </Table.Summary.Row>
+            )}
+            rowClassName={(_, index) =>
+              index % 2 === 0 ? "bg-gray-50" : "bg-white"
+            }
+          />
+        )}
       </Spin>
     </div>
   );

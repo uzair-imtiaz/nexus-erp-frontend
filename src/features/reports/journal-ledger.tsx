@@ -11,6 +11,7 @@ import {
   Row,
   Table,
   Tooltip,
+  Typography,
 } from "antd";
 import dayjs from "dayjs";
 import { useState } from "react";
@@ -22,6 +23,7 @@ import { ACCOUNT_TYPE } from "../charts-of-accounts/utils";
 import { NominalAccountGroup } from "../journal/types";
 
 const { RangePicker } = DatePicker;
+const { Title } = Typography;
 
 const columns = [
   //   {
@@ -32,6 +34,7 @@ const columns = [
     title: "Date",
     dataIndex: "date",
     render: (date: string) => dayjs(date).format("DD MMM, YY"),
+    width: 100,
   },
   {
     title: "Account",
@@ -41,6 +44,7 @@ const columns = [
     title: "V. ID",
     dataIndex: "id",
     render: (id: number) => <a>{id}</a>,
+    width: 70,
   },
   {
     title: "Ref",
@@ -145,6 +149,7 @@ const JournalLedger = () => {
 
   return (
     <div className="p-6">
+      <Title level={3}>Journal Ledger</Title>
       <Card title="Report Criteria" className="mb-6">
         <Row gutter={16}>
           <Col span={3}>

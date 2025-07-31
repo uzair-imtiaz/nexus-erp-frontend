@@ -1,12 +1,23 @@
+import { SearchOutlined } from "@ant-design/icons";
+import {
+  Button,
+  Collapse,
+  DatePicker,
+  Divider,
+  Flex,
+  Spin,
+  Table,
+  Typography,
+  notification,
+} from "antd";
+import dayjs from "dayjs";
 import React, { useState } from "react";
-import { Typography, Divider, Collapse, Table } from "antd";
-import { formatCurrency } from "../../utils";
+import { getProfitLossReport } from "../../services/reports.services";
+import { buildQueryString, formatCurrency } from "../../utils";
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
-
-const formatAmount = (amount: number) =>
-  amount.toLocaleString(undefined, { minimumFractionDigits: 2 });
+const { RangePicker } = DatePicker;
 
 const LineItem: React.FC<{
   label: React.ReactNode;
@@ -17,34 +28,36 @@ const LineItem: React.FC<{
     className="flex justify-between items-baseline py-1"
     style={{ paddingLeft: indent * 20 }}
   >
-    <Text>{label}</Text>
-    {value !== undefined && <Text>{formatAmount(value)}</Text>}
+    <Text strong>{label}</Text>
+    {value !== undefined && <Text strong>{formatCurrency(value)}</Text>}
   </div>
 );
 
 const EntryTable: React.FC<{
   entries: Record<string, any>;
-  indent?: number;
-}> = ({ entries, indent = 0 }) => {
-  const rows = renderNestedItems(entries, indent);
-  const totals = calcDebitCreditBalance(entries);
-
+  total: number;
+}> = ({ entries, total }) => {
   return (
     <>
       <Table
         columns={[
-          { title: "Account", dataIndex: "label", key: "label" },
-          { title: "Debit", dataIndex: "debit", key: "debit" },
-          { title: "Credit", dataIndex: "credit", key: "credit" },
-          { title: "Balance", dataIndex: "balance", key: "balance" },
+          { title: "Account", dataIndex: "name", key: "name" },
+          {
+            title: "Amount",
+            dataIndex: "amount",
+            key: "amount",
+            render: (a) => (
+              <span style={{ color: a > 0 ? "#52c41a" : "#d9d9d9" }}>{a}</span>
+            ),
+          },
         ]}
-        dataSource={rows}
+        dataSource={entries.accounts}
         pagination={false}
         bordered
         size="small"
       />
       <div className="flex justify-end font-semibold pr-4 pt-2">
-        <div>Balance: {formatCurrency(totals.debit - totals.credit)}</div>
+        <div>Balance: {formatCurrency(total)}</div>
       </div>
     </>
   );
@@ -52,9 +65,9 @@ const EntryTable: React.FC<{
 
 const Section: React.FC<{
   title: string;
+  total: number;
   data: Record<string, any>;
-}> = ({ title, data }) => {
-  const total = calcTotal(data);
+}> = ({ title, data, total }) => {
   return (
     <Collapse defaultActiveKey={[title]} className="mb-4">
       <Panel
@@ -63,161 +76,141 @@ const Section: React.FC<{
             <Title level={5} className="m-0">
               {title}
             </Title>
-            <Text strong>{formatAmount(total)}</Text>
           </div>
         }
         key={title}
       >
-        <EntryTable entries={data} />
+        <EntryTable entries={data} total={total} />
       </Panel>
     </Collapse>
   );
 };
 
-const renderNestedItems = (obj: any, indent = 0): any[] => {
-  return Object.entries(obj).flatMap(([label, value], index) => {
-    if (typeof value === "object") {
-      const subItems = renderNestedItems(value, indent + 1);
-      return [
-        {
-          key: `${label}-${index}`,
-          label: label,
-          debit: "",
-          credit: "",
-          balance: "",
-        },
-        ...subItems,
-      ];
-    } else {
-      const isNegative = value < 0;
-      const debit = isNegative ? 0 : value;
-      const credit = isNegative ? Math.abs(value) : 0;
-      return [
-        {
-          key: `${label}-${index}`,
-          label: label,
-          debit: formatAmount(debit),
-          credit: formatAmount(credit),
-          balance: formatAmount(debit - credit),
-        },
-      ];
-    }
-  });
-};
+// const renderNestedItems = (obj: any, indent = 0): any[] => {
+//   return Object.entries(obj).flatMap(([label, value], index) => {
+//     if (typeof value === "object") {
+//       const subItems = renderNestedItems(value, indent + 1);
+//       return [
+//         {
+//           key: `${label}-${index}`,
+//           label: label,
+//           debit: "",
+//           credit: "",
+//           balance: "",
+//         },
+//         ...subItems,
+//       ];
+//     } else {
+//       const isNegative = value < 0;
+//       const debit = isNegative ? 0 : value;
+//       const credit = isNegative ? Math.abs(value) : 0;
+//       return [
+//         {
+//           key: `${label}-${index}`,
+//           label: label,
+//           debit: formatAmount(debit),
+//           credit: formatAmount(credit),
+//           balance: formatAmount(debit - credit),
+//         },
+//       ];
+//     }
+//   });
+// };
 
-const calcTotal = (obj: any): number => {
-  return Object.values(obj).reduce((sum, val) => {
-    return sum + (typeof val === "object" ? calcTotal(val) : (val as number));
-  }, 0);
-};
+// const calcTotal = (obj: any): number => {
+//   return Object.values(obj).reduce((sum, val) => {
+//     return sum + (typeof val === "object" ? calcTotal(val) : (val as number));
+//   }, 0);
+// };
 
-const calcDebitCreditBalance = (
-  obj: any
-): { debit: number; credit: number } => {
-  let debit = 0;
-  let credit = 0;
+const ProfitLossReport: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(
+    null
+  );
+  const [data, setData] = useState<any>(null);
 
-  const recurse = (data: any) => {
-    for (const val of Object.values(data)) {
-      if (typeof val === "object") {
-        recurse(val);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const query = buildQueryString({});
+      const response = await getProfitLossReport(query);
+      if (response?.success) {
+        setData(response?.data);
       } else {
-        if (val < 0) credit += Math.abs(val);
-        else debit += val;
+        notification.error({
+          message: "Error",
+          description: response?.message,
+        });
       }
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: error,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  recurse(obj);
-  return { debit, credit };
-};
-
-const data = {
-  turnover: {
-    "Product Sale": 2479800,
-    "Discount Allowed": -186000,
-  },
-  costOfSales: {
-    "Supplies And Materials": 451200,
-    "Discount Received": -23500,
-  },
-  directExpenses: {
-    Freight: 300,
-  },
-  otherDirectCosts: {
-    "Hosting and domain": 63075,
-  },
-  adminExpenses: {
-    "Wages & Salaries": 8000,
-    "Premises Expenses": 21594,
-    "Motor Expenses": {
-      "Khusham Vehicle Fuel": 46828,
-      "Anas vehicle fuel": 20310,
-    },
-    "Printing, Postage And Stationery": 14250,
-    "Advertising And PR": {
-      "Mela Business Expense": 14250,
-      "Advertising and PR": 13500,
-    },
-    "Telephone And Internet": {
-      "Telephone and Fax": 3350,
-      "Mobile Phone Charges": 11000,
-    },
-    "Legal And Professional Fees": 900,
-    Entertainment: {
-      "Staff Meals": 10700,
-    },
-    "Bad Debt": 5150,
-    "Repair and Maintenance": 3400,
-  },
-};
-
-const ProfitLossReport: React.FC = () => {
-  const turnoverTotal = calcTotal(data.turnover);
-  const costOfSalesTotal = calcTotal(data.costOfSales);
-  const grossProfit = turnoverTotal - costOfSalesTotal;
-  const directExpensesTotal = calcTotal(data.directExpenses);
-  const otherDirectCostsTotal = calcTotal(data.otherDirectCosts);
-  const opProfit = grossProfit - directExpensesTotal - otherDirectCostsTotal;
-  const adminTotal = calcTotal(data.adminExpenses);
-  const finalProfit = opProfit - adminTotal;
+  const handleRangeChange = (range) => {
+    if (range) setDateRange(range);
+  };
 
   return (
     <div className="p-6 bg-white rounded-xl shadow text-sm">
       <Title level={4}>Profit & Loss Report</Title>
+      <Flex gap={6} className="mt-3">
+        <RangePicker value={dateRange} onChange={handleRangeChange} />
+        <Button icon={<SearchOutlined />} onClick={fetchData}>
+          Run Report
+        </Button>
+      </Flex>
       <Divider />
 
-      <Section title="Turnover" data={data.turnover} />
-      <Section title="Cost Of Sales" data={data.costOfSales} />
-
-      <LineItem
-        label={<strong>Gross Profit</strong>}
-        value={grossProfit}
-        indent={0}
-      />
-
-      <Divider dashed className="my-3" />
-
-      <Section title="Direct Expenses" data={data.directExpenses} />
-      <Section title="Other Direct Costs" data={data.otherDirectCosts} />
-
-      <LineItem
-        label={<strong>Operating Profit</strong>}
-        value={opProfit}
-        indent={0}
-      />
-
-      <Divider dashed className="my-3" />
-
-      <Section title="Administrative Expenses" data={data.adminExpenses} />
-
-      <Divider />
-
-      <LineItem
-        label={<strong>Net Profit</strong>}
-        value={finalProfit}
-        indent={0}
-      />
+      {loading ? (
+        <div className="mt-40 flex justify-center">
+          <Spin />
+        </div>
+      ) : (
+        data && (
+          <>
+            <Section
+              title="Turnover"
+              data={data.turnover}
+              total={data.turnover.total}
+            />
+            <Section
+              title="Cost Of Sales"
+              data={data.costOfSales}
+              total={data.costOfSales.total}
+            />
+            <LineItem
+              label={<strong>Gross Profit</strong>}
+              value={data.grossProfit}
+              indent={0}
+            />
+            <Divider dashed className="my-3" />
+            <Section
+              title="Direct Expenses"
+              data={data.operatingExpenses}
+              total={data.operatingExpenses.total}
+            />
+            <LineItem
+              label={<strong>Operating Profit</strong>}
+              value={data.operatingProfit}
+              indent={0}
+            />
+            <Divider dashed className="my-3" />
+            <Divider />
+            <LineItem
+              label={<strong>Earnings Before Tax</strong>}
+              value={data.earningsBeforeTax}
+              indent={0}
+            />
+          </>
+        )
+      )}
     </div>
   );
 };

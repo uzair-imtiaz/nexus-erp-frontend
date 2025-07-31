@@ -25,12 +25,19 @@ import JournalLedger from "./features/reports/journal-ledger";
 import ProfitLossReport from "./features/reports/pnl-report";
 import BalanceSheet from "./features/reports/balance-sheet";
 
-const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
-
-Spin.setDefaultIndicator(loadingIcon);
-
 const AppContent: React.FC = () => {
   const { themeMode } = useTheme();
+  const loadingIcon = (
+    <LoadingOutlined
+      style={{
+        fontSize: 24,
+        color: themeMode === "dark" ? "#2dd4bf" : "#1B4D3E",
+      }}
+      spin
+    />
+  );
+
+  Spin.setDefaultIndicator(loadingIcon);
   const theme = themeMode === "dark" ? darkTheme : lightTheme;
 
   return (
