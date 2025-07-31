@@ -12,7 +12,7 @@ const ThemeToggle: React.FC = () => {
       color={themeMode === "light" ? "white" : "black"}
     >
       <Button
-        type="text"
+        type="link"
         icon={themeMode === "light" ? <MoonOutlined /> : <SunOutlined />}
         onClick={toggleTheme}
         style={{

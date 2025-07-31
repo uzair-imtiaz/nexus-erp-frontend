@@ -40,7 +40,15 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   });
 
   const toggleTheme = () => {
+    // Temporarily add a class to trigger CSS transitions
+    document.body.classList.add("theme-transition");
+
     setThemeMode((prev) => (prev === "light" ? "dark" : "light"));
+
+    // Remove the transition class after the animation completes
+    setTimeout(() => {
+      document.body.classList.remove("theme-transition");
+    }, 300);
   };
 
   useEffect(() => {
