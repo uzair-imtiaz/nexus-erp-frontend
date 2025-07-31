@@ -6,6 +6,7 @@ export interface TransactionItem {
   discount?: number;
   tax?: number;
   rate: number;
+  buyingRate: number;
   quantity: number;
   unit: string;
 }
