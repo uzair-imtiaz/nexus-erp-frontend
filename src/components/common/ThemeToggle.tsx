@@ -8,7 +8,8 @@ const ThemeToggle: React.FC = () => {
   return (
     <Tooltip
       title={`Switch to ${themeMode === "light" ? "dark" : "light"} mode`}
-      color={"black"}
+      styles={{ body: { color: themeMode === "light" ? "black" : "white" } }}
+      color={themeMode === "light" ? "white" : "black"}
     >
       <Button
         type="text"
