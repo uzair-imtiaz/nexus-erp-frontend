@@ -124,8 +124,8 @@ const AppLayout = () => {
 
   const getPageTitle = () => {
     const currentPath = location.pathname;
-    const menuItem = menuItems.find((item) => item.key === currentPath);
-    return menuItem ? menuItem.label : "Dashboard";
+    const route = currentPath.split("/")[1];
+    return route.charAt(0).toUpperCase() + route.slice(1);
   };
 
   return (
@@ -163,14 +163,14 @@ const AppLayout = () => {
           height: "100vh",
           position: "fixed",
           left: 0,
-          top: 0,
+          top: 20,
           bottom: 0,
           zIndex: 1000,
           boxShadow: "2px 0 8px rgba(0,0,0,0.1)",
-          backgroundColor: themeMode === "dark" ? "#1f1f1f" : "#fff",
+          // backgroundColor: themeMode === "dark" ? "#1f1f1f" : "#fff",
         }}
       >
-        <div
+        {/* <div
           style={{
             backgroundColor: "#0f4741",
             paddingBlock: 9,
@@ -181,14 +181,14 @@ const AppLayout = () => {
             alt="Logo"
             style={{
               width: "100%",
-              display: "block" /* Removes bottom space */,
-              verticalAlign: "bottom" /* Removes any baseline spacing */,
+              display: "block",
+              verticalAlign: "bottom",
             }}
           />
-        </div>
+        </div> */}
         <Menu
           theme={themeMode}
-          mode="inline"
+          mode="vertical"
           selectedKeys={[location.pathname]}
           style={{ borderRight: 0 }}
           onClick={({ key }) => {
