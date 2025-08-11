@@ -48,7 +48,7 @@ const columns = [
 const Receipts = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { pagination, setPagination } = useState({
+  const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
     total: 0,
