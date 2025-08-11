@@ -159,7 +159,7 @@ const ProfitLossReport: React.FC = () => {
 
   return (
     <div className="p-6 bg-white rounded-xl shadow text-sm">
-      <Title level={4}>Profit & Loss Report</Title>
+      <Title level={3}>Profit & Loss Report</Title>
       <Flex gap={6} className="mt-3">
         <RangePicker value={dateRange} onChange={handleRangeChange} />
         <Button icon={<SearchOutlined />} onClick={fetchData}>

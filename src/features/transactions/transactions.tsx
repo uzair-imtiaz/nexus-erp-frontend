@@ -6,6 +6,8 @@ import { Transaction } from "../../components/common/transaction/types";
 import { getPurchasesApi } from "../../services/purchase.services";
 import { getSalesApi } from "../../services/sales.services";
 import { buildQueryString } from "../../utils";
+import { ReceiptIcon } from "lucide-react";
+import Receipts from "../receipt";
 
 const { TabPane } = Tabs;
 
@@ -129,6 +131,16 @@ const TransactionsPage = () => {
             },
           ]}
         />
+      </TabPane>
+      <TabPane
+        tab={
+          <span className="flex items-center gap-1">
+            <ReceiptIcon size={16} /> Receipts
+          </span>
+        }
+        key={"receipt"}
+      >
+        <Receipts />
       </TabPane>
     </Tabs>
   );

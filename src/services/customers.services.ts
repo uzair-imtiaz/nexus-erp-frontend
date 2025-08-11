@@ -40,3 +40,12 @@ export const getCustomerApi = async (id: string): Promise<responseMetadata> => {
   const response: responseMetadata = await getCallback(`customer/${id}`);
   return response;
 };
+
+export const getCustomersWithTransactions = async (
+  query: string = ""
+): Promise<responseMetadata> => {
+  const response: responseMetadata = await getCallback(
+    `customer/customers_open_transactions${query}`
+  );
+  return response;
+};

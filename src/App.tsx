@@ -24,6 +24,8 @@ import TrialBalance from "./features/reports/trial-balance";
 import JournalLedger from "./features/reports/journal-ledger";
 import ProfitLossReport from "./features/reports/pnl-report";
 import BalanceSheet from "./features/reports/balance-sheet";
+import ReceiptForm from "./features/receipt/create-receipt";
+import Receipts from "./features/receipt";
 
 const AppContent: React.FC = () => {
   const { themeMode } = useTheme();
@@ -73,6 +75,8 @@ const AppContent: React.FC = () => {
                 <Route path="profit-loss" element={<ProfitLossReport />} />
                 <Route path="balance-sheet" element={<BalanceSheet />} />
               </Route>
+              <Route path="receipts" element={<Receipts />} />
+              <Route path="receipts/new" element={<ReceiptForm />} />
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

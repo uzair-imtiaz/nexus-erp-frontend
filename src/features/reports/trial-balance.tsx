@@ -97,7 +97,7 @@ const TrialBalance: React.FC = () => {
 
   return (
     <div className="p-6 bg-white rounded-xl shadow">
-      <Title level={4}>Trial Balance Report</Title>
+      <Title level={3}>Trial Balance Report</Title>
 
       <Row gutter={[16, 16]} className="mb-4">
         <Col xs={16} md={8}>

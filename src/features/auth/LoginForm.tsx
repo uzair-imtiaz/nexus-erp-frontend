@@ -35,12 +35,8 @@ const LoginForm = () => {
       setError("");
       const response = await login(values);
       if (!response?.success) {
-        setError(response.message);
+        setError("Invalid Credentials");
         setLoading(false);
-        notification.error({
-          message: "Error",
-          description: "Invalid Credentials",
-        });
         return;
       }
       notification.success({
