@@ -17,13 +17,12 @@ import {
 import dayjs from "dayjs";
 import { Formik, Form as FormikForm } from "formik";
 import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { getBanks } from "../../../services/bank-services";
 import { formatCurrency } from "../../../utils";
 import PaginatedSelect from "../paginated-select/paginated-select";
 import { createPayload, getInitialValues, PaymentTypeOptions } from "./utils";
-import { createReceiptApi } from "../../../services/receipt.services";
-import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -79,6 +78,7 @@ const FinancialSettlementForm = ({
   isEdit = false,
   onSubmit,
   onCancel,
+  createApi,
 }) => {
   const isReceipt = type === "receipt";
   const transactorLabel = isReceipt ? "Customer" : "Vendor";
@@ -413,13 +413,13 @@ const FinancialSettlementForm = ({
       );
       console.log("payload", payload);
 
-      const response = await createReceiptApi(payload);
+      const response = await createApi(payload);
       if (response?.success) {
         notification.success({
           message: "Success",
           description: response?.message,
         });
-        navigate("/transactions#receipts");
+        navigate(`/transactions#${type}`);
       } else {
         notification.error({
           message: "Error",

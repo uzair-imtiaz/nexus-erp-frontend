@@ -36,3 +36,12 @@ export const getVendorApi = async (id: string): Promise<responseMetadata> => {
   const response: responseMetadata = await getCallback(`vendor/${id}`);
   return response;
 };
+
+export const getVendorsWithTransactions = async (
+  query: string = ""
+): Promise<responseMetadata> => {
+  const response: responseMetadata = await getCallback(
+    `vendor/vendors_open_transactions${query}`
+  );
+  return response;
+};

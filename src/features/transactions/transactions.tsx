@@ -1,76 +1,45 @@
 import { DollarOutlined, ShoppingCartOutlined } from "@ant-design/icons";
-import { notification, Tabs } from "antd";
+import { Flex, Tabs } from "antd";
 import { useEffect, useState } from "react";
+import { IoReceiptOutline } from "react-icons/io5";
+import { MdOutlinePayment } from "react-icons/md";
 import Transactions from "../../components/common/transaction/transaction-listing";
-import { Transaction } from "../../components/common/transaction/types";
 import { getPurchasesApi } from "../../services/purchase.services";
 import { getSalesApi } from "../../services/sales.services";
-import { buildQueryString } from "../../utils";
-import { ReceiptIcon } from "lucide-react";
+
 import Receipts from "../receipt";
+import Payments from "../payment";
 
 const { TabPane } = Tabs;
 
+const tabKeyToHash: Record<string, string> = {
+  purchase: "purchases",
+  sale: "sales",
+  receipt: "receipts",
+  payment: "payments",
+};
+
+const hashToTabKey: Record<string, string> = Object.fromEntries(
+  Object.entries(tabKeyToHash).map(([k, v]) => [`#${v}`, k])
+);
+
 const TransactionsPage = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"purchase" | "sale">(() => {
+  // Pick tab from hash or default to 'purchase'
+  const [activeTab, setActiveTab] = useState<string>(() => {
     const hash = window.location.hash.toLowerCase();
-    return hash === "#sales" ? "sale" : "purchase";
+    return hashToTabKey[hash] || "purchase";
   });
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-    totalPages: 0,
-    nextPage: null,
-    prevPage: null,
-  });
-
-  const fetchTransactions = async (
-    type: "purchase" | "sale",
-    queryParams: Record<string, any> = {}
-  ) => {
-    try {
-      setLoading(true);
-      const queryString = buildQueryString(queryParams);
-      const response =
-        type === "purchase"
-          ? await getPurchasesApi(queryString)
-          : await getSalesApi(queryString);
-      if (!response?.success) {
-        return notification.error({
-          message: "Error",
-          description: response.message,
-        });
-      }
-      setTransactions(response?.data);
-      setPagination(response?.pagination);
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    window.location.hash = activeTab;
-    fetchTransactions(activeTab);
-  }, [activeTab]);
 
   const handleTabChange = (key: string) => {
-    const newTab = key as "purchase" | "sale";
-    setActiveTab(newTab);
-    window.location.hash = newTab === "sale" ? "sales" : "purchases";
+    setActiveTab(key);
+    window.location.hash = tabKeyToHash[key] || "";
   };
 
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase();
-      if (hash === "#sales" && activeTab !== "sale") {
-        setActiveTab("sale");
-      } else if (hash === "#purchases" && activeTab !== "purchase") {
-        setActiveTab("purchase");
+      if (hashToTabKey[hash] && activeTab !== hashToTabKey[hash]) {
+        setActiveTab(hashToTabKey[hash]);
       }
     };
 
@@ -82,65 +51,57 @@ const TransactionsPage = () => {
     <Tabs activeKey={activeTab} onChange={handleTabChange}>
       <TabPane
         tab={
-          <span className="flex items-center gap-1">
-            <ShoppingCartOutlined size={16} /> Purchases
+          <span>
+            <ShoppingCartOutlined /> Purchases
           </span>
         }
         key="purchase"
       >
         <Transactions
           type="purchase"
-          transactions={transactions}
-          loading={loading}
-          pagination={pagination}
-          fetch={fetchTransactions}
+          fetchApi={getPurchasesApi}
           menuOptions={[
-            {
-              key: "purchase",
-              label: "Purchase",
-            },
-            {
-              key: "purchase-return",
-              label: "Purchase Return",
-            },
+            { key: "purchase", label: "Purchase" },
+            { key: "purchase-return", label: "Purchase Return" },
           ]}
         />
       </TabPane>
       <TabPane
         tab={
-          <span className="flex items-center gap-1">
-            <DollarOutlined size={16} /> Sales
+          <span>
+            <DollarOutlined /> Sales
           </span>
         }
         key="sale"
       >
         <Transactions
           type="sale"
-          transactions={transactions}
-          loading={loading}
-          pagination={pagination}
-          fetch={fetchTransactions}
+          fetchApi={getSalesApi}
           menuOptions={[
-            {
-              key: "sale",
-              label: "Sale",
-            },
-            {
-              key: "sale-return",
-              label: "Sale Return",
-            },
+            { key: "sale", label: "Sale" },
+            { key: "sale-return", label: "Sale Return" },
           ]}
         />
       </TabPane>
       <TabPane
         tab={
-          <span className="flex items-center gap-1">
-            <ReceiptIcon size={16} /> Receipts
-          </span>
+          <Flex align="center" gap={4}>
+            <IoReceiptOutline /> Receipts
+          </Flex>
         }
-        key={"receipt"}
+        key="receipt"
       >
         <Receipts />
+      </TabPane>
+      <TabPane
+        tab={
+          <Flex align="center" gap={4}>
+            <MdOutlinePayment /> Payments
+          </Flex>
+        }
+        key="payment"
+      >
+        <Payments />
       </TabPane>
     </Tabs>
   );
