@@ -1,43 +1,37 @@
-import {
-  Button,
-  Flex,
-  Popconfirm,
-  Space,
-  Table,
-  Tooltip,
-  Dropdown,
-} from "antd";
-import { ColumnsType } from "antd/es/table";
-import { Download, Edit, Eye, Plus, Trash2, Upload } from "lucide-react";
 import { DownOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import type { MenuProps } from "antd";
+import { Button, Dropdown, Flex, notification, Space, Table } from "antd";
+import { ColumnsType } from "antd/es/table";
+import { Download, Plus, Upload } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { buildQueryString, formatCurrency } from "../../../utils";
 import type { Transaction, TransactionType } from "./types";
 import ViewTransactionModal from "./view-transaction";
-import { formatCurrency } from "../../../utils";
-import type { MenuProps } from "antd";
 
 interface TransactionsTableProps {
   type: TransactionType;
-  transactions: Transaction[];
-  loading?: boolean;
-  fetch?: (
-    type: "purchase" | "sale",
-    queryParams?: Record<string, any>
-  ) => void;
-  pagination?: any;
+  fetchApi: (queryString: string) => Promise<any>;
   menuOptions: MenuProps["items"];
 }
 
 const TransactionsTable: React.FC<TransactionsTableProps> = ({
   type,
-  transactions,
-  pagination,
-  loading = false,
   menuOptions,
-  fetch,
+  fetchApi,
 }) => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
+    nextPage: null,
+    prevPage: null,
+  });
+
   const [currentTransaction, setCurrentTransaction] =
     useState<Transaction | null>(null);
   const navigate = useNavigate();
@@ -45,6 +39,30 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
   const handleMenuClick: MenuProps["onClick"] = ({ key }) => {
     navigate(`/${key.split("-")[0]}s/new?type=${key}`);
   };
+
+  const fetchTransactions = async (queryParams: Record<string, any> = {}) => {
+    try {
+      setLoading(true);
+      const queryString = buildQueryString(queryParams);
+      const response = await fetchApi(queryString);
+      if (!response?.success) {
+        return notification.error({
+          message: "Error",
+          description: response.message,
+        });
+      }
+      setTransactions(response?.data);
+      setPagination(response?.pagination);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions({});
+  }, [type]);
 
   const handleEdit = (transaction: Transaction) => {
     // TODO: Implement edit functionality
@@ -149,7 +167,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
         }}
         loading={loading}
         onChange={(pagination) => {
-          fetch?.(type, {
+          fetchTransactions?.({
             page: pagination.current,
             limit: pagination.pageSize,
           });

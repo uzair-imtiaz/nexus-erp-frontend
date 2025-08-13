@@ -1,9 +1,8 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import { ConfigProvider, Spin } from "antd";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
-import { lightTheme, darkTheme } from "./styles/theme";
 import AppLayout from "./components/common/layout";
+import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import Login from "./features/auth/LoginForm";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import RegisterForm from "./features/auth/RegisterForm";
@@ -15,15 +14,18 @@ import Formulation from "./features/formulation/formulation-listing";
 import Inventory from "./features/inventory/inventory";
 import Journal from "./features/journal";
 import JournalEntry from "./features/journal/add-journal";
+import PaymentForm from "./features/payment/payment-form";
+import ProductionForm from "./features/production/production-form";
+import Production from "./features/production/production-listing";
+import ReceiptForm from "./features/receipt/create-receipt";
+import BalanceSheet from "./features/reports/balance-sheet";
+import JournalLedger from "./features/reports/journal-ledger";
+import ProfitLossReport from "./features/reports/pnl-report";
+import TrialBalance from "./features/reports/trial-balance";
 import PurchaseForm from "./features/transactions/purchase-form";
 import SaleForm from "./features/transactions/sale-form";
 import TransactionsPage from "./features/transactions/transactions";
-import Production from "./features/production/production-listing";
-import ProductionForm from "./features/production/production-form";
-import TrialBalance from "./features/reports/trial-balance";
-import JournalLedger from "./features/reports/journal-ledger";
-import ProfitLossReport from "./features/reports/pnl-report";
-import BalanceSheet from "./features/reports/balance-sheet";
+import { darkTheme, lightTheme } from "./styles/theme";
 
 const AppContent: React.FC = () => {
   const { themeMode } = useTheme();
@@ -73,6 +75,8 @@ const AppContent: React.FC = () => {
                 <Route path="profit-loss" element={<ProfitLossReport />} />
                 <Route path="balance-sheet" element={<BalanceSheet />} />
               </Route>
+              <Route path="receipts/new" element={<ReceiptForm />} />
+              <Route path="payments/new" element={<PaymentForm />} />
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

@@ -76,7 +76,7 @@ export const TransactorFormModal: React.FC<TransactorFormModalProps> = ({
         layout="vertical"
         onFinish={handleSubmit}
         initialValues={{
-          openingBalance: 0,
+          // openingBalance: 0,
           openingBalanceDate: dayjs(),
         }}
       >
