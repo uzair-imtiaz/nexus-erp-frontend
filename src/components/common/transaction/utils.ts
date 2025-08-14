@@ -34,7 +34,7 @@ export const createPayload = (values, isReceipt, transactions) => {
   } else {
     return {
       ...basePayload,
-      vendorId: values.transactor?.id,
+      vendorId: values.transactor,
       transactions:
         outstandingTransactions.length > 0
           ? outstandingTransactions
