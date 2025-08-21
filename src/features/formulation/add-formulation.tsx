@@ -14,7 +14,7 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 import useItemManagerColumns from "../../hooks/formulation-columns.hook";
-import { formatCurrency } from "../../utils";
+import { buildQueryString, formatCurrency } from "../../utils";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   createFormulationApi,
@@ -25,6 +25,7 @@ import { getInventories } from "../../apis";
 import { getByTypeUnderTopLevel } from "../../services/charts-of-accounts.services";
 import { ACCOUNT_TYPE } from "../charts-of-accounts/utils";
 import ItemManager from "../../components/common/item-manager/item-manager";
+import { getCodeApi } from "../../services/common.services";
 
 const { Title } = Typography;
 
@@ -51,6 +52,15 @@ const AddEditFormulation = () => {
 
   const rmFactor = Form.useWatch("rmFactor", form) || 1;
   const isEditing = !!id;
+
+  useEffect(() => {
+    const getCode = async () => {
+      const query = buildQueryString({ entity: "FORMULATION" });
+      const response = await getCodeApi(query);
+      form.setFieldValue("code", response.data.code);
+    };
+    getCode();
+  }, []);
 
   useEffect(() => {
     const recalculateQtyRequired = (items, setItems) => {
@@ -385,18 +395,12 @@ const AddEditFormulation = () => {
                 { required: true, message: "Formulation code is required" },
               ]}
             >
-              <Input />
+              <Input placeholder="Enter formulation code" />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              label="Formulation Name"
-              name="name"
-              rules={[
-                { required: true, message: "Formulation name is required" },
-              ]}
-            >
-              <Input />
+            <Form.Item label="Formulation Name (Optional)" name="name">
+              <Input placeholder="Enter formulation name" />
             </Form.Item>
           </Col>
 
