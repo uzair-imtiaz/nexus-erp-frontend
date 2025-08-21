@@ -1,6 +1,8 @@
 import { DatePicker, Form, Input, InputNumber, Modal, Row, Col } from "antd";
 import dayjs from "dayjs";
 import { useEffect } from "react";
+import { buildQueryString } from "../../utils";
+import { getCodeApi } from "../../services/common.services";
 
 export const BankFormModal = ({
   visible,
@@ -23,6 +25,20 @@ export const BankFormModal = ({
       form.resetFields();
     }
   }, [initialValues]);
+
+  useEffect(() => {
+    const getCode = async () => {
+      const query = buildQueryString({ entity: "BANK" });
+      const response = await getCodeApi(query);
+      form.setFieldValue("code", response.data.code);
+    };
+    if (form.getFieldValue("code")) {
+      return;
+    }
+    if (!initialValues) {
+      getCode();
+    }
+  }, []);
 
   const handleFinish = (values: any) => {
     const { code, ...rest } = values;
