@@ -95,7 +95,7 @@ const ProductionForm: React.FC = () => {
       formikRef?.current?.setFieldValue("code", response.data.code);
     };
     fetchFormulations();
-    if (formikRef?.current?.values?.code === "") getCode();
+    if (formikRef?.current?.values?.code) getCode();
   }, []);
 
   useEffect(() => {
