@@ -16,14 +16,23 @@ import {
   Typography,
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
-import { ErrorMessage, Field, FieldProps, Form, Formik } from "formik";
-import React, { useEffect, useState } from "react";
+import {
+  ErrorMessage,
+  Field,
+  FieldProps,
+  Form,
+  Formik,
+  FormikProps,
+} from "formik";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from "yup";
 import { getFormulationsApi } from "../../services/formulation.services";
 import { createProductionApi } from "../../services/production.services";
 import FormulationDetail from "../formulation/formulation-detail";
 import { FormulationItem } from "../formulation/types";
+import { getCodeApi } from "../../services/common.services";
+import { buildQueryString } from "../../utils";
 
 const { Title } = Typography;
 
@@ -48,6 +57,7 @@ const ProductionForm: React.FC = () => {
   const [batchSize, setBatchSize] = useState<number>(1);
   const [ingredientShortages, setIngredientShortages] = useState<string[]>([]);
 
+  const formikRef = useRef<FormikProps<FormValues>>(null);
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = !!id;
@@ -78,7 +88,14 @@ const ProductionForm: React.FC = () => {
         });
       }
     };
+
+    const getCode = async () => {
+      const query = buildQueryString({ entity: "PRODUCTION" });
+      const response = await getCodeApi(query);
+      formikRef?.current?.setFieldValue("code", response.data.code);
+    };
     fetchFormulations();
+    if (formikRef?.current?.values?.code === "") getCode();
   }, []);
 
   useEffect(() => {
@@ -158,6 +175,7 @@ const ProductionForm: React.FC = () => {
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
+        innerRef={formikRef}
       >
         {({ setFieldValue, values, errors, touched, isSubmitting }) => (
           <div>

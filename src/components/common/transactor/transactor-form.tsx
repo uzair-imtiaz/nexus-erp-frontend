@@ -11,6 +11,8 @@ import {
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import { TransactorFormModalProps } from "./types";
+import { buildQueryString } from "../../../utils";
+import { getCodeApi } from "../../../services/common.services";
 
 const { TextArea } = Input;
 
@@ -27,6 +29,11 @@ export const TransactorFormModal: React.FC<TransactorFormModalProps> = ({
   const isEditing = !!entity;
 
   useEffect(() => {
+    const getCode = async () => {
+      const query = buildQueryString({ entity: type?.toUpperCase() });
+      const response = await getCodeApi(query);
+      form.setFieldValue("code", response.data.code);
+    };
     if (entity)
       form.setFieldsValue({
         ...entity,
@@ -34,6 +41,10 @@ export const TransactorFormModal: React.FC<TransactorFormModalProps> = ({
           ? dayjs(entity.openingBalanceDate)
           : null,
       });
+    if (form.getFieldValue("code")) {
+      return;
+    }
+    getCode();
   }, []);
 
   const handleSubmit = async (values: any) => {

@@ -16,12 +16,14 @@ import {
   Table,
   Typography,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createInventory, updateInventory } from "../../../apis";
 import { responseMetadata } from "../../../apis/types";
 import { AddEditItemModalProps } from "./types";
 import { suggestedUnits } from "../constants/index.constants";
 import dayjs from "dayjs";
+import { getCodeApi } from "../../../services/common.services";
+import { buildQueryString } from "../../../utils";
 
 const { Option } = Select;
 
@@ -40,6 +42,18 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
     factor: number | null;
   }>({ name: "", factor: null });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const getCode = async () => {
+      const query = buildQueryString({ entity: "INVENTORY" });
+      const response = await getCodeApi(query);
+      form.setFieldValue("code", response.data.code);
+    };
+    if (form.getFieldValue("code")) {
+      return;
+    }
+    getCode();
+  }, [item]);
 
   const handleAddUnit = () => {
     if (!newUnit.name.trim()) {
