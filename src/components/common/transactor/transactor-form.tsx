@@ -41,10 +41,9 @@ export const TransactorFormModal: React.FC<TransactorFormModalProps> = ({
           ? dayjs(entity.openingBalanceDate)
           : null,
       });
-    if (form.getFieldValue("code")) {
-      return;
+    if (!form.getFieldValue("code")) {
+      getCode();
     }
-    getCode();
   }, []);
 
   const handleSubmit = async (values: any) => {

@@ -38,7 +38,7 @@ export const BankFormModal = ({
     if (!initialValues) {
       getCode();
     }
-  });
+  }, []);
 
   const handleFinish = (values: any) => {
     const { code, ...rest } = values;

@@ -49,10 +49,9 @@ const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
       const response = await getCodeApi(query);
       form.setFieldValue("code", response.data.code);
     };
-    if (form.getFieldValue("code")) {
-      return;
+    if (!form.getFieldValue("code")) {
+      getCode();
     }
-    getCode();
   }, [item]);
 
   const handleAddUnit = () => {
