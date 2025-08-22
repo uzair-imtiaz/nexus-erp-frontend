@@ -84,7 +84,10 @@ const getCallback = async <T>(
   url: string,
   config?: AxiosRequestConfig
 ): Promise<T> => {
-  const response = await axiosInstance.get<T>(url, mergeConfig(config));
+  const response = await axiosInstance.get<T>(url, {
+    ...mergeConfig(config),
+    responseType: config?.responseType || "json",
+  });
   return response.data;
 };
 
