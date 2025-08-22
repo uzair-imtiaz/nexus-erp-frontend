@@ -1,4 +1,4 @@
-import { DownOutlined } from "@ant-design/icons";
+import { DownOutlined, EyeOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Button, Dropdown, Flex, notification, Space, Table } from "antd";
 import { ColumnsType } from "antd/es/table";
@@ -8,6 +8,14 @@ import { useNavigate } from "react-router-dom";
 import { buildQueryString, formatCurrency } from "../../../utils";
 import type { Transaction, TransactionType } from "./types";
 import ViewTransactionModal from "./view-transaction";
+import {
+  downloadInvoiceApi,
+  getinvoiceApi,
+} from "../../../services/sales.services";
+import {
+  downloadBillApi,
+  getBillApi,
+} from "../../../services/purchase.services";
 
 interface TransactionsTableProps {
   type: TransactionType;
@@ -34,6 +42,8 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
 
   const [currentTransaction, setCurrentTransaction] =
     useState<Transaction | null>(null);
+  const [viewInvoiceLoading, setViewInvoiceLoading] = useState(false);
+  const [downloadInvoiceLoading, setDownloadInvoiceLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleMenuClick: MenuProps["onClick"] = ({ key }) => {
@@ -63,6 +73,51 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
   useEffect(() => {
     fetchTransactions({});
   }, [type]);
+
+  const downloadPdf = async (id) => {
+    try {
+      setDownloadInvoiceLoading(true);
+      const response =
+        type === "sale"
+          ? await downloadInvoiceApi(id)
+          : await downloadBillApi(id);
+      const fileURL = URL.createObjectURL(response);
+
+      const link = document.createElement("a");
+      link.href = fileURL;
+      link.download = type === "sale" ? `invoice-${id}.pdf` : `bill-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(fileURL);
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: error?.message,
+      });
+    } finally {
+      setDownloadInvoiceLoading(false);
+    }
+  };
+
+  const viewPdf = async (id: string) => {
+    try {
+      setViewInvoiceLoading(true);
+      const response =
+        type === "sale" ? await getinvoiceApi(id) : await getBillApi(id);
+
+      const fileURL = URL.createObjectURL(response);
+      window.open(fileURL, "_blank");
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: error?.message,
+      });
+    } finally {
+      setViewInvoiceLoading(false);
+    }
+  };
 
   const handleEdit = (transaction: Transaction) => {
     // TODO: Implement edit functionality
@@ -105,6 +160,27 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
       sorter: (a, b) => a.totalAmount - b.totalAmount,
     },
     {
+      title: "Actions",
+      render: (_, record) => (
+        <Space>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={async () => viewPdf(record.id)}
+            loading={viewInvoiceLoading}
+            type="text"
+            size="small"
+            disabled={downloadInvoiceLoading}
+          />
+          <Button
+            size="small"
+            type="text"
+            icon={<Download size={16} />}
+            onClick={async () => downloadPdf(record.id)}
+            loading={downloadInvoiceLoading}
+            disabled={viewInvoiceLoading}
+          />
+        </Space>
+      ),
       /*{
       title: "Actions",
       render: (_, record) => (

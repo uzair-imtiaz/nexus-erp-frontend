@@ -38,3 +38,17 @@ export const addPurchaseApi = async (payload): Promise<responseMetadata> => {
   const response: responseMetadata = await postCallback("/purchases", payload);
   return response;
 };
+
+export const getBillApi = async (id: string): Promise<Blob> => {
+  const response = await getCallback<Blob>(`/purchases/${id}/bill/view`, {
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const downloadBillApi = async (id: string): Promise<Blob> => {
+  const response = await getCallback<Blob>(`/purchases/${id}/bill/download`, {
+    responseType: "blob",
+  });
+  return response;
+};
