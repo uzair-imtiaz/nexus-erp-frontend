@@ -83,7 +83,8 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
         </Select>
       </Form.Item>
 
-      <Form.Item name={"name"} />
+      {/* Hidden field to store the product name for form submission */}
+      <Form.Item name={"name"} hidden />
       <Form.Item
         label="Qty"
         name="quantity"
