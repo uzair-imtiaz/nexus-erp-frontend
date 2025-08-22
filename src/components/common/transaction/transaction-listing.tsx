@@ -101,7 +101,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
     }
   };
 
-  const viewPdf = async (id) => {
+  const viewPdf = async (id: string) => {
     try {
       setViewInvoiceLoading(true);
       const response =
