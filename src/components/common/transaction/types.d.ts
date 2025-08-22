@@ -2,7 +2,7 @@ export type TransactionType = "purchase" | "sale";
 
 export interface TransactionItem {
   id: string;
-  // name: string;
+  name: string;
   discount?: number;
   tax?: number;
   rate: number;

@@ -30,10 +30,16 @@ const ItemTable: React.FC<ItemTableProps> = ({ items, onRemove }) => {
 
   const columns = useMemo(
     () => [
+      // {
+      //   title: "ID",
+      //   dataIndex: "id",
+      //   key: "id",
+      //   render: (text: string) => <Text>{text}</Text>,
+      // },
       {
-        title: "ID",
-        dataIndex: "id",
-        key: "id",
+        title: "Name",
+        dataIndex: "name",
+        key: "name",
         render: (text: string) => <Text>{text}</Text>,
       },
       {

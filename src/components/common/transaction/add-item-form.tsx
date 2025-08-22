@@ -27,6 +27,7 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
         rate: selectedProduct?.sellingRate,
         unit: selectedProduct.baseUnit,
         buyingRate: selectedProduct?.baseRate,
+        name: selectedProduct?.name,
       });
       setMultiUnitOptions(selectedProduct.multiUnits || {});
       setSelectedBaseUnit(selectedProduct.baseUnit);
@@ -39,6 +40,7 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
         id: values.product,
         quantity: values.quantity,
         unit: values.unit,
+        name: values.name,
         rate: values.rate,
         buyingRate: values.buyingRate,
         discount:
@@ -81,6 +83,7 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
         </Select>
       </Form.Item>
 
+      <Form.Item name={"name"} />
       <Form.Item
         label="Qty"
         name="quantity"
