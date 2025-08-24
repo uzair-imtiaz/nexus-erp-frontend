@@ -22,12 +22,9 @@ const Payments = () => {
     total: 0,
     totalPages: 0,
   });
-  const [viewPdfLoading, setViewPdfLoading] = useState<{
-    id: boolean;
-  } | null>(null);
-  const [downloadPdfLoading, setDownloadPdfLoading] = useState<{
-    id: boolean;
-  } | null>(null);
+  const [viewPdfLoading, setViewPdfLoading] = useState<Record<string, boolean>>({});
+
+  const [downloadPdfLoading, setDownloadPdfLoading] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
 
   useEffect(() => {
