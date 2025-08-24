@@ -40,3 +40,17 @@ export const deleteReceiptApi = async (
   const response: responseMetadata = await deleteCallback(`/receipts/${id}`);
   return response;
 };
+
+export const viewReceiptPdfApi = async (id: string): Promise<Blob> => {
+  const response: Blob = await getCallback(`/receipts/${id}/view`, {
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const downloadReceiptPdfApi = async (id: string): Promise<Blob> => {
+  const response: Blob = await getCallback(`/receipts/${id}/download`, {
+    responseType: "blob",
+  });
+  return response;
+};

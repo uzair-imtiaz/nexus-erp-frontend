@@ -42,8 +42,12 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
 
   const [currentTransaction, setCurrentTransaction] =
     useState<Transaction | null>(null);
-  const [viewInvoiceLoading, setViewInvoiceLoading] = useState(false);
-  const [downloadInvoiceLoading, setDownloadInvoiceLoading] = useState(false);
+  const [viewInvoiceLoading, setViewInvoiceLoading] = useState<{
+    id: boolean;
+  } | null>(null);
+  const [downloadInvoiceLoading, setDownloadInvoiceLoading] = useState<{
+    id: boolean;
+  } | null>(null);
   const navigate = useNavigate();
 
   const handleMenuClick: MenuProps["onClick"] = ({ key }) => {
@@ -76,7 +80,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
 
   const downloadPdf = async (id) => {
     try {
-      setDownloadInvoiceLoading(true);
+      setDownloadInvoiceLoading({ id: true });
       const response =
         type === "sale"
           ? await downloadInvoiceApi(id)
@@ -97,13 +101,13 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
         description: error?.message,
       });
     } finally {
-      setDownloadInvoiceLoading(false);
+      setDownloadInvoiceLoading({ id: false });
     }
   };
 
   const viewPdf = async (id: string) => {
     try {
-      setViewInvoiceLoading(true);
+      setViewInvoiceLoading({ id: true });
       const response =
         type === "sale" ? await getinvoiceApi(id) : await getBillApi(id);
 
@@ -115,7 +119,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
         description: error?.message,
       });
     } finally {
-      setViewInvoiceLoading(false);
+      setViewInvoiceLoading({ id: false });
     }
   };
 
@@ -166,18 +170,18 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
           <Button
             icon={<EyeOutlined />}
             onClick={async () => viewPdf(record.id)}
-            loading={viewInvoiceLoading}
+            loading={viewInvoiceLoading?.[record.id]}
             type="text"
             size="small"
-            disabled={downloadInvoiceLoading}
+            disabled={downloadInvoiceLoading?.[record.id]}
           />
           <Button
             size="small"
             type="text"
             icon={<Download size={16} />}
             onClick={async () => downloadPdf(record.id)}
-            loading={downloadInvoiceLoading}
-            disabled={viewInvoiceLoading}
+            loading={downloadInvoiceLoading?.[record.id]}
+            disabled={viewInvoiceLoading?.[record.id]}
           />
         </Space>
       ),

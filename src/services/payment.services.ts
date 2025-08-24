@@ -40,3 +40,17 @@ export const deletePaymentApi = async (
   const response: responseMetadata = await deleteCallback(`/payments/${id}`);
   return response;
 };
+
+export const viewPaymentPdfApi = async (id: string): Promise<Blob> => {
+  const response: Blob = await getCallback(`/payments/${id}/view`, {
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const downloadPaymentPdfApi = async (id: string): Promise<Blob> => {
+  const response: Blob = await getCallback(`/payments/${id}/download`, {
+    responseType: "blob",
+  });
+  return response;
+};
