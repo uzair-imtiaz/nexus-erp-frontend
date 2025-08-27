@@ -36,7 +36,6 @@ export const UserManagementDashboard: React.FC = () => {
     fetchDashboardData();
   }, []);
 
-  console.log("stats", stats);
   const fetchDashboardData = async () => {
     try {
       setLoading(true);

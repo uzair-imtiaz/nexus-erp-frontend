@@ -24,6 +24,7 @@ import {
   type Permission,
 } from "../../services/user.services";
 import { ProtectedComponent } from "../../components/common/ProtectedComponent";
+import dayjs from "dayjs";
 
 interface UserDetailProps {
   visible: boolean;
@@ -142,15 +143,15 @@ export const UserDetail: React.FC<UserDetailProps> = ({
               <Space>
                 <ClockCircleOutlined />
                 {user.lastLogin
-                  ? new Date(user.lastLogin).toLocaleString()
+                  ? dayjs(user.lastLogin).format("MMM DD, YYYY")
                   : "Never"}
               </Space>
             </Descriptions.Item>
             <Descriptions.Item label="Created">
-              {new Date(user.createdAt).toLocaleString()}
+              {dayjs(user.createdAt).format("MMM DD, YYYY")}
             </Descriptions.Item>
             <Descriptions.Item label="Updated">
-              {new Date(user.updatedAt).toLocaleString()}
+              {dayjs(user.updatedAt).format("MMM DD, YYYY")}
             </Descriptions.Item>
           </Descriptions>
         </Card>
