@@ -18,6 +18,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../services/auth.services";
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "../../contexts/ThemeContext";
+import { UserIcon } from "lucide-react";
 
 const { Header, Sider, Content } = Layout;
 
@@ -99,6 +100,11 @@ const AppLayout = () => {
       key: "/core",
       icon: <SettingOutlined />,
       label: "Core",
+    },
+    {
+      key: "/users",
+      icon: <UserIcon />,
+      label: "Users",
     },
   ];
 
