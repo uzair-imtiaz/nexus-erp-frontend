@@ -3,7 +3,6 @@ import { usePermissions } from "../../contexts/PermissionContext";
 
 interface ProtectedComponentProps {
   permission?: string;
-  permissions?: string[];
   role?: string;
   roles?: string[];
   requireAll?: boolean;
@@ -14,6 +13,8 @@ interface ProtectedComponentProps {
 
 /**
  * ProtectedComponent - Conditionally renders children based on user permissions or roles
+ *
+ * Super Admin Bypass: Users with 'super_admin' role or '*' permission automatically get access
  *
  * @param permission - Single permission to check
  * @param permissions - Array of permissions to check
@@ -46,6 +47,11 @@ export const ProtectedComponent: React.FC<ProtectedComponentProps> = ({
   const hasAccess = useMemo(() => {
     // If still loading, deny access
     if (isLoading) return false;
+
+    // Super Admin bypass: If user has super_admin role or wildcard permissions, grant access
+    if (hasRole("Super Admin") || hasPermission("*")) {
+      return true;
+    }
 
     let permissionAccess = true;
     let roleAccess = true;

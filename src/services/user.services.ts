@@ -23,6 +23,7 @@ export interface User {
 export interface Role {
   id: string;
   name: string;
+  users: User[];
   description?: string;
   isSystemRole: boolean;
   permissions: Permission[];
@@ -64,6 +65,35 @@ export interface UserFilters {
   role_id?: string;
   page?: number;
   limit?: number;
+}
+
+export interface CreateRoleData {
+  name: string;
+  description?: string;
+  permissionIds?: string[];
+}
+
+export interface UpdateRoleData {
+  name?: string;
+  description?: string;
+  permissionIds?: string[];
+}
+
+export interface CloneRoleData {
+  name: string;
+  description?: string;
+}
+
+export interface RoleUsage {
+  roleId: string;
+  roleName: string;
+  userCount: number;
+  users: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  }[];
 }
 
 // User Management APIs
@@ -161,17 +191,9 @@ export const getUserPermissionsApi = async (
 export const getRolesApi = async (
   filters: { search?: string; page?: number; limit?: number } = {}
 ): Promise<responseMetadata> => {
-  const queryParams = new URLSearchParams();
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      queryParams.append(key, String(value));
-    }
-  });
-
-  const queryString = queryParams.toString();
+  const queryString = buildQueryString(filters);
   const response: responseMetadata = await getCallback(
-    `roles${queryString ? `?${queryString}` : ""}`
+    `roles${queryString ? `${queryString}` : ""}`
   );
   return response;
 };
@@ -185,5 +207,74 @@ export const getRoleUsageApi = async (
   id: string
 ): Promise<responseMetadata> => {
   const response: responseMetadata = await getCallback(`roles/${id}/usage`);
+  return response;
+};
+
+export const createRoleApi = async (
+  roleData: CreateRoleData
+): Promise<responseMetadata> => {
+  const response: responseMetadata = await postCallback("roles", roleData);
+  return response;
+};
+
+export const updateRoleApi = async (
+  id: string,
+  roleData: UpdateRoleData
+): Promise<responseMetadata> => {
+  const response: responseMetadata = await putCallback(`roles/${id}`, roleData);
+  return response;
+};
+
+export const deleteRoleApi = async (id: string): Promise<responseMetadata> => {
+  const response: responseMetadata = await deleteCallback(`roles/${id}`);
+  return response;
+};
+
+export const cloneRoleApi = async (
+  id: string,
+  cloneData: CloneRoleData
+): Promise<responseMetadata> => {
+  const response: responseMetadata = await postCallback(
+    `roles/${id}/clone`,
+    cloneData
+  );
+  return response;
+};
+
+export const assignPermissionsApi = async (
+  roleId: string,
+  permissionIds: string[]
+): Promise<responseMetadata> => {
+  const response: responseMetadata = await postCallback(
+    `roles/${roleId}/permissions`,
+    { permissionIds }
+  );
+  return response;
+};
+
+export const removePermissionsApi = async (
+  roleId: string,
+  permissionIds: string[]
+): Promise<responseMetadata> => {
+  const response: responseMetadata = await postCallback(
+    `roles/${roleId}/permissions/remove`,
+    { permissionIds }
+  );
+  return response;
+};
+
+// Permission Management APIs
+export const getPermissionsApi = async (
+  filters: {
+    search?: string;
+    resource?: string;
+    page?: number;
+    limit?: number;
+  } = {}
+): Promise<responseMetadata> => {
+  const queryString = buildQueryString(filters);
+  const response: responseMetadata = await getCallback(
+    `permissions${queryString ? `${queryString}` : ""}`
+  );
   return response;
 };

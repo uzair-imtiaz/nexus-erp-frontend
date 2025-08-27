@@ -1,12 +1,17 @@
 import React, { useState } from "react";
 import { Tabs } from "antd";
-import { UserOutlined, DashboardOutlined } from "@ant-design/icons";
+import {
+  UserOutlined,
+  DashboardOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
 import { UserList } from "./UserList";
 import { UserForm } from "./UserForm";
 import { UserInvitation } from "./UserInvitation";
 import { UserDetail } from "./UserDetail";
 import { UserRoleManagement } from "./UserRoleManagement";
 import { UserManagementDashboard } from "./UserManagementDashboard";
+import { RoleManagement } from "./RoleManagement";
 import { type User } from "../../services/user.services";
 
 export const UserManagement: React.FC = () => {
@@ -91,6 +96,16 @@ export const UserManagement: React.FC = () => {
           onInviteUser={handleInviteUser}
         />
       ),
+    },
+    {
+      key: "roles",
+      label: (
+        <span>
+          <TeamOutlined />
+          Roles & Permissions
+        </span>
+      ),
+      children: <RoleManagement key={refreshKey} />,
     },
   ];
 
