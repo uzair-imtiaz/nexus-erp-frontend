@@ -186,7 +186,7 @@ const AddEditFormulation = () => {
       try {
         setLoading(true);
         const [invRes, expensesRes] = await Promise.all([
-          getInventories(),
+          getInventories("?limit=100000"),
           getByTypeUnderTopLevel("Expenses", ACCOUNT_TYPE[3].value),
         ]);
         if (invRes?.success && expensesRes?.success) {
