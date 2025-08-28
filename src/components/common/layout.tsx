@@ -2,6 +2,7 @@ import {
   BarChartOutlined,
   BookOutlined,
   CloseOutlined,
+  DashboardOutlined,
   ExperimentOutlined,
   FileTextOutlined,
   LogoutOutlined,
@@ -10,15 +11,16 @@ import {
   ProfileOutlined,
   SettingOutlined,
   ShoppingCartOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu, message } from "antd";
+import { Button, Layout, message } from "antd";
 import Title from "antd/es/typography/Title";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { logout } from "../../services/auth.services";
-import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "../../contexts/ThemeContext";
-import { UserIcon } from "lucide-react";
+import { logout } from "../../services/auth.services";
+import PermissionAwareMenu from "./PermissionAwareMenu";
+import ThemeToggle from "./ThemeToggle";
 
 const { Header, Sider, Content } = Layout;
 
@@ -39,60 +41,71 @@ const AppLayout = () => {
   };
 
   const menuItems = [
-    // {
-    //   key: "/",
-    //   icon: <DashboardOutlined />,
-    //   label: "Dashboard",
-    // },
+    {
+      key: "/",
+      icon: <DashboardOutlined />,
+      label: "Dashboard",
+      permissions: ["sales.read", "purchases.read", "reports.read"],
+    },
     {
       key: "/production",
       icon: <ExperimentOutlined />,
       label: "Production",
+      permission: "production.read",
     },
     {
       key: "/formulations",
       icon: <FileTextOutlined />,
       label: "Formulation",
+      permission: "formulations.read",
     },
     {
       key: "/transactions",
       icon: <ShoppingCartOutlined />,
       label: "Transactions",
+      permissions: ["sales.read", "purchases.read"],
     },
     {
       key: "/expenses",
       icon: <ProfileOutlined />,
       label: "Expenses",
+      permission: "expenses.read",
     },
     {
       key: "/journal",
       icon: <BookOutlined />,
       label: "Journal",
+      permission: "journal.read",
     },
     {
       key: "reports",
       icon: <BarChartOutlined />,
       label: "Reports",
+      permission: "reports.read",
       children: [
         {
           key: "/reports/trial-balance",
           icon: <BarChartOutlined />,
           label: "Trial Balance",
+          permission: "reports.read",
         },
         {
           key: "/reports/journal-ledger",
           icon: <BookOutlined />,
           label: "Journal Ledger",
+          permission: "reports.read",
         },
         {
           key: "/reports/profit-loss",
           icon: <ProfileOutlined />,
           label: "Profit & Loss",
+          permission: "reports.read",
         },
         {
           key: "/reports/balance-sheet",
           icon: <FileTextOutlined />,
           label: "Balance Sheet (As At)",
+          permission: "reports.read",
         },
       ],
     },
@@ -100,11 +113,18 @@ const AppLayout = () => {
       key: "/core",
       icon: <SettingOutlined />,
       label: "Core",
+      permissions: [
+        "accounts.read",
+        "inventory.read",
+        "customers.read",
+        "vendors.read",
+      ],
     },
     {
       key: "/users",
-      icon: <UserIcon />,
+      icon: <UserOutlined />,
       label: "Users",
+      permission: "users.read",
     },
   ];
 
@@ -192,7 +212,7 @@ const AppLayout = () => {
             }}
           />
         </div> */}
-        <Menu
+        <PermissionAwareMenu
           theme={themeMode}
           mode="vertical"
           selectedKeys={[location.pathname]}

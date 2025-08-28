@@ -2,9 +2,11 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { ConfigProvider, Spin } from "antd";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/common/layout";
+import Dashboard from "./components/Dashboard";
+import { PermissionProvider } from "./contexts";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import Login from "./features/auth/LoginForm";
-import ProtectedRoute from "./features/auth/ProtectedRoute";
+import PermissionProtectedRoute from "./features/auth/PermissionProtectedRoute";
 import RegisterForm from "./features/auth/RegisterForm";
 import Core from "./features/core";
 import ExpenseListing from "./features/expenses";
@@ -27,8 +29,6 @@ import SaleForm from "./features/transactions/sale-form";
 import TransactionsPage from "./features/transactions/transactions";
 import UserManagement from "./features/users";
 import { darkTheme, lightTheme } from "./styles/theme";
-import PermissionProtectedRoute from "./features/auth/PermissionProtectedRoute";
-import { PermissionProvider } from "./contexts";
 
 const AppContent: React.FC = () => {
   const { themeMode } = useTheme();
@@ -55,7 +55,7 @@ const AppContent: React.FC = () => {
 
             <Route element={<PermissionProtectedRoute />}>
               <Route path="/" element={<AppLayout />}>
-                {/* <Route index element={<Dashboard />} /> */}
+                <Route index element={<Dashboard />} />
                 <Route path="core/inventory" element={<Inventory />} />
                 <Route path="production" element={<Production />} />
                 <Route path="production/new" element={<ProductionForm />} />

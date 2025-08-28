@@ -1,8 +1,10 @@
+// Permission-aware components
 export { default as ProtectedComponent } from "./ProtectedComponent";
-export { default as PermissionButton } from "./PermissionButton";
-export { default as PermissionMenu } from "./PermissionMenu";
+export { default as PermissionAwareMenu } from "./PermissionAwareMenu";
+export { default as PermissionAwareTable } from "./PermissionAwareTable";
 export {
-  withPermissions,
-  createProtectedComponent,
-  createRoleProtectedComponent,
-} from "./withPermissions";
+  PermissionAwareForm,
+  PermissionAwareFormItem,
+} from "./PermissionAwareForm";
+export { default as PermissionAwareDashboard } from "./PermissionAwareDashboard";
+export { default as ThemeToggle } from "./ThemeToggle";
