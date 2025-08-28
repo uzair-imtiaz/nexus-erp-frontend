@@ -9,6 +9,7 @@ import {
   Table,
 } from "antd";
 import { formatCurrency } from "../../../utils";
+import PaginatedSelect from "../paginated-select/paginated-select";
 
 const ItemManager = ({
   title = "Items",
@@ -93,6 +94,22 @@ const ItemManager = ({
         } = col;
 
         switch (inputType) {
+          case "paginated-select":
+            return (
+              <PaginatedSelect
+                api={col.api}
+                apiParams={col.apiParams}
+                placeholder={placeholder}
+                value={text}
+                onChange={(value) =>
+                  handleCellChange(value, record.id, dataIndex)
+                }
+                style={{ width: "100%" }}
+                disabled={disabled}
+                showSearch
+                allowClear
+              />
+            );
           case "select":
             const selectOptions = getOptions
               ? getOptions(record)
@@ -105,6 +122,9 @@ const ItemManager = ({
                 onChange={(value) =>
                   handleCellChange(value, record.id, dataIndex)
                 }
+                showSearch
+                optionFilterProp="children" // or "value"
+                filterOption={true}
                 disabled={disabled}
                 allowClear={col.allowClear}
               >
