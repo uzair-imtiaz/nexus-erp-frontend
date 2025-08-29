@@ -27,7 +27,6 @@ export const updateVendorApi = async (
 };
 
 export const deleteVendorApi = async (id: string) => {
-  console.log("id", id);
   const response = await deleteCallback(`vendor/${id}`);
   return response;
 };

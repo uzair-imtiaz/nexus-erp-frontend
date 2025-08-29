@@ -12,9 +12,13 @@ import ChartOfAccounts from "../charts-of-accounts";
 import { CustomerComponent } from "../customers";
 import Inventory from "../inventory/inventory";
 import { VendorComponent } from "../vendors";
+import ProtectedComponent from "../../components/common/ProtectedComponent";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 const Core = () => {
-  const tabKeys = [
+  const { hasPermission } = usePermissions();
+
+  const allTabKeys = [
     "vendor",
     "customer",
     "bank",
@@ -22,10 +26,30 @@ const Core = () => {
     "charts-of-accounts",
   ];
 
-  // Read initial tab key from URL hash (default to vendor if none)
+  // Filter tabs based on permissions
+  const availableTabKeys = allTabKeys.filter((key) => {
+    switch (key) {
+      case "vendor":
+        return hasPermission("vendors.read");
+      case "customer":
+        return hasPermission("customers.read");
+      case "bank":
+        return hasPermission("banks.read");
+      case "inventory":
+        return hasPermission("inventory.read");
+      case "charts-of-accounts":
+        return hasPermission("accounts.read");
+      default:
+        return false;
+    }
+  });
+
+  // Read initial tab key from URL hash (default to first available if none)
   const getInitialTab = () => {
     const hash = window.location.hash.replace("#", "");
-    return tabKeys.includes(hash) ? hash : "vendor";
+    return availableTabKeys.includes(hash)
+      ? hash
+      : availableTabKeys[0] || "vendor";
   };
 
   const [activeKey, setActiveKey] = useState(getInitialTab);
@@ -45,7 +69,7 @@ const Core = () => {
     };
   }, []);
 
-  const items = [
+  const allItems = [
     {
       key: "vendor",
       label: (
@@ -53,7 +77,12 @@ const Core = () => {
           <ShoppingOutlined /> Vendors
         </span>
       ),
-      children: <VendorComponent />,
+      children: (
+        <ProtectedComponent permission="vendors.read">
+          <VendorComponent />
+        </ProtectedComponent>
+      ),
+      permission: "vendors.read",
     },
     {
       key: "customer",
@@ -62,7 +91,12 @@ const Core = () => {
           <UserOutlined /> Customers
         </span>
       ),
-      children: <CustomerComponent />,
+      children: (
+        <ProtectedComponent permission="customers.read">
+          <CustomerComponent />
+        </ProtectedComponent>
+      ),
+      permission: "customers.read",
     },
     {
       key: "bank",
@@ -71,7 +105,12 @@ const Core = () => {
           <BankOutlined /> Banks
         </span>
       ),
-      children: <BanksPage />,
+      children: (
+        <ProtectedComponent permission="banks.read">
+          <BanksPage />
+        </ProtectedComponent>
+      ),
+      permission: "banks.read",
     },
     {
       key: "inventory",
@@ -80,7 +119,12 @@ const Core = () => {
           <InboxOutlined /> Inventory
         </span>
       ),
-      children: <Inventory />,
+      children: (
+        <ProtectedComponent permission="inventory.read">
+          <Inventory />
+        </ProtectedComponent>
+      ),
+      permission: "inventory.read",
     },
     {
       key: "charts-of-accounts",
@@ -89,14 +133,32 @@ const Core = () => {
           <FundOutlined /> Charts of Accounts
         </span>
       ),
-      children: <ChartOfAccounts />,
+      children: (
+        <ProtectedComponent permission="accounts.read">
+          <ChartOfAccounts />
+        </ProtectedComponent>
+      ),
+      permission: "accounts.read",
     },
   ];
+
+  // Filter items based on permissions
+  const items = allItems.filter((item) => hasPermission(item.permission));
 
   const handleTabChange = (key: string) => {
     setActiveKey(key);
     window.location.hash = key;
   };
+
+  // If user has no permissions for any core modules, show access denied
+  if (items.length === 0) {
+    return (
+      <div style={{ textAlign: "center", padding: "60px 0" }}>
+        <h3>Access Denied</h3>
+        <p>You don't have permission to access any core management features.</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "24px" }}>

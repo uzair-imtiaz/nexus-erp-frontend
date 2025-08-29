@@ -4,7 +4,6 @@ import {
   Col,
   DatePicker,
   Divider,
-  Form,
   Input,
   Row,
   Select,
@@ -17,6 +16,11 @@ import React, { useEffect, useState } from "react";
 import AddItemForm from "./add-item-form";
 import ItemTable from "./item-table";
 import { Transaction } from "./types";
+import {
+  PermissionAwareForm,
+  PermissionAwareFormItem,
+} from "../PermissionAwareForm";
+import ProtectedComponent from "../ProtectedComponent";
 
 const { Text } = Typography;
 
@@ -106,25 +110,34 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       </div>
 
       <div style={{ padding: 24 }}>
-        <Form form={form} layout="vertical">
+        <PermissionAwareForm form={form} layout="vertical">
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item
+              <PermissionAwareFormItem
                 label="Date"
                 name="date"
                 rules={[{ required: true, message: "Please select date" }]}
+                permission={`${type.split("-")[0]}s.update`}
+                readOnlyPermission={`${type.split("-")[0]}s.read`}
               >
                 <DatePicker style={{ width: "100%" }} />
-              </Form.Item>
-              <Form.Item label="Ref" name={"ref"}>
+              </PermissionAwareFormItem>
+              <PermissionAwareFormItem
+                label="Ref"
+                name={"ref"}
+                permission={`${type.split("-")[0]}s.update`}
+                readOnlyPermission={`${type.split("-")[0]}s.read`}
+              >
                 <Input placeholder="Enter Ref" />
-              </Form.Item>
+              </PermissionAwareFormItem>
             </Col>
             <Col span={12}>
-              <Form.Item
+              <PermissionAwareFormItem
                 label={type === "sale" ? "Customer" : "Vendor"}
                 name="entity"
                 rules={[{ required: true, message: "Please select an option" }]}
+                permission={`${type.split("-")[0]}s.update`}
+                readOnlyPermission={`${type.split("-")[0]}s.read`}
               >
                 <Select placeholder="Select option">
                   {parties.map((party) => (
@@ -133,20 +146,22 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                     </Select.Option>
                   ))}
                 </Select>
-              </Form.Item>
+              </PermissionAwareFormItem>
             </Col>
           </Row>
 
           <Divider />
 
-          <Text strong style={{ display: "block", marginBottom: 8 }}>
-            Add {type} Item
-          </Text>
-          <AddItemForm
-            onAdd={(item) => setItems([...items, item])}
-            list={inventory}
-            type={type}
-          />
+          <ProtectedComponent permission={`${type.split("-")[0]}s.update`}>
+            <Text strong style={{ display: "block", marginBottom: 8 }}>
+              Add {type} Item
+            </Text>
+            <AddItemForm
+              onAdd={(item) => setItems([...items, item])}
+              list={inventory}
+              type={type}
+            />
+          </ProtectedComponent>
 
           {!!items?.length && (
             <>
@@ -156,12 +171,17 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             </>
           )}
 
-          <Form.Item label="Notes" name="notes">
+          <PermissionAwareFormItem
+            label="Notes"
+            name="notes"
+            permission={`${type.split("-")[0]}s.update`}
+            readOnlyPermission={`${type.split("-")[0]}s.read`}
+          >
             <Input.TextArea
               rows={3}
               placeholder="Add any additional notes here..."
             />
-          </Form.Item>
+          </PermissionAwareFormItem>
 
           {error && (
             <Alert
@@ -172,15 +192,21 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             />
           )}
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button
-              type="primary"
-              onClick={handleSubmit}
-              loading={submitLoading}
+            <ProtectedComponent
+              permission={`${type.split("-")[0]}s.${
+                isEditing ? "update" : "create"
+              }`}
             >
-              {isEditing ? `Update ${transType}` : `Create ${transType}`}
-            </Button>
+              <Button
+                type="primary"
+                onClick={handleSubmit}
+                loading={submitLoading}
+              >
+                {isEditing ? `Update ${transType}` : `Create ${transType}`}
+              </Button>
+            </ProtectedComponent>
           </div>
-        </Form>
+        </PermissionAwareForm>
       </div>
     </>
   );

@@ -411,7 +411,6 @@ const FinancialSettlementForm = ({
         isReceipt,
         transactions[values.transactor]
       );
-      console.log("payload", payload);
 
       const response = await createApi(payload);
       if (response?.success) {
@@ -472,8 +471,6 @@ const FinancialSettlementForm = ({
           isSubmitting,
           isValid,
         }) => {
-          console.log("values", transactions[values.transactor]);
-          console.log("values.transactor", values.transactor);
           return (
             <FormikForm>
               <Row gutter={24}>

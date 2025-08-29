@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import axiosRetry from "axios-retry";
 import Cookies from "js-cookie";
 import { redirectToLogin } from ".";
+import { refreshAccessToken, shouldRefreshToken } from "./token-refresh";
 
 const axiosInstance = axios.create({
   baseURL:
@@ -32,11 +33,19 @@ axiosRetry(axiosInstance, {
 
 // 🛠 Inject token into headers
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = Cookies.get("token");
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    const token = Cookies.get("accessToken");
+
+    // Check if token needs refresh before making the request
+    if (token && shouldRefreshToken(token)) {
+      await refreshAccessToken();
     }
+
+    const currentToken = Cookies.get("accessToken");
+    if (currentToken && config.headers) {
+      config.headers.Authorization = `Bearer ${currentToken}`;
+    }
+
     const tenantId = Cookies.get("tenantId");
     if (tenantId) {
       config.headers["x-tenant-id"] = tenantId;
@@ -54,17 +63,43 @@ axiosInstance.interceptors.request.use(
 // 🚫 Global error handling
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
-  (error) => {
-    const { response } = error;
-    if (response?.status === 401 || response?.status === 403) {
+  async (error) => {
+    const { response, config } = error;
+
+    if (response?.status === 401) {
+      // Try to refresh token once
+      if (!config._retry) {
+        config._retry = true;
+        const refreshed = await refreshAccessToken();
+
+        if (refreshed) {
+          // Retry the original request with new token
+          const token = Cookies.get("accessToken");
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+          return axiosInstance(config);
+        }
+      }
+
+      // If refresh failed or this is a retry, redirect to login
       Cookies.remove("accessToken");
-      Cookies.remove("tenant");
+      Cookies.remove("refreshToken");
+      Cookies.remove("tenantId");
       redirectToLogin();
       return Promise.resolve({
         success: false,
         message: "Unauthorized",
       });
     }
+
+    if (response?.status === 403) {
+      return Promise.resolve({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
     return Promise.reject(error);
   }
 );
@@ -111,6 +146,15 @@ const putCallback = async <T>(
   return response.data;
 };
 
+const patchCallback = async <T>(
+  url: string,
+  data?: any,
+  config?: AxiosRequestConfig
+): Promise<T> => {
+  const response = await axiosInstance.patch<T>(url, data, mergeConfig(config));
+  return response.data;
+};
+
 // ❌ DELETE
 const deleteCallback = async <T>(
   url: string,
@@ -126,4 +170,5 @@ export {
   postCallback,
   putCallback,
   deleteCallback,
+  patchCallback,
 };
