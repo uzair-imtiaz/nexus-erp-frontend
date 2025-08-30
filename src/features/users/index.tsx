@@ -117,7 +117,7 @@ export const UserManagement: React.FC = () => {
         ]
       : []),
     // Roles tab - visible to users with roles.read permission
-    ...(hasPermission("roles.read")
+    ...(hasPermission("roles.list")
       ? [
           {
             key: "roles",
@@ -128,7 +128,7 @@ export const UserManagement: React.FC = () => {
               </span>
             ),
             children: (
-              <ProtectedComponent permission="roles.read">
+              <ProtectedComponent permission="roles.list">
                 <RoleManagement key={refreshKey} />
               </ProtectedComponent>
             ),
