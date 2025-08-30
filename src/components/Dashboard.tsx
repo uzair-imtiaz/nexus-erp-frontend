@@ -129,11 +129,11 @@ const Dashboard: React.FC = () => {
           ...widget,
           loading,
         }))}
-        extra={
-          <ProtectedComponent permission="reports.export">
-            <Button type="primary">Export Report</Button>
-          </ProtectedComponent>
-        }
+        // extra={
+        //   <ProtectedComponent permission="reports.export">
+        //     <Button type="primary">Export Report</Button>
+        //   </ProtectedComponent>
+        // }
       />
 
       <Row gutter={[16, 16]} style={{ marginTop: 24 }}>

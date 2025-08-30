@@ -20,6 +20,8 @@ import {
   type Role,
   type CreateUserData,
   type UpdateUserData,
+  UserInvitationData,
+  inviteUserApi,
 } from "../../services/user.services";
 
 interface UserFormProps {
@@ -113,16 +115,16 @@ export const UserForm: React.FC<UserFormProps> = ({
           description: "User updated successfully",
         });
       } else {
+        console.log("values", values);
         // Create new user
-        const createData: CreateUserData = {
+        const createData: UserInvitationData = {
           firstName: values.firstName,
           lastName: values.lastName,
           email: values.email,
-          password: values.password,
-          tenantName: values.tenantName,
+          roleId: values.role[0],
         };
 
-        const response = await createUserApi(createData);
+        const response = await inviteUserApi(createData);
         if (!response.success) {
           throw new Error(response.message || "Failed to create user");
         }
@@ -201,75 +203,48 @@ export const UserForm: React.FC<UserFormProps> = ({
           <Input placeholder="Enter email address" />
         </Form.Item>
 
-        {!isEditing && (
-          <>
-            <Form.Item
-              name="password"
-              label="Password"
-              rules={[
-                { required: true, message: "Please enter password" },
-                { min: 6, message: "Password must be at least 6 characters" },
-                {
-                  max: 24,
-                  message: "Password must be less than 24 characters",
-                },
-              ]}
-            >
-              <Input.Password placeholder="Enter password" />
-            </Form.Item>
-
-            <Form.Item
-              name="tenantName"
-              label="Tenant Name"
-              rules={[{ required: true, message: "Please enter tenant name" }]}
-            >
-              <Input placeholder="Enter tenant name" />
-            </Form.Item>
-          </>
-        )}
+        <Form.Item
+          name="roles"
+          label="Roles"
+          rules={[{ required: true, message: "Please select a role" }]}
+        >
+          <Select
+            mode="multiple"
+            placeholder="Select roles for this user"
+            value={selectedRoles}
+            onChange={setSelectedRoles}
+            optionLabelProp="label"
+            showSearch
+            filterOption={(input, option) =>
+              (option?.label as string)
+                ?.toLowerCase()
+                .includes(input.toLowerCase())
+            }
+          >
+            {roles.map((role) => (
+              <Select.Option key={role.id} value={role.id} label={role.name}>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <span>{role.name}</span>
+                    {role.isSystemRole && (
+                      <Tag size="small" color="blue">
+                        System
+                      </Tag>
+                    )}
+                  </div>
+                  {role.description && (
+                    <span className="text-xs text-gray-500">
+                      {role.description}
+                    </span>
+                  )}
+                </div>
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
 
         {isEditing && (
           <>
-            <Form.Item name="roles" label="Roles">
-              <Select
-                mode="multiple"
-                placeholder="Select roles for this user"
-                value={selectedRoles}
-                onChange={setSelectedRoles}
-                optionLabelProp="label"
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.label as string)
-                    ?.toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-              >
-                {roles.map((role) => (
-                  <Select.Option
-                    key={role.id}
-                    value={role.id}
-                    label={role.name}
-                  >
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <span>{role.name}</span>
-                        {role.isSystemRole && (
-                          <Tag size="small" color="blue">
-                            System
-                          </Tag>
-                        )}
-                      </div>
-                      {role.description && (
-                        <span className="text-xs text-gray-500">
-                          {role.description}
-                        </span>
-                      )}
-                    </div>
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-
             <Form.Item
               name="isActive"
               label="Account Status"
