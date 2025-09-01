@@ -10,11 +10,8 @@ import {
 import {
   Button,
   DatePicker,
-  Flex,
   notification,
-  Popconfirm,
   Space,
-  Table,
   Tag,
   Tooltip,
   Typography,
@@ -23,6 +20,8 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaginatedSelect from "../../components/common/paginated-select/paginated-select";
+import PermissionAwareTable from "../../components/common/PermissionAwareTable";
+import ProtectedComponent from "../../components/common/ProtectedComponent";
 import { getBanks } from "../../services/bank-services";
 import { getAccounts } from "../../services/charts-of-accounts.services";
 import {
@@ -161,6 +160,7 @@ const ExpenseListing = () => {
         render: (bank: { name: string } | null) => (
           <Tag color={bank ? "blue" : "default"}>{bank?.name || "No Bank"}</Tag>
         ),
+        permission: "banks.read", // Hide bank column if no bank read permission
       },
       {
         title: "Total Amount",
@@ -178,6 +178,7 @@ const ExpenseListing = () => {
           </span>
         ),
         sorter: true,
+        permission: "expenses.read", // Hide amount if no read permission
       },
       {
         title: "Description",
@@ -191,37 +192,31 @@ const ExpenseListing = () => {
           </Tooltip>
         ),
       },
-      {
-        title: "Actions",
-        key: "actions",
-        width: 100,
-        fixed: "right" as const,
-        render: (_: any, record: Expense) => (
-          <Flex gap={5}>
-            <Button
-              type="link"
-              size="small"
-              icon={<EditOutlined />}
-              onClick={() => navigate(`/expenses/${record.id}`)}
-            />
-            {/* <Popconfirm
-              title="Are you sure?"
-              onConfirm={() => onDeleteExpense(record?.id)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button
-                type="link"
-                size="small"
-                icon={<DeleteOutlined />}
-                danger
-              />
-            </Popconfirm> */}
-          </Flex>
-        ),
-      },
     ],
     []
+  );
+
+  const tableActions = useMemo(
+    () => [
+      {
+        key: "edit",
+        label: "",
+        icon: <EditOutlined />,
+        permission: "expenses.update",
+        onClick: (record: Expense) => navigate(`/expenses/${record.id}`),
+        tooltip: "Edit Expense",
+      },
+      {
+        key: "delete",
+        label: "",
+        icon: <DeleteOutlined />,
+        permission: "expenses.delete",
+        onClick: (record: Expense) => onDeleteExpense(record.id),
+        danger: true,
+        tooltip: "Delete Expense",
+      },
+    ],
+    [navigate]
   );
 
   const detailColumns = useMemo(
@@ -282,37 +277,43 @@ const ExpenseListing = () => {
       <Title level={3}>Expenses Management</Title>
 
       <Space size="middle" wrap style={{ marginBottom: 16 }}>
-        <PaginatedSelect
-          api={getBanks}
-          queryParamName="name"
-          placeholder="Select Bank Account"
-          style={{ width: 250 }}
-          labelExtractor={(item) => `${item.name}`}
-          value={filters.bank_id}
-          onChange={(value) => handleFilterChange("bank_id", value)}
-        />
+        <ProtectedComponent permission="banks.read">
+          <PaginatedSelect
+            api={getBanks}
+            queryParamName="name"
+            placeholder="Select Bank Account"
+            style={{ width: 250 }}
+            labelExtractor={(item) => `${item.name}`}
+            value={filters.bank_id}
+            onChange={(value) => handleFilterChange("bank_id", value)}
+          />
+        </ProtectedComponent>
 
-        <PaginatedSelect
-          api={getAccounts}
-          apiParams={{ types: [ACCOUNT_TYPE[3].value] }}
-          queryParamName="name"
-          mode="multiple"
-          placeholder="Select Nominals"
-          maxTagCount={"responsive"}
-          maxTagPlaceholder={(omittedValues) => (
-            <Tooltip
-              styles={{ root: { pointerEvents: "none" } }}
-              title={omittedValues.map(({ label }) => (
-                <div>{label}</div>
-              ))}
-            >
-              <span>+{omittedValues.length} more...</span>
-            </Tooltip>
-          )}
-          style={{ width: 240 }}
-          value={filters.nominal_account_ids}
-          onChange={(value) => handleFilterChange("nominal_account_ids", value)}
-        />
+        <ProtectedComponent permission="accounts.read">
+          <PaginatedSelect
+            api={getAccounts}
+            apiParams={{ types: [ACCOUNT_TYPE[3].value] }}
+            queryParamName="name"
+            mode="multiple"
+            placeholder="Select Nominals"
+            maxTagCount={"responsive"}
+            maxTagPlaceholder={(omittedValues) => (
+              <Tooltip
+                styles={{ root: { pointerEvents: "none" } }}
+                title={omittedValues.map(({ label }) => (
+                  <div>{label}</div>
+                ))}
+              >
+                <span>+{omittedValues.length} more...</span>
+              </Tooltip>
+            )}
+            style={{ width: 240 }}
+            value={filters.nominal_account_ids}
+            onChange={(value) =>
+              handleFilterChange("nominal_account_ids", value)
+            }
+          />
+        </ProtectedComponent>
 
         <RangePicker
           value={filters.dateRange}
@@ -333,18 +334,21 @@ const ExpenseListing = () => {
           Search
         </Button>
 
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          size="middle"
-          onClick={() => navigate("/expenses/new")}
-        >
-          Add New Expense
-        </Button>
+        <ProtectedComponent permission="expenses.create">
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            size="middle"
+            onClick={() => navigate("/expenses/new")}
+          >
+            Add New Expense
+          </Button>
+        </ProtectedComponent>
       </Space>
 
-      <Table
+      <PermissionAwareTable
         columns={columns}
+        actions={tableActions}
         dataSource={data}
         loading={loading}
         pagination={{
@@ -360,7 +364,7 @@ const ExpenseListing = () => {
         rowKey="id"
         expandable={{
           expandedRowRender: (record) => (
-            <Table
+            <PermissionAwareTable
               columns={detailColumns}
               dataSource={record.details}
               pagination={false}

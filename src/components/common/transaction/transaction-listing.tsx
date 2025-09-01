@@ -1,8 +1,7 @@
 import { DownOutlined, EyeOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Button, Dropdown, Flex, notification, Space, Table } from "antd";
-import { ColumnsType } from "antd/es/table";
-import { Download, Plus, Upload } from "lucide-react";
+import { Button, Dropdown, Flex, notification, Space } from "antd";
+import { Download, Plus, Upload, Edit, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { buildQueryString, formatCurrency } from "../../../utils";
@@ -16,6 +15,8 @@ import {
   downloadBillApi,
   getBillApi,
 } from "../../../services/purchase.services";
+import PermissionAwareTable from "../PermissionAwareTable";
+import ProtectedComponent from "../ProtectedComponent";
 
 interface TransactionsTableProps {
   type: TransactionType;
@@ -133,7 +134,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
     console.log("Delete transaction:", transaction);
   };
 
-  const columnsConfig = (type: TransactionType): ColumnsType<Transaction> => [
+  const columnsConfig = (type: TransactionType) => [
     {
       title: "ID",
       dataIndex: "id",
@@ -154,7 +155,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
     {
       title: type === "purchase" ? "Vendor" : "Customer",
       dataIndex: [type === "purchase" ? "vendor" : "customer"],
-      render: (type: any) =>
+      render: (type: unknown) =>
         type?.name?.charAt?.(0)?.toUpperCase?.() + type?.name?.slice?.(1),
     },
     {
@@ -162,58 +163,47 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
       dataIndex: "totalAmount",
       render: (total: number) => formatCurrency(total),
       sorter: (a, b) => a.totalAmount - b.totalAmount,
+      permission: `${type}s.read`, // Hide amount column if no read permission
+    },
+  ];
+
+  const tableActions = [
+    {
+      key: "view",
+      label: "",
+      icon: <EyeOutlined />,
+      permission: `${type}s.read`,
+      onClick: (record: Transaction) => viewPdf(record.id),
+      loading: viewInvoiceLoading?.[record.id],
+      disabled: (record: Transaction) => downloadInvoiceLoading?.[record.id],
+      tooltip: "View PDF",
     },
     {
-      title: "Actions",
-      render: (_, record) => (
-        <Space>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={async () => viewPdf(record.id)}
-            loading={viewInvoiceLoading?.[record.id]}
-            type="text"
-            size="small"
-            disabled={downloadInvoiceLoading?.[record.id]}
-          />
-          <Button
-            size="small"
-            type="text"
-            icon={<Download size={16} />}
-            onClick={async () => downloadPdf(record.id)}
-            loading={downloadInvoiceLoading?.[record.id]}
-            disabled={viewInvoiceLoading?.[record.id]}
-          />
-        </Space>
-      ),
-      /*{
-      title: "Actions",
-      render: (_, record) => (
-        <Space>
-          <Tooltip title="View">
-            <Button
-              type="text"
-              icon={<Eye size={16} />}
-              onClick={() => setCurrentTransaction(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Edit">
-            <Button
-              type="text"
-              icon={<Edit size={16} />}
-              onClick={() => navigate(`/${type}s/${record.id}`)}
-            />
-          </Tooltip>
-           <Tooltip title="Delete">
-            <Popconfirm
-              title="Are you sure you want to delete this transaction?"
-              onConfirm={() => handleDelete(record)}
-            >
-              <Button type="text" icon={<Trash2 size={16} />} danger />
-            </Popconfirm>
-          </Tooltip> 
-        </Space>
-      ),
-    },*/
+      key: "download",
+      label: "",
+      icon: <Download size={16} />,
+      permission: `${type}s.export`,
+      onClick: (record: Transaction) => downloadPdf(record.id),
+      loading: downloadInvoiceLoading?.[record.id],
+      disabled: (record: Transaction) => viewInvoiceLoading?.[record.id],
+      tooltip: "Download PDF",
+    },
+    {
+      key: "edit",
+      label: "",
+      icon: <Edit size={16} />,
+      permission: `${type}s.update`,
+      onClick: (record: Transaction) => navigate(`/${type}s/${record.id}`),
+      tooltip: "Edit Transaction",
+    },
+    {
+      key: "delete",
+      label: "",
+      icon: <Trash2 size={16} />,
+      permission: `${type}s.delete`,
+      onClick: (record: Transaction) => handleDelete(record),
+      danger: true,
+      tooltip: "Delete Transaction",
     },
   ];
 
@@ -222,21 +212,28 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
       {/* Controls */}
       <Flex wrap gap={2} justify="end">
         <Space>
-          <Dropdown
-            menu={{ items: menuOptions, onClick: handleMenuClick }}
-            placement="bottomRight"
-          >
-            <Button type="primary" icon={<Plus size={16} />}>
-              Add New <DownOutlined />
-            </Button>
-          </Dropdown>
-          <Button icon={<Download size={16} />}>Download</Button>
-          <Button icon={<Upload size={16} />}>Import</Button>
+          <ProtectedComponent permission={`${type}s.create`}>
+            <Dropdown
+              menu={{ items: menuOptions, onClick: handleMenuClick }}
+              placement="bottomRight"
+            >
+              <Button type="primary" icon={<Plus size={16} />}>
+                Add New <DownOutlined />
+              </Button>
+            </Dropdown>
+          </ProtectedComponent>
+          <ProtectedComponent permission={`${type}s.export`}>
+            <Button icon={<Download size={16} />}>Download</Button>
+          </ProtectedComponent>
+          <ProtectedComponent permission={`${type}s.create`}>
+            <Button icon={<Upload size={16} />}>Import</Button>
+          </ProtectedComponent>
         </Space>
       </Flex>
 
-      <Table
+      <PermissionAwareTable
         columns={columnsConfig(type)}
+        actions={tableActions}
         dataSource={transactions}
         rowKey="id"
         pagination={{
