@@ -23,11 +23,11 @@ export const prettifyLabel = (label: string): string => {
     .replace(/^./, (str) => str.toUpperCase());
 };
 
-export const formatCurrency = (value: number) => {
+export const formatCurrency = (value: number, precision = 2) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "PKR",
-    minimumFractionDigits: 2,
+    minimumFractionDigits: precision,
   }).format(value);
 };
 

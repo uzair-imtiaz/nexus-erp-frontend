@@ -26,6 +26,7 @@ import PurchaseForm from "./features/transactions/purchase-form";
 import SaleForm from "./features/transactions/sale-form";
 import TransactionsPage from "./features/transactions/transactions";
 import { darkTheme, lightTheme } from "./styles/theme";
+import Dashboard from "./components/dashboard";
 
 const AppContent: React.FC = () => {
   const { themeMode } = useTheme();
@@ -51,7 +52,7 @@ const AppContent: React.FC = () => {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<AppLayout />}>
-              {/* <Route index element={<Dashboard />} /> */}
+              <Route index element={<Dashboard />} />
               <Route path="core/inventory" element={<Inventory />} />
               <Route path="production" element={<Production />} />
               <Route path="production/new" element={<ProductionForm />} />

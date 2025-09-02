@@ -2,6 +2,7 @@ import {
   BarChartOutlined,
   BookOutlined,
   CloseOutlined,
+  DashboardOutlined,
   ExperimentOutlined,
   FileTextOutlined,
   LogoutOutlined,
@@ -38,11 +39,11 @@ const AppLayout = () => {
   };
 
   const menuItems = [
-    // {
-    //   key: "/",
-    //   icon: <DashboardOutlined />,
-    //   label: "Dashboard",
-    // },
+    {
+      key: "/",
+      icon: <DashboardOutlined />,
+      label: "Dashboard",
+    },
     {
       key: "/production",
       icon: <ExperimentOutlined />,
