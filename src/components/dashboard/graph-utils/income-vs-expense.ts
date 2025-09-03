@@ -1,4 +1,6 @@
-export const incomeConfig = {
+import type { LineConfig } from "@ant-design/plots";
+
+export const incomeConfig: LineConfig = {
   xField: "date",
   yField: "value",
   colorField: "type",
