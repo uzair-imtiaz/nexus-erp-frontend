@@ -1,29 +1,15 @@
-export const config = {
-  data: {
-    type: "fetch",
-    value:
-      "https://gw.alipayobjects.com/os/antvdemo/assets/data/blockchain.json",
-    transform: [
-      {
-        type: "fold",
-        fields: ["blockchain", "nlp"],
-        key: "type",
-        value: "value",
-      },
-    ],
-  },
-
-  xField: (d) => new Date(d.date),
+export const incomeConfig = {
+  xField: "date",
   yField: "value",
   colorField: "type",
   axis: {
     x: { labelAutoHide: "greedy" },
   },
   height: 350,
+  smooth: true,
   annotations: [
     {
       type: "text",
-      data: [new Date("2017-12-17"), 100],
       style: {
         wordWrap: true,
         wordWrapWidth: 164,

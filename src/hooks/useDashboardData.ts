@@ -1,73 +1,165 @@
-import { useState, useEffect } from "react";
-import { message } from "antd";
-
-interface DashboardSummary {
-  stats: {
-    inventory: { value: number; change: string };
-    sales: { value: number; change: string };
-    production: { value: number; change: string };
-    profit: { value: number; change: string };
-  };
-  alertsCount: number;
-  recentTransactions: Transaction[];
-}
+import { notification } from "antd";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useState } from "react";
+import {
+  AccountsAging,
+  BusinessStats,
+  ChartFilters,
+  ExpenseBreakdown,
+  getAccountsPayableApi,
+  getAccountsReceivableApi,
+  getDashboardSummaryApi,
+  getExpensesBreakdownApi,
+  getIncomeVsExpensesApi,
+  getRecentTransactionsApi,
+  IncomeExpenseChart,
+  Transaction,
+  TransactionFilters,
+} from "../services/dashboard.services";
 
 interface ChartData {
-  expensesBreakdown: { category: string; value: number; color: string }[];
-  incomeVsExpenses: { month: string; income: number; expenses: number }[];
+  expensesBreakdown: ExpenseBreakdown[];
+  incomeVsExpenses: IncomeExpenseChart[];
 }
 
-export const useDashboardData = () => {
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+interface AccountsData {
+  receivable: AccountsAging;
+  payable: AccountsAging;
+}
+
+export interface DateRange {
+  startDate: string;
+  endDate: string;
+}
+
+export interface DashboardFilters {
+  dateRange?: DateRange;
+  transactionLimit?: number;
+}
+
+export const useDashboardData = (initialFilters?: DashboardFilters) => {
+  const [summary, setSummary] = useState<BusinessStats | null>(null);
   const [chartData, setChartData] = useState<ChartData | null>(null);
-  const [accountsData, setAccountsData] = useState<{
-    receivable: any[];
-    payable: any[];
-  } | null>(null);
+  const [accountsData, setAccountsData] = useState<AccountsData | null>(null);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(
+    []
+  );
 
   const [loading, setLoading] = useState({
     summary: true,
     charts: true,
     accounts: true,
+    transactions: true,
   });
 
-  // Critical data first - fast load
-  useEffect(() => {
-    const fetchSummary = async () => {
-      try {
-        const response = await fetch("/api/dashboard/summary");
-        const data = await response.json();
-        setSummary(data);
-      } catch (error) {
-        message.error("Failed to load dashboard summary");
-      } finally {
-        setLoading((prev) => ({ ...prev, summary: false }));
-      }
-    };
+  const [currentFilters, setCurrentFilters] = useState<DashboardFilters>(() => {
+    // Default to last 12 months
+    const endDate = dayjs();
+    const startDate = endDate.subtract(12, "months");
 
-    fetchSummary();
+    return {
+      dateRange: {
+        startDate: startDate.format("YYYY-MM-DD"),
+        endDate: endDate.format("YYYY-MM-DD"),
+      },
+      transactionLimit: 10,
+      ...initialFilters,
+    };
+  });
+
+  // Helper function for API calls with proper error handling
+  const handleApiCall = useCallback(
+    async <T>(
+      apiFunction: () => Promise<{
+        success: boolean;
+        message: string;
+        data: T;
+      }>,
+      setter: (data: T) => void,
+      loadingKey: keyof typeof loading
+    ) => {
+      try {
+        const response = await apiFunction();
+
+        if (response.success) {
+          setter(response.data);
+        } else {
+          throw new Error(response.message);
+        }
+      } catch (error) {
+        notification.error({
+          message: "Error",
+          description: error instanceof Error ? error.message : "Network Error",
+        });
+      } finally {
+        setLoading((prev) => ({ ...prev, [loadingKey]: false }));
+      }
+    },
+    []
+  );
+
+  // Function to update filters and refetch data
+  const updateFilters = useCallback((newFilters: Partial<DashboardFilters>) => {
+    setCurrentFilters((prev) => ({ ...prev, ...newFilters }));
   }, []);
 
-  // Charts data - can load after summary
+  // Critical data first - fast load (500ms requirement)
+  useEffect(() => {
+    handleApiCall<BusinessStats>(getDashboardSummaryApi, setSummary, "summary");
+  }, [handleApiCall]);
+
+  // Recent transactions - medium priority (800ms requirement)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const transactionFilters: TransactionFilters = {
+        limit: currentFilters.transactionLimit || 10,
+      };
+
+      handleApiCall<Transaction[]>(
+        () => getRecentTransactionsApi(transactionFilters),
+        setRecentTransactions,
+        "transactions"
+      );
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [handleApiCall, currentFilters.transactionLimit]);
+
+  // Charts data - can load after summary (1000ms requirement)
   useEffect(() => {
     const fetchCharts = async () => {
       try {
-        const [expensesRes, incomeRes] = await Promise.all([
-          fetch("/api/dashboard/charts/expenses-breakdown"),
-          fetch("/api/dashboard/charts/income-vs-expenses"),
+        setLoading((prev) => ({ ...prev, charts: true }));
+
+        const chartFilters: ChartFilters = currentFilters.dateRange
+          ? {
+              startDate: currentFilters.dateRange.startDate,
+              endDate: currentFilters.dateRange.endDate,
+            }
+          : {};
+
+        const [expensesResponse, incomeResponse] = await Promise.all([
+          getExpensesBreakdownApi(chartFilters),
+          getIncomeVsExpensesApi(chartFilters),
         ]);
 
-        const [expensesData, incomeData] = await Promise.all([
-          expensesRes.json(),
-          incomeRes.json(),
-        ]);
-
-        setChartData({
-          expensesBreakdown: expensesData,
-          incomeVsExpenses: incomeData,
-        });
+        if (expensesResponse.success && incomeResponse.success) {
+          setChartData({
+            expensesBreakdown: expensesResponse.data,
+            incomeVsExpenses: incomeResponse.data,
+          });
+        } else {
+          throw new Error(
+            expensesResponse.message ||
+              incomeResponse.message ||
+              "Failed to load chart data"
+          );
+        }
       } catch (error) {
-        message.error("Failed to load chart data");
+        notification.error({
+          message: "Error",
+          description:
+            error instanceof Error ? error.message : "Unknown error occurred",
+        });
       } finally {
         setLoading((prev) => ({ ...prev, charts: false }));
       }
@@ -76,28 +168,35 @@ export const useDashboardData = () => {
     // Delay charts to prioritize summary
     const timer = setTimeout(fetchCharts, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [currentFilters.dateRange]);
 
-  // Accounts data - lowest priority
+  // Accounts data - lowest priority (2000ms requirement)
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const [receivableRes, payableRes] = await Promise.all([
-          fetch("/api/dashboard/accounts-receivable"),
-          fetch("/api/dashboard/accounts-payable"),
+        const [receivableResponse, payableResponse] = await Promise.all([
+          getAccountsReceivableApi(),
+          getAccountsPayableApi(),
         ]);
 
-        const [receivableData, payableData] = await Promise.all([
-          receivableRes.json(),
-          payableRes.json(),
-        ]);
-
-        setAccountsData({
-          receivable: receivableData,
-          payable: payableData,
-        });
+        if (receivableResponse.success && payableResponse.success) {
+          setAccountsData({
+            receivable: receivableResponse.data,
+            payable: payableResponse.data,
+          });
+        } else {
+          throw new Error(
+            receivableResponse.message ||
+              payableResponse.message ||
+              "Failed to load accounts data"
+          );
+        }
       } catch (error) {
-        message.error("Failed to load accounts data");
+        notification.error({
+          message: "Error",
+          description:
+            error instanceof Error ? error.message : "Unknown error occurred",
+        });
       } finally {
         setLoading((prev) => ({ ...prev, accounts: false }));
       }
@@ -109,18 +208,102 @@ export const useDashboardData = () => {
   }, []);
 
   const refetch = {
-    summary: () => {
+    summary: useCallback(() => {
       setLoading((prev) => ({ ...prev, summary: true }));
-      // Re-fetch summary logic
-    },
-    charts: () => {
+      handleApiCall<BusinessStats>(
+        getDashboardSummaryApi,
+        setSummary,
+        "summary"
+      );
+    }, [handleApiCall]),
+
+    charts: useCallback(() => {
       setLoading((prev) => ({ ...prev, charts: true }));
-      // Re-fetch charts logic
-    },
-    accounts: () => {
+      const fetchCharts = async () => {
+        try {
+          const chartFilters: ChartFilters = currentFilters.dateRange
+            ? {
+                startDate: currentFilters.dateRange.startDate,
+                endDate: currentFilters.dateRange.endDate,
+              }
+            : {};
+
+          const [expensesResponse, incomeResponse] = await Promise.all([
+            getExpensesBreakdownApi(chartFilters),
+            getIncomeVsExpensesApi(chartFilters),
+          ]);
+
+          if (expensesResponse.success && incomeResponse.success) {
+            setChartData({
+              expensesBreakdown: expensesResponse.data,
+              incomeVsExpenses: incomeResponse.data,
+            });
+          } else {
+            throw new Error(
+              expensesResponse.message ||
+                incomeResponse.message ||
+                "Failed to load chart data"
+            );
+          }
+        } catch (error) {
+          notification.error({
+            message: "Error",
+            description:
+              error instanceof Error ? error.message : "Unknown error occurred",
+          });
+        } finally {
+          setLoading((prev) => ({ ...prev, charts: false }));
+        }
+      };
+      fetchCharts();
+    }, [currentFilters.dateRange]),
+
+    accounts: useCallback(() => {
       setLoading((prev) => ({ ...prev, accounts: true }));
-      // Re-fetch accounts logic
-    },
+      const fetchAccounts = async () => {
+        try {
+          const [receivableResponse, payableResponse] = await Promise.all([
+            getAccountsReceivableApi(),
+            getAccountsPayableApi(),
+          ]);
+
+          if (receivableResponse.success && payableResponse.success) {
+            setAccountsData({
+              receivable: receivableResponse.data,
+              payable: payableResponse.data,
+            });
+          } else {
+            throw new Error(
+              receivableResponse.message ||
+                payableResponse.message ||
+                "Failed to load accounts data"
+            );
+          }
+        } catch (error) {
+          notification.error({
+            message: "Error",
+            description:
+              error instanceof Error ? error.message : "Unknown error occurred",
+          });
+        } finally {
+          setLoading((prev) => ({ ...prev, accounts: false }));
+        }
+      };
+      fetchAccounts();
+    }, []),
+
+    transactions: useCallback(() => {
+      setLoading((prev) => ({ ...prev, transactions: true }));
+      const transactionFilters: TransactionFilters = {
+        limit: currentFilters.transactionLimit || 10,
+      };
+
+      handleApiCall<Transaction[]>(
+        () => getRecentTransactionsApi(transactionFilters),
+        setRecentTransactions,
+        "transactions"
+      );
+    }, [handleApiCall, currentFilters.transactionLimit]),
   };
 
   return {
@@ -128,8 +311,11 @@ export const useDashboardData = () => {
       summary,
       chartData,
       accountsData,
+      recentTransactions,
     },
     loading,
     refetch,
+    filters: currentFilters,
+    updateFilters,
   };
 };

@@ -1,10 +1,11 @@
 import {
   ArrowUpOutlined,
+  CalendarOutlined,
   DownloadOutlined,
   ExperimentOutlined,
-  EyeOutlined,
   InboxOutlined,
   PlusOutlined,
+  ReloadOutlined,
   ShoppingCartOutlined,
 } from "@ant-design/icons";
 import {
@@ -12,31 +13,26 @@ import {
   Button,
   Card,
   Col,
+  DatePicker,
   List,
   Row,
   Space,
+  Spin,
   Statistic,
   Table,
-  Tag,
   Typography,
 } from "antd";
 
 import { Line, Pie } from "@ant-design/plots";
+import dayjs from "dayjs";
 import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useDashboardData } from "../../hooks/useDashboardData";
 import { formatCurrency } from "../../utils";
-import { config, expensesConfig } from "./graph-utils";
+import { expensesConfig, incomeConfig } from "./graph-utils";
 
-const { Text } = Typography;
-
-interface Transaction {
-  key: string;
-  date: string;
-  description: string;
-  category: string;
-  amount: string;
-  status: "Completed" | "Pending";
-}
+const { Text, Title } = Typography;
+const { RangePicker } = DatePicker;
 
 interface AccountItem {
   status: string;
@@ -46,48 +42,30 @@ interface AccountItem {
 
 const Dashboard: React.FC = () => {
   const { themeMode } = useTheme();
-  const recentTransactions: Transaction[] = [
-    {
-      key: "1",
-      date: "Oct 15, 2024",
-      description: "Client Payment - ABC Corp",
-      category: "Accounts Receivable",
-      amount: "$5,240.00",
-      status: "Completed",
-    },
-    {
-      key: "2",
-      date: "Oct 14, 2024",
-      description: "Office Supplies Purchase",
-      category: "Office Expenses",
-      amount: "$845.75",
-      status: "Completed",
-    },
-    {
-      key: "3",
-      date: "Oct 13, 2024",
-      description: "Vendor Payment - XYZ Ltd",
-      category: "Accounts Payable",
-      amount: "$2,340.50",
-      status: "Completed",
-    },
-    {
-      key: "4",
-      date: "Oct 12, 2024",
-      description: "Software Subscription",
-      category: "Technology",
-      amount: "$299.00",
-      status: "Completed",
-    },
-    {
-      key: "5",
-      date: "Oct 11, 2024",
-      description: "Client Payment - DEF Inc",
-      category: "Accounts Receivable",
-      amount: "$8,750.00",
-      status: "Completed",
-    },
-  ];
+  const { data, loading, refetch, filters, updateFilters } = useDashboardData();
+
+  // Handle date range change
+  const handleDateRangeChange = (dates: unknown) => {
+    if (dates && dates.length === 2) {
+      updateFilters({
+        dateRange: {
+          startDate: dates[0].format("YYYY-MM-DD"),
+          endDate: dates[1].format("YYYY-MM-DD"),
+        },
+      });
+    }
+  };
+
+  // Format transaction data for table
+  const formattedTransactions = data.recentTransactions.map(
+    (transaction, index) => ({
+      key: transaction.id || index.toString(),
+      date: dayjs(transaction.date).format("MMM DD, YYYY"),
+      description: transaction.description,
+      category: transaction.type,
+      amount: formatCurrency(transaction.amount),
+    })
+  );
 
   const transactionColumns = [
     {
@@ -111,124 +89,281 @@ const Dashboard: React.FC = () => {
       key: "amount",
       render: (amount: string) => <Text strong>{amount}</Text>,
     },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => (
-        <Tag color={status === "Completed" ? "green" : "orange"}>{status}</Tag>
-      ),
-    },
   ];
 
-  const accountsReceivable: AccountItem[] = [
-    { status: "Current", count: 12, amount: "$14,560.00" },
-    { status: "1-30 Days", count: 6, amount: "$7,240.00" },
-    { status: "31-60 Days", count: 4, amount: "$3,120.00" },
-    { status: ">60 Days", count: 2, amount: "$2,880.00" },
-  ];
+  // Format accounts receivable data
+  const accountsReceivable: AccountItem[] = data.accountsData?.receivable
+    ? [
+        {
+          status: "Current",
+          count: data.accountsData.receivable.buckets.current.count,
+          amount: formatCurrency(
+            data.accountsData.receivable.buckets.current.amount
+          ),
+        },
+        {
+          status: "1-30 Days",
+          count: data.accountsData.receivable.buckets.days1to30.count,
+          amount: formatCurrency(
+            data.accountsData.receivable.buckets.days1to30.amount
+          ),
+        },
+        {
+          status: "31-60 Days",
+          count: data.accountsData.receivable.buckets.days31to60.count,
+          amount: formatCurrency(
+            data.accountsData.receivable.buckets.days31to60.amount
+          ),
+        },
+        {
+          status: ">60 Days",
+          count: data.accountsData.receivable.buckets.daysOver60.count,
+          amount: formatCurrency(
+            data.accountsData.receivable.buckets.daysOver60.amount
+          ),
+        },
+      ]
+    : [];
 
-  const accountsPayable: AccountItem[] = [
-    { status: "Current", count: 9, amount: "$8,560.25" },
-    { status: "1-30 Days", count: 7, amount: "$4,110.50" },
-    { status: "31-60 Days", count: 3, amount: "$1,890.00" },
-    { status: ">60 Days", count: 2, amount: "$560.00" },
-  ];
+  // Format accounts payable data
+  const accountsPayable: AccountItem[] = data.accountsData?.payable
+    ? [
+        {
+          status: "Current",
+          count: data.accountsData.payable.buckets.current.count,
+          amount: formatCurrency(
+            data.accountsData.payable.buckets.current.amount
+          ),
+        },
+        {
+          status: "1-30 Days",
+          count: data.accountsData.payable.buckets.days1to30.count,
+          amount: formatCurrency(
+            data.accountsData.payable.buckets.days1to30.amount
+          ),
+        },
+        {
+          status: "31-60 Days",
+          count: data.accountsData.payable.buckets.days31to60.count,
+          amount: formatCurrency(
+            data.accountsData.payable.buckets.days31to60.amount
+          ),
+        },
+        {
+          status: ">60 Days",
+          count: data.accountsData.payable.buckets.daysOver60.count,
+          amount: formatCurrency(
+            data.accountsData.payable.buckets.daysOver60.amount
+          ),
+        },
+      ]
+    : [];
+
+  // Prepare chart data
+  const expensesChartData =
+    data.chartData?.expensesBreakdown?.map((item) => ({
+      name: item.category,
+      value: item.value,
+    })) || [];
+
+  const incomeChartData =
+    data.chartData?.incomeVsExpenses?.flatMap((item) => [
+      {
+        date: item.month,
+        type: "Income",
+        value: item.income,
+      },
+      {
+        date: item.month,
+        type: "Expenses",
+        value: item.expenses,
+      },
+      {
+        date: item.month,
+        type: "Profit",
+        value: item.profit,
+      },
+    ]) || [];
 
   return (
     <div style={{ padding: "24px", minHeight: "100vh" }}>
+      {/* Header with Date Range Filter */}
+      <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+        <Col>
+          <Title level={2} style={{ margin: 0 }}>
+            Dashboard
+          </Title>
+        </Col>
+        <Col>
+          <Space size="middle">
+            <RangePicker
+              value={
+                filters.dateRange
+                  ? [
+                      dayjs(filters.dateRange.startDate),
+                      dayjs(filters.dateRange.endDate),
+                    ]
+                  : null
+              }
+              onChange={handleDateRangeChange}
+              format="YYYY-MM-DD"
+              placeholder={["Start Date", "End Date"]}
+              suffixIcon={<CalendarOutlined />}
+            />
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                refetch.summary();
+                refetch.charts();
+                refetch.accounts();
+                refetch.transactions();
+              }}
+            >
+              Refresh
+            </Button>
+          </Space>
+        </Col>
+      </Row>
+
       {/* Stats Cards */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic
-              title={
-                <Space
-                  style={{ justifyContent: "space-between", width: "100%" }}
-                >
-                  <span>
-                    <InboxOutlined className="mr-2" />
-                    Inventory
-                  </span>
-                  <Button shape="circle" icon={<PlusOutlined />} size="small" />
-                </Space>
-              }
-              value={formatCurrency(248560)}
-              precision={0}
-              valueStyle={{ color: "#3f8600" }}
-              suffix="$"
-            />
-            <Text type="secondary">Last Updated Value</Text>
-            <br />
-            <Text type="success">
-              <ArrowUpOutlined /> +5.2% from last month
-            </Text>
+            <Spin spinning={loading.summary}>
+              <Statistic
+                title={
+                  <Space
+                    style={{ justifyContent: "space-between", width: "100%" }}
+                  >
+                    <span>
+                      <InboxOutlined className="mr-2" />
+                      Inventory
+                    </span>
+                    <Button
+                      shape="circle"
+                      icon={<PlusOutlined />}
+                      size="small"
+                    />
+                  </Space>
+                }
+                value={formatCurrency(data.summary?.inventory.value || 0, 0)}
+                precision={0}
+                valueStyle={{ color: "#3f8600" }}
+              />
+              <Text type="secondary">Last Updated Value</Text>
+              <br />
+              <Text
+                type={
+                  data.summary?.inventory.change.startsWith("+")
+                    ? "success"
+                    : "danger"
+                }
+              >
+                <ArrowUpOutlined /> {data.summary?.inventory.change || "0%"}{" "}
+                from last month
+              </Text>
+            </Spin>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic
-              title={
-                <Space
-                  style={{ justifyContent: "space-between", width: "100%" }}
-                >
-                  <span>
-                    <ShoppingCartOutlined className="mr-2" />
-                    Sales
-                  </span>
-                  <Button shape="circle" icon={<PlusOutlined />} size="small" />
-                </Space>
-              }
-              value={formatCurrency(482290)}
-              precision={0}
-              valueStyle={{ color: "#1890ff" }}
-            />
-            <Text type="secondary">Current Month Sales</Text>
-            <br />
-            <Text type="success">
-              <ArrowUpOutlined /> +12.4% from last month
-            </Text>
+            <Spin spinning={loading.summary}>
+              <Statistic
+                title={
+                  <Space
+                    style={{ justifyContent: "space-between", width: "100%" }}
+                  >
+                    <span>
+                      <ShoppingCartOutlined className="mr-2" />
+                      Sales
+                    </span>
+                    <Button
+                      shape="circle"
+                      icon={<PlusOutlined />}
+                      size="small"
+                    />
+                  </Space>
+                }
+                value={formatCurrency(data.summary?.sales.value || 0, 0)}
+                precision={0}
+                valueStyle={{ color: "#1890ff" }}
+              />
+              <Text type="secondary">Current Month Sales</Text>
+              <br />
+              <Text
+                type={
+                  data.summary?.sales.change.startsWith("+")
+                    ? "success"
+                    : "danger"
+                }
+              >
+                <ArrowUpOutlined /> {data.summary?.sales.change || "0%"} from
+                last month
+              </Text>
+            </Spin>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic
-              title={
-                <Space
-                  style={{ justifyContent: "space-between", width: "100%" }}
-                >
-                  <span>
-                    <ExperimentOutlined className="mr-2" />
-                    Production
-                  </span>
-                  <Button shape="circle" icon={<PlusOutlined />} size="small" />
-                </Space>
-              }
-              value={142850}
-              precision={0}
-              valueStyle={{ color: "#13c2c2" }}
-              suffix=" units"
-            />
-            <Text type="secondary">Monthly Production Output</Text>
-            <br />
-            <Text type="success">
-              <ArrowUpOutlined /> +8.2% from last month
-            </Text>
+            <Spin spinning={loading.summary}>
+              <Statistic
+                title={
+                  <Space
+                    style={{ justifyContent: "space-between", width: "100%" }}
+                  >
+                    <span>
+                      <ExperimentOutlined className="mr-2" />
+                      Production
+                    </span>
+                    <Button
+                      shape="circle"
+                      icon={<PlusOutlined />}
+                      size="small"
+                    />
+                  </Space>
+                }
+                value={data.summary?.production.value || 0}
+                precision={0}
+                valueStyle={{ color: "#13c2c2" }}
+                suffix=" units"
+              />
+              <Text type="secondary">Monthly Production Output</Text>
+              <br />
+              <Text
+                type={
+                  data.summary?.production.change.startsWith("+")
+                    ? "success"
+                    : "danger"
+                }
+              >
+                <ArrowUpOutlined /> {data.summary?.production.change || "0%"}
+                from last month
+              </Text>
+            </Spin>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic
-              title="Simple P&L"
-              value={formatCurrency(126740)}
-              precision={0}
-              valueStyle={{ color: "#52c41a" }}
-            />
-            <Text type="secondary">Net Profit This Month</Text>
-            <br />
-            <Text type="success">
-              <ArrowUpOutlined /> +15.7% from last month
-            </Text>
+            <Spin spinning={loading.summary}>
+              <Statistic
+                title="Simple P&L"
+                value={formatCurrency(data.summary?.profit.value ?? 0, 0)}
+                precision={0}
+                valueStyle={{ color: "#52c41a" }}
+              />
+              <Text type="secondary">Net Profit This Month</Text>
+              <br />
+              <Text
+                type={
+                  data.summary?.profit.change.startsWith("+")
+                    ? "success"
+                    : "danger"
+                }
+              >
+                <ArrowUpOutlined /> {data.summary?.profit.change || "0%"} from
+                last month
+              </Text>
+            </Spin>
           </Card>
         </Col>
       </Row>
@@ -236,48 +371,86 @@ const Dashboard: React.FC = () => {
       {/* Charts Row */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} lg={12}>
-          <Card title="Expenses Breakdown">
-            <Pie
-              data={[
-                { name: "Operations", value: 5000 },
-                { name: "Marketing", value: 3000 },
-                { name: "Admin", value: 2000 },
-              ]}
-              {...expensesConfig}
-              theme={{
-                type: themeMode === "dark" ? "classicDark" : "classic",
-              }}
-            />
+          <Card
+            title="Expenses Breakdown"
+            extra={
+              <Text type="secondary">
+                {filters.dateRange &&
+                  `${dayjs(filters.dateRange.startDate).format(
+                    "MMM YYYY"
+                  )} - ${dayjs(filters.dateRange.endDate).format("MMM YYYY")}`}
+              </Text>
+            }
+          >
+            <Spin spinning={loading.charts}>
+              {expensesChartData.length > 0 ? (
+                <Pie
+                  data={expensesChartData}
+                  {...expensesConfig}
+                  theme={{
+                    type: themeMode === "dark" ? "classicDark" : "classic",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{ textAlign: "center", padding: "40px", height: 350 }}
+                >
+                  <Text type="secondary">
+                    No expense data available for the selected period
+                  </Text>
+                </div>
+              )}
+            </Spin>
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Income vs Expenses">
-            <Line
-              {...config}
-              theme={{
-                type: themeMode === "dark" ? "classicDark" : "classic",
-              }}
-            />
+          <Card
+            title="Income vs Expenses"
+            extra={
+              <Text type="secondary">
+                {filters.dateRange &&
+                  `${dayjs(filters.dateRange.startDate).format(
+                    "MMM YYYY"
+                  )} - ${dayjs(filters.dateRange.endDate).format("MMM YYYY")}`}
+              </Text>
+            }
+          >
+            <Spin spinning={loading.charts}>
+              {incomeChartData.length > 0 ? (
+                <Line
+                  data={incomeChartData}
+                  {...incomeConfig}
+                  theme={{
+                    type: themeMode === "dark" ? "classicDark" : "classic",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{ textAlign: "center", padding: "40px", height: 350 }}
+                >
+                  <Text type="secondary">
+                    No income/expense data available for the selected period
+                  </Text>
+                </div>
+              )}
+            </Spin>
           </Card>
         </Col>
       </Row>
 
       {/* Recent Transactions */}
-      <Card
-        title="Recent Transactions"
-        extra={
-          <Button type="link" icon={<EyeOutlined />}>
-            View All
-          </Button>
-        }
-        style={{ marginBottom: 24 }}
-      >
-        <Table
-          dataSource={recentTransactions}
-          columns={transactionColumns}
-          pagination={false}
-          size="small"
-        />
+      <Card title="Recent Transactions" style={{ marginBottom: 24 }}>
+        <Spin spinning={loading.transactions}>
+          <Table
+            dataSource={formattedTransactions}
+            columns={transactionColumns}
+            pagination={false}
+            size="small"
+            locale={{
+              emptyText: "No transactions found",
+            }}
+          />
+        </Spin>
       </Card>
 
       {/* Bottom Row */}
@@ -292,32 +465,37 @@ const Dashboard: React.FC = () => {
               </Space>
             }
           >
-            <Statistic
-              title="Total Outstanding"
-              value={28420}
-              precision={2}
-              prefix="$"
-              style={{ marginBottom: 16 }}
-            />
-            <List
-              dataSource={accountsReceivable}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={
-                      <Space>
-                        <Text>{item.status}</Text>
-                        <Badge
-                          count={item.count}
-                          style={{ backgroundColor: "#52c41a" }}
-                        />
-                      </Space>
-                    }
-                  />
-                  <Text strong>{item.amount}</Text>
-                </List.Item>
-              )}
-            />
+            <Spin spinning={loading.accounts}>
+              <Statistic
+                title="Total Outstanding"
+                value={data.accountsData?.receivable?.totalOutstanding || 0}
+                precision={2}
+                prefix="$"
+                style={{ marginBottom: 16 }}
+              />
+              <List
+                dataSource={accountsReceivable}
+                renderItem={(item) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={
+                        <Space>
+                          <Text>{item.status}</Text>
+                          <Badge
+                            count={item.count}
+                            style={{ backgroundColor: "#52c41a" }}
+                          />
+                        </Space>
+                      }
+                    />
+                    <Text strong>{item.amount}</Text>
+                  </List.Item>
+                )}
+                locale={{
+                  emptyText: "No receivables data",
+                }}
+              />
+            </Spin>
           </Card>
         </Col>
 
@@ -331,32 +509,37 @@ const Dashboard: React.FC = () => {
               </Space>
             }
           >
-            <Statistic
-              title="Total Outstanding"
-              value={15520.75}
-              precision={2}
-              prefix="$"
-              style={{ marginBottom: 16 }}
-            />
-            <List
-              dataSource={accountsPayable}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={
-                      <Space>
-                        <Text>{item.status}</Text>
-                        <Badge
-                          count={item.count}
-                          style={{ backgroundColor: "#faad14" }}
-                        />
-                      </Space>
-                    }
-                  />
-                  <Text strong>{item.amount}</Text>
-                </List.Item>
-              )}
-            />
+            <Spin spinning={loading.accounts}>
+              <Statistic
+                title="Total Outstanding"
+                value={data.accountsData?.payable?.totalOutstanding || 0}
+                precision={2}
+                prefix="$"
+                style={{ marginBottom: 16 }}
+              />
+              <List
+                dataSource={accountsPayable}
+                renderItem={(item) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={
+                        <Space>
+                          <Text>{item.status}</Text>
+                          <Badge
+                            count={item.count}
+                            style={{ backgroundColor: "#faad14" }}
+                          />
+                        </Space>
+                      }
+                    />
+                    <Text strong>{item.amount}</Text>
+                  </List.Item>
+                )}
+                locale={{
+                  emptyText: "No payables data",
+                }}
+              />
+            </Spin>
           </Card>
         </Col>
       </Row>

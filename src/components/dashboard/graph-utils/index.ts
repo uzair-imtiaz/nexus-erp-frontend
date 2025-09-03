@@ -1,2 +1,2 @@
 export { expensesConfig } from "./expenses-pie-graph";
-export { config } from "./income-vs-expense";
+export { incomeConfig } from "./income-vs-expense";
