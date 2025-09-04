@@ -99,16 +99,10 @@ export const getRecentTransactionsApi = async (
   return response;
 };
 
-export const getAccountsReceivableApi = async (): Promise<responseMetadata> => {
-  const response: responseMetadata = await getCallback(
-    `dashboard/accounts-receivable`
-  );
-  return response;
-};
-
-export const getAccountsPayableApi = async (): Promise<responseMetadata> => {
-  const response: responseMetadata = await getCallback(
-    `dashboard/accounts-payable`
-  );
-  return response;
-};
+export const getAccountsReceivableAndPayablesApi =
+  async (): Promise<responseMetadata> => {
+    const response: responseMetadata = await getCallback(
+      `dashboard/receivable-and-payables`
+    );
+    return response;
+  };
