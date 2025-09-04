@@ -54,7 +54,7 @@ const AddAccountModal = ({
           rules={[{ required: true, message: "Please select account level" }]}
         >
           <Select placeholder="Select type" onChange={handleTypeChange}>
-            {ACCOUNT_TYPE.map((type) => (
+            {ACCOUNT_TYPE?.slice(1).map((type) => (
               <Option key={type.value} value={type.value} allowClear>
                 {type.label}
               </Option>
