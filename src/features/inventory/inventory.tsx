@@ -1,5 +1,4 @@
 import {
-  DeleteOutlined,
   DownloadOutlined,
   EditOutlined,
   EyeOutlined,
@@ -7,22 +6,13 @@ import {
   SearchOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import {
-  Button,
-  Flex,
-  Input,
-  notification,
-  Popconfirm,
-  Select,
-  Space,
-  Table,
-} from "antd";
+import { Button, Flex, Input, notification, Select, Space, Table } from "antd";
 import { useEffect, useState } from "react";
 import { deleteInventory, getInventories } from "../../apis";
+import { buildQueryString, formatCurrency } from "../../utils";
 import AddEditItemModal from "./add-edit-modal/add-edit-modal";
 import { InventoryItem } from "./types";
 import ViewItemModal from "./view-item-modal/view-modal";
-import { buildQueryString, formatCurrency } from "../../utils";
 
 const Inventory = () => {
   const { Option } = Select;

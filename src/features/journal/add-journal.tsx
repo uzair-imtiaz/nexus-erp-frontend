@@ -211,13 +211,7 @@ const JournalEntry = () => {
         >
           <DatePicker />
         </Form.Item>
-        <Form.Item
-          name="ref"
-          label="Ref No"
-          rules={[
-            { required: true, message: "Please enter a reference number" },
-          ]}
-        >
+        <Form.Item name="ref" label="Ref No">
           <Input placeholder="Ref No" />
         </Form.Item>
         <Form.Item name="description" label="Description">
