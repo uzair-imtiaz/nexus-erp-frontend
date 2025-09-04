@@ -38,6 +38,8 @@ const PaginatedSelect = ({
           [queryParamName]: currentSearchValue,
           ...(apiParams ? apiParams : {}),
         };
+        console.log("apiParams", apiParams);
+        console.log("queryParams", queryParams);
         const query = buildQueryString(queryParams);
 
         const response = await api(query);
@@ -74,7 +76,7 @@ const PaginatedSelect = ({
         setLoading(false);
       }
     },
-    []
+    [apiParams]
   );
 
   useEffect(() => {
