@@ -173,16 +173,18 @@ const BanksPage = () => {
         fetchItems={fetchBanks}
       />
 
-      <BankFormModal
-        visible={modalVisible}
-        onCancel={() => {
-          setModalVisible(false);
-          setEditingBank(null);
-        }}
-        onSubmit={handleCreateOrUpdate}
-        loading={submitting}
-        initialValues={editingBank}
-      />
+      {modalVisible && (
+        <BankFormModal
+          visible={modalVisible}
+          onCancel={() => {
+            setModalVisible(false);
+            setEditingBank(null);
+          }}
+          onSubmit={handleCreateOrUpdate}
+          loading={submitting}
+          initialValues={editingBank}
+        />
+      )}
     </div>
   );
 };
