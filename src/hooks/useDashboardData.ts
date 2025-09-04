@@ -6,8 +6,7 @@ import {
   BusinessStats,
   ChartFilters,
   ExpenseBreakdown,
-  getAccountsPayableApi,
-  getAccountsReceivableApi,
+  getAccountsReceivableAndPayablesApi,
   getDashboardSummaryApi,
   getExpensesBreakdownApi,
   getIncomeVsExpensesApi,
@@ -174,22 +173,12 @@ export const useDashboardData = (initialFilters?: DashboardFilters) => {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const [receivableResponse, payableResponse] = await Promise.all([
-          getAccountsReceivableApi(),
-          getAccountsPayableApi(),
-        ]);
+        const response = await getAccountsReceivableAndPayablesApi();
 
-        if (receivableResponse.success && payableResponse.success) {
-          setAccountsData({
-            receivable: receivableResponse.data,
-            payable: payableResponse.data,
-          });
+        if (response.success) {
+          setAccountsData(response.data);
         } else {
-          throw new Error(
-            receivableResponse.message ||
-              payableResponse.message ||
-              "Failed to load accounts data"
-          );
+          throw new Error(response.message || "Failed to load accounts data");
         }
       } catch (error) {
         notification.error({
@@ -262,22 +251,12 @@ export const useDashboardData = (initialFilters?: DashboardFilters) => {
       setLoading((prev) => ({ ...prev, accounts: true }));
       const fetchAccounts = async () => {
         try {
-          const [receivableResponse, payableResponse] = await Promise.all([
-            getAccountsReceivableApi(),
-            getAccountsPayableApi(),
-          ]);
+          const response = await getAccountsReceivableAndPayablesApi();
 
-          if (receivableResponse.success && payableResponse.success) {
-            setAccountsData({
-              receivable: receivableResponse.data,
-              payable: payableResponse.data,
-            });
+          if (response.success) {
+            setAccountsData(response.data);
           } else {
-            throw new Error(
-              receivableResponse.message ||
-                payableResponse.message ||
-                "Failed to load accounts data"
-            );
+            throw new Error(response.message || "Failed to load accounts data");
           }
         } catch (error) {
           notification.error({
