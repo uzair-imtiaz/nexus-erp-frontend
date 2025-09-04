@@ -24,9 +24,9 @@ export const BankFormModal = ({
     }
   }, [initialValues]);
 
-  const handleFinish = (values: any) => {
+  const handleFinish = async (values: any) => {
     const { code, ...rest } = values;
-    onSubmit({
+    await onSubmit({
       ...rest,
       openingDate: values.openingDate.format("YYYY-MM-DD"),
       ...(!initialValues && { code }),
