@@ -168,7 +168,7 @@ const ProductionForm: React.FC = () => {
       <Space className="mb-6">
         <Button onClick={() => navigate(-1)} icon={<LeftOutlined />} />
         <Title level={3} style={{ margin: 0 }}>
-          {isEditing ? "Edit Formulation" : "Add New Formulation"}
+          {isEditing ? "Edit Production" : "Add New Production"}
         </Title>
       </Space>
       <Formik
