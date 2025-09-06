@@ -133,7 +133,12 @@ const ProfitLossReport: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const query = buildQueryString({});
+      const queryObj: { date_from?: string; date_to?: string } = {};
+      if (dateRange) {
+        queryObj.date_from = dateRange[0].format("YYYY-MM-DD");
+        queryObj.date_to = dateRange[1].format("YYYY-MM-DD");
+      }
+      const query = buildQueryString(queryObj);
       const response = await getProfitLossReport(query);
       if (response?.success) {
         setData(response?.data);
