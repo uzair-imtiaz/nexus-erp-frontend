@@ -10,8 +10,10 @@ import {
   getDashboardSummaryApi,
   getExpensesBreakdownApi,
   getIncomeVsExpensesApi,
+  getPnLSummaryApi,
   getRecentTransactionsApi,
   IncomeExpenseChart,
+  StatValue,
   Transaction,
   TransactionFilters,
 } from "../services/dashboard.services";
@@ -38,6 +40,7 @@ export interface DashboardFilters {
 
 export const useDashboardData = (initialFilters?: DashboardFilters) => {
   const [summary, setSummary] = useState<BusinessStats | null>(null);
+  const [pnlSummary, setPnlSummary] = useState<StatValue | null>(null);
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [accountsData, setAccountsData] = useState<AccountsData | null>(null);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(
@@ -46,6 +49,7 @@ export const useDashboardData = (initialFilters?: DashboardFilters) => {
 
   const [loading, setLoading] = useState({
     summary: true,
+    pnl: true,
     charts: true,
     accounts: true,
     transactions: true,
@@ -283,11 +287,28 @@ export const useDashboardData = (initialFilters?: DashboardFilters) => {
         "transactions"
       );
     }, [handleApiCall, currentFilters.transactionLimit]),
+
+    pnl: useCallback(() => {
+      setLoading((prev) => ({ ...prev, pnl: true }));
+      const chartFilters: ChartFilters = currentFilters.dateRange
+        ? {
+            startDate: currentFilters.dateRange.startDate,
+            endDate: currentFilters.dateRange.endDate,
+          }
+        : {};
+
+      handleApiCall<StatValue>(
+        () => getPnLSummaryApi(chartFilters),
+        setPnlSummary,
+        "pnl"
+      );
+    }, [handleApiCall, currentFilters.dateRange]),
   };
 
   return {
     data: {
       summary,
+      pnlSummary,
       chartData,
       accountsData,
       recentTransactions,

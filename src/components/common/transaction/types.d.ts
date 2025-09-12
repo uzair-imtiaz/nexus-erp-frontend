@@ -1,3 +1,5 @@
+import { InventoryItem } from "../../../features/inventory/types";
+
 export type TransactionType = "purchase" | "sale";
 
 export interface TransactionItem {
@@ -14,10 +16,12 @@ export interface TransactionItem {
 export interface Transaction {
   id: string;
   date: string;
-  entity: TransactionItem;
+  entity?: TransactionItem;
+  vendor?: { id: string; name: string };
+  customer?: { id: string; name: string };
   amount: number;
   notes: string;
   totalAmount: number;
-  items: any[];
+  inventories: InventoryItem[];
   type: "sale" | "sale-return" | "purchase" | "purchase-return";
 }

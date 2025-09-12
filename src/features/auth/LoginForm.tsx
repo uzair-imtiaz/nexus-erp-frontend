@@ -354,7 +354,7 @@ const LoginForm = () => {
                     <Checkbox style={{ color: "#6b7280" }}>
                       Remember me
                     </Checkbox>
-                    <Link
+                    {/* <Link
                       to="/forgot-password"
                       style={{
                         color: "#3b82f6",
@@ -363,7 +363,7 @@ const LoginForm = () => {
                       }}
                     >
                       Forgot password?
-                    </Link>
+                    </Link> */}
                   </div>
                 </Form.Item>
 

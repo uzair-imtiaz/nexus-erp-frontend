@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react";
-import DataTable from "../../components/common/table/data-table";
+import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
+import { Button, Flex, notification, Space, Tooltip, Typography } from "antd";
 import dayjs from "dayjs";
-import { buildQueryString, formatCurrency } from "../../utils";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Receipt } from "../../components/common/financial-transaction/types";
+import ViewReceiptModal from "../../components/common/financial-transaction/view-receipt-modal";
+import DataTable from "../../components/common/table/data-table";
 import {
   downloadReceiptPdfApi,
   getReceiptsApi,
   viewReceiptPdfApi,
 } from "../../services/receipt.services";
-import { Button, Flex, notification, Space, Typography } from "antd";
-import { useNavigate } from "react-router-dom";
-import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
+import { buildQueryString, formatCurrency } from "../../utils";
 
 const { Title } = Typography;
 
@@ -22,9 +24,15 @@ const Receipts = () => {
     total: 0,
     totalPages: 0,
   });
-  const [viewPdfLoading, setViewPdfLoading] = useState<Record<string, boolean>>({});
+  const [viewPdfLoading, setViewPdfLoading] = useState<Record<string, boolean>>(
+    {}
+  );
 
-  const [downloadPdfLoading, setDownloadPdfLoading] = useState<Record<string, boolean>>({});
+  const [downloadPdfLoading, setDownloadPdfLoading] = useState<
+    Record<string, boolean>
+  >({});
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [currentReceipt, setCurrentReceipt] = useState<Receipt | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,7 +90,6 @@ const Receipts = () => {
   const viewPdf = async (id: string) => {
     try {
       setViewPdfLoading({ id: true });
-      debugger;
       const response = await viewReceiptPdfApi(id);
 
       const fileURL = URL.createObjectURL(response);
@@ -94,6 +101,18 @@ const Receipts = () => {
       });
     } finally {
       setViewPdfLoading({ id: false });
+    }
+  };
+
+  const viewReceiptDetails = async (receipt: Receipt) => {
+    try {
+      setCurrentReceipt(receipt);
+      setViewModalVisible(true);
+    } catch {
+      notification.error({
+        message: "Error",
+        description: "Failed to fetch receipt details",
+      });
     }
   };
 
@@ -138,22 +157,24 @@ const Receipts = () => {
       title: "Actions",
       render: (_, record) => (
         <Space>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={async () => viewPdf(record.id)}
-            loading={viewPdfLoading?.[record.id]}
-            type="text"
-            size="small"
-            disabled={downloadPdfLoading?.[record.id]}
-          />
-          <Button
-            size="small"
-            type="text"
-            icon={<DownloadOutlined size={16} />}
-            onClick={async () => downloadPdf(record.id)}
-            loading={downloadPdfLoading?.[record.id]}
-            disabled={viewPdfLoading?.[record.id]}
-          />
+          <Tooltip title="View Details">
+            <Button
+              icon={<EyeOutlined />}
+              onClick={() => viewReceiptDetails(record)}
+              type="text"
+              size="small"
+            />
+          </Tooltip>
+          <Tooltip title="Download PDF">
+            <Button
+              size="small"
+              type="text"
+              icon={<DownloadOutlined size={16} />}
+              onClick={async () => downloadPdf(record.id)}
+              loading={downloadPdfLoading?.[record.id]}
+              disabled={viewPdfLoading?.[record.id]}
+            />
+          </Tooltip>
         </Space>
       ),
     },
@@ -179,6 +200,17 @@ const Receipts = () => {
         pagination={pagination}
         loading={loading}
       />
+
+      {/* View Receipt Modal */}
+      {viewModalVisible && currentReceipt && (
+        <ViewReceiptModal
+          receipt={currentReceipt}
+          onClose={() => {
+            setViewModalVisible(false);
+            setCurrentReceipt(null);
+          }}
+        />
+      )}
     </>
   );
 };

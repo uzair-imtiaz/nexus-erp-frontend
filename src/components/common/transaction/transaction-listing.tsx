@@ -1,21 +1,23 @@
 import { DownOutlined, EyeOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Button, Dropdown, Flex, notification, Space, Table } from "antd";
+import {
+  Button,
+  Dropdown,
+  Flex,
+  notification,
+  Space,
+  Table,
+  Tooltip,
+} from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Download, Plus, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { downloadBillApi } from "../../../services/purchase.services";
+import { downloadInvoiceApi } from "../../../services/sales.services";
 import { buildQueryString, formatCurrency } from "../../../utils";
 import type { Transaction, TransactionType } from "./types";
 import ViewTransactionModal from "./view-transaction";
-import {
-  downloadInvoiceApi,
-  getinvoiceApi,
-} from "../../../services/sales.services";
-import {
-  downloadBillApi,
-  getBillApi,
-} from "../../../services/purchase.services";
 
 interface TransactionsTableProps {
   type: TransactionType;
@@ -105,24 +107,6 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
     }
   };
 
-  const viewPdf = async (id: string) => {
-    try {
-      setViewInvoiceLoading({ id: true });
-      const response =
-        type === "sale" ? await getinvoiceApi(id) : await getBillApi(id);
-
-      const fileURL = URL.createObjectURL(response);
-      window.open(fileURL, "_blank");
-    } catch (error) {
-      notification.error({
-        message: "Error",
-        description: error?.message,
-      });
-    } finally {
-      setViewInvoiceLoading({ id: false });
-    }
-  };
-
   const handleEdit = (transaction: Transaction) => {
     // TODO: Implement edit functionality
     console.log("Edit transaction:", transaction);
@@ -154,7 +138,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
     {
       title: type === "purchase" ? "Vendor" : "Customer",
       dataIndex: [type === "purchase" ? "vendor" : "customer"],
-      render: (type: any) =>
+      render: (type: unknown) =>
         type?.name?.charAt?.(0)?.toUpperCase?.() + type?.name?.slice?.(1),
     },
     {
@@ -167,22 +151,27 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
       title: "Actions",
       render: (_, record) => (
         <Space>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={async () => viewPdf(record.id)}
-            loading={viewInvoiceLoading?.[record.id]}
-            type="text"
-            size="small"
-            disabled={downloadInvoiceLoading?.[record.id]}
-          />
-          <Button
-            size="small"
-            type="text"
-            icon={<Download size={16} />}
-            onClick={async () => downloadPdf(record.id)}
-            loading={downloadInvoiceLoading?.[record.id]}
-            disabled={viewInvoiceLoading?.[record.id]}
-          />
+          <Tooltip title="View Details">
+            <Button
+              icon={<EyeOutlined />}
+              onClick={() => {
+                setCurrentTransaction(record);
+                setViewModalVisible(true);
+              }}
+              type="text"
+              size="small"
+            />
+          </Tooltip>
+          <Tooltip title="Download PDF">
+            <Button
+              size="small"
+              type="text"
+              icon={<Download size={16} />}
+              onClick={async () => downloadPdf(record.id)}
+              loading={downloadInvoiceLoading?.[record.id]}
+              disabled={viewInvoiceLoading?.[record.id]}
+            />
+          </Tooltip>
         </Space>
       ),
       /*{

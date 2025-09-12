@@ -1,6 +1,8 @@
 import React from "react";
 import { Modal, Descriptions, Table, Tag, Button } from "antd";
 import { Transaction } from "./types";
+import { formatCurrency } from "../../../utils";
+import { InventoryItem } from "../../../features/inventory/types";
 
 interface ViewTransactionModalProps {
   transaction: Transaction;
@@ -14,8 +16,8 @@ const ViewTransactionModal: React.FC<ViewTransactionModalProps> = ({
   const columns = [
     {
       title: "Product",
-      dataIndex: "productName",
-      key: "productName",
+      dataIndex: "name",
+      key: "name",
     },
     {
       title: "Quantity",
@@ -33,23 +35,36 @@ const ViewTransactionModal: React.FC<ViewTransactionModalProps> = ({
       ),
     },
     {
+      title: "Discount",
+      dataIndex: "discount",
+      key: "discount",
+    },
+    {
+      title: "Tax",
+      dataIndex: "tax",
+      key: "tax",
+    },
+    {
       title: "Rate",
       dataIndex: "rate",
       key: "rate",
-      render: (rate: number, record: any) =>
-        `${rate.toFixed(2)} per ${record.unit}`,
+      render: (rate: number, record: unknown) =>
+        `${formatCurrency(rate)} per ${record.unit}`,
     },
     {
       title: "Amount",
       dataIndex: "amount",
       key: "amount",
-      render: (amount: number) => amount.toFixed(2),
+      render: (_: number, record: InventoryItem) =>
+        formatCurrency(record.quantity * record.rate),
     },
   ];
 
   return (
     <Modal
-      title={`${transaction.type === "purchase" ? "Purchase" : "Sale"} Details`}
+      title={`${
+        transaction.type?.includes("purchase") ? "Purchase" : "Sale"
+      } Details`}
       open
       onCancel={onClose}
       footer={[
@@ -66,33 +81,52 @@ const ViewTransactionModal: React.FC<ViewTransactionModalProps> = ({
         <Descriptions.Item label="Date">
           {new Date(transaction.date).toLocaleDateString()}
         </Descriptions.Item>
-        <Descriptions.Item
-          label={transaction.type === "purchase" ? "Vendor" : "Customer"}
-        >
-          {transaction.entity.name}
+        <Descriptions.Item label="Type">
+          <Tag
+            color={transaction.type?.includes("purchase") ? "blue" : "green"}
+          >
+            {transaction.type?.charAt(0).toUpperCase() +
+              transaction.type?.slice(1)}
+          </Tag>
         </Descriptions.Item>
-        <Descriptions.Item label="Notes" span={2}>
+        <Descriptions.Item
+          label={transaction.type?.includes("purchase") ? "Vendor" : "Customer"}
+        >
+          {transaction.type?.includes("purchase")
+            ? transaction.vendor?.name
+            : transaction.customer?.name}
+        </Descriptions.Item>
+        <Descriptions.Item label="Total Amount">
+          {formatCurrency(transaction.totalAmount)}
+        </Descriptions.Item>
+        <Descriptions.Item label="Notes">
           {transaction.notes || "No notes added"}
         </Descriptions.Item>
       </Descriptions>
 
-      <Table
-        columns={columns}
-        dataSource={transaction.items}
-        rowKey="id"
-        pagination={false}
-        style={{ marginTop: 24 }}
-        summary={() => (
-          <Table.Summary.Row>
-            <Table.Summary.Cell colSpan={3} align="right" index={2}>
-              <strong>Total:</strong>
-            </Table.Summary.Cell>
-            <Table.Summary.Cell index={3}>
-              {transaction.totalAmount.toFixed(2)}
-            </Table.Summary.Cell>
-          </Table.Summary.Row>
-        )}
-      />
+      {transaction.inventories && transaction.inventories.length > 0 ? (
+        <Table
+          columns={columns}
+          dataSource={transaction.inventories}
+          rowKey="id"
+          pagination={false}
+          style={{ marginTop: 24 }}
+          summary={() => (
+            <Table.Summary.Row>
+              <Table.Summary.Cell colSpan={5} align="right" index={2}>
+                <strong>Total:</strong>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={5}>
+                {formatCurrency(transaction.totalAmount)}
+              </Table.Summary.Cell>
+            </Table.Summary.Row>
+          )}
+        />
+      ) : (
+        <div style={{ marginTop: 24, textAlign: "center", color: "#999" }}>
+          No items available for this transaction
+        </div>
+      )}
     </Modal>
   );
 };
