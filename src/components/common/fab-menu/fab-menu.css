@@ -1,0 +1,168 @@
+.fab-menu {
+  position: fixed;
+  z-index: 1000;
+}
+
+.fab-menu-bottom-right {
+  bottom: 24px;
+  right: 24px;
+}
+
+.fab-menu-bottom-left {
+  bottom: 24px;
+  left: 24px;
+}
+
+.fab-menu-top-right {
+  top: 24px;
+  right: 24px;
+}
+
+.fab-menu-top-left {
+  top: 24px;
+  left: 24px;
+}
+
+.fab-main-button {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 56px !important;
+  height: 56px !important;
+  font-size: 18px;
+}
+
+.fab-main-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.fab-main-button-open {
+  transform: rotate(45deg);
+}
+
+.fab-main-button-open:hover {
+  transform: rotate(45deg) scale(1.1);
+}
+
+.fab-actions {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.fab-menu-bottom-right .fab-actions,
+.fab-menu-bottom-left .fab-actions {
+  bottom: 72px;
+}
+
+.fab-menu-top-right .fab-actions,
+.fab-menu-top-left .fab-actions {
+  top: 72px;
+  flex-direction: column-reverse;
+}
+
+.fab-menu-bottom-right .fab-actions,
+.fab-menu-top-right .fab-actions {
+  right: 0;
+  align-items: flex-end;
+}
+
+.fab-menu-bottom-left .fab-actions,
+.fab-menu-top-left .fab-actions {
+  left: 0;
+  align-items: flex-start;
+}
+
+.fab-actions-open {
+  pointer-events: all;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.fab-action-button {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 48px !important;
+  height: 48px !important;
+  font-size: 16px;
+  animation: fabSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.fab-action-button:hover {
+  transform: scale(1.1) translateY(0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.fab-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: -1;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fabSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .fab-menu-bottom-right,
+  .fab-menu-top-right {
+    right: 16px;
+  }
+
+  .fab-menu-bottom-left,
+  .fab-menu-top-left {
+    left: 16px;
+  }
+
+  .fab-menu-bottom-right,
+  .fab-menu-bottom-left {
+    bottom: 16px;
+  }
+
+  .fab-menu-top-right,
+  .fab-menu-top-left {
+    top: 16px;
+  }
+
+  .fab-main-button {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 16px;
+  }
+
+  .fab-action-button {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 14px;
+  }
+}
+
+/* Dark theme support */
+.ant-theme-dark .fab-backdrop {
+  background: rgba(255, 255, 255, 0.1);
+}
