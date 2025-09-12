@@ -466,7 +466,7 @@ const Dashboard: React.FC = () => {
                     </Space>
                   }
                   value={formatCurrency(
-                    data.pnlSummary?.value ?? data.summary?.profit.value ?? 0,
+                    data.pnlSummary?.value ?? data.pnlSummary?.value ?? 0,
                     0
                   )}
                   precision={0}
@@ -481,15 +481,14 @@ const Dashboard: React.FC = () => {
                 <Text
                   type={
                     (
-                      data.pnlSummary?.change ?? data.summary?.profit.change
+                      data.pnlSummary?.change ?? data.pnlSummary?.change
                     )?.startsWith("+")
                       ? "success"
                       : "danger"
                   }
                 >
                   <ArrowUpOutlined />{" "}
-                  {data.pnlSummary?.change ??
-                    (data.summary?.profit.change || "0%")}{" "}
+                  {data.pnlSummary?.change ?? (data.pnlSummary?.change || "0%")}{" "}
                   from last month
                 </Text>
               </Spin>
