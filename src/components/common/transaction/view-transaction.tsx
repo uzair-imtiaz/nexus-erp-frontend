@@ -1,18 +1,23 @@
-import React from "react";
-import { Modal, Descriptions, Table, Tag, Button } from "antd";
-import { Transaction } from "./types";
-import { formatCurrency } from "../../../utils";
+import { Descriptions, Modal, notification, Table, Tag } from "antd";
+import React, { useState } from "react";
 import { InventoryItem } from "../../../features/inventory/types";
+import { getBillApi } from "../../../services/purchase.services";
+import { getinvoiceApi } from "../../../services/sales.services";
+import { formatCurrency } from "../../../utils";
+import { Transaction } from "./types";
 
 interface ViewTransactionModalProps {
   transaction: Transaction;
   onClose: () => void;
 }
 
+const isTransactionPurchase = (type: string) => type.includes("PURCHASE");
+
 const ViewTransactionModal: React.FC<ViewTransactionModalProps> = ({
   transaction,
   onClose,
 }) => {
+  const [pdfLoading, setPdfLoading] = useState(false);
   const columns = [
     {
       title: "Product",
@@ -60,18 +65,32 @@ const ViewTransactionModal: React.FC<ViewTransactionModalProps> = ({
     },
   ];
 
+  const viewPdf = async () => {
+    try {
+      setPdfLoading(true);
+      const response = isTransactionPurchase(transaction.type)
+        ? await getBillApi(transaction.id)
+        : await getinvoiceApi(transaction.id);
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: error.message,
+      });
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
   return (
     <Modal
       title={`${
-        transaction.type?.includes("purchase") ? "Purchase" : "Sale"
+        isTransactionPurchase(transaction.type) ? "Purchase" : "Sale"
       } Details`}
       open
+      onOk={viewPdf}
+      okText="Print"
+      okButtonProps={{ loading: pdfLoading }}
       onCancel={onClose}
-      footer={[
-        <Button key="close" type="primary" onClick={onClose}>
-          Close
-        </Button>,
-      ]}
       width={900}
     >
       <Descriptions column={2} bordered size="middle">
@@ -83,16 +102,18 @@ const ViewTransactionModal: React.FC<ViewTransactionModalProps> = ({
         </Descriptions.Item>
         <Descriptions.Item label="Type">
           <Tag
-            color={transaction.type?.includes("purchase") ? "blue" : "green"}
+            color={isTransactionPurchase(transaction.type) ? "blue" : "green"}
           >
             {transaction.type?.charAt(0).toUpperCase() +
               transaction.type?.slice(1)}
           </Tag>
         </Descriptions.Item>
         <Descriptions.Item
-          label={transaction.type?.includes("purchase") ? "Vendor" : "Customer"}
+          label={
+            isTransactionPurchase(transaction.type) ? "Vendor" : "Customer"
+          }
         >
-          {transaction.type?.includes("purchase")
+          {isTransactionPurchase(transaction.type)
             ? transaction.vendor?.name
             : transaction.customer?.name}
         </Descriptions.Item>

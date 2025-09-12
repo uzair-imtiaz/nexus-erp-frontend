@@ -156,7 +156,9 @@ const useItemManagerColumns = (rmFactor) => {
         render: (_: number, record) =>
           formatCurrency(
             parseFloat(record.qtyRequired) *
-              parseFloat(record.amount / record.quantity || 0)
+              parseFloat(
+                record.baseRate || record.amount / record.quantity || 0
+              )
           ),
       },
     ],

@@ -74,6 +74,7 @@ const AddItemForm: React.FC<AddSaleItemFormProps> = ({ onAdd, list, type }) => {
           style={{ width: 160 }}
           onChange={handleProductSelect}
           showSearch
+          optionFilterProp="children"
         >
           {list.map((item) => (
             <Select.Option key={item.id} value={item.id}>
