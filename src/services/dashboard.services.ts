@@ -106,3 +106,13 @@ export const getAccountsReceivableAndPayablesApi =
     );
     return response;
   };
+
+export const getPnLSummaryApi = async (
+  filters?: ChartFilters
+): Promise<responseMetadata> => {
+  const query = buildQueryString(filters || {});
+  const response: responseMetadata = await getCallback(
+    `dashboard/pnl-summary${query}`
+  );
+  return response;
+};

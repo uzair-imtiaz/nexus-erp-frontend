@@ -23,12 +23,13 @@ import {
   Spin,
   Statistic,
   Table,
+  Tooltip,
   Typography,
 } from "antd";
 
 import { Line, Pie } from "@ant-design/plots";
 import dayjs, { Dayjs } from "dayjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
 import AddEditItemModal from "../../features/inventory/add-edit-modal/add-edit-modal";
@@ -50,9 +51,21 @@ const Dashboard: React.FC = () => {
   const { themeMode } = useTheme();
   const navigate = useNavigate();
   const { data, loading, refetch, filters, updateFilters } = useDashboardData();
+  const [pnlLoaded, setPnlLoaded] = useState(false);
 
   // Modal states
   const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
+
+  // Load P&L data after main dashboard loads (lazy loading)
+  useEffect(() => {
+    if (!loading.summary && !pnlLoaded) {
+      const timer = setTimeout(() => {
+        refetch.pnl();
+        setPnlLoaded(true);
+      }, 120);
+      return () => clearTimeout(timer);
+    }
+  }, [loading.summary, pnlLoaded, refetch]);
 
   // Handle successful inventory creation/update
   const handleInventorySuccess = () => {
@@ -314,6 +327,7 @@ const Dashboard: React.FC = () => {
               icon={<ReloadOutlined />}
               onClick={() => {
                 refetch.summary();
+                refetch.pnl();
                 refetch.charts();
                 refetch.accounts();
                 refetch.transactions();
@@ -343,7 +357,7 @@ const Dashboard: React.FC = () => {
                 }
                 value={formatCurrency(data.summary?.inventory.value || 0, 0)}
                 precision={0}
-                valueStyle={{ color: "#3f8600" }}
+                valueStyle={{ color: "#d97706" }}
               />
               <Text type="secondary">Last Updated Value</Text>
               <br />
@@ -376,7 +390,7 @@ const Dashboard: React.FC = () => {
                 }
                 value={formatCurrency(data.summary?.sales.value || 0, 0)}
                 precision={0}
-                valueStyle={{ color: "#1890ff" }}
+                valueStyle={{ color: "#2563eb" }}
               />
               <Text type="secondary">Current Month Sales</Text>
               <br />
@@ -409,7 +423,7 @@ const Dashboard: React.FC = () => {
                 }
                 value={data.summary?.production.value || 0}
                 precision={0}
-                valueStyle={{ color: "#13c2c2" }}
+                valueStyle={{ color: "#e11d48" }}
                 suffix=" units"
               />
               <Text type="secondary">Monthly Production Output</Text>
@@ -422,34 +436,65 @@ const Dashboard: React.FC = () => {
                 }
               >
                 <ArrowUpOutlined /> {data.summary?.production.change || "0%"}
-                from last month
+                &nbsp;from last month
               </Text>
             </Spin>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Spin spinning={loading.summary}>
-              <Statistic
-                title="Simple P&L"
-                value={formatCurrency(data.summary?.profit.value ?? 0, 0)}
-                precision={0}
-                valueStyle={{ color: "#52c41a" }}
-              />
-              <Text type="secondary">Net Profit This Month</Text>
-              <br />
-              <Text
-                type={
-                  data.summary?.profit.change.startsWith("+")
-                    ? "success"
-                    : "danger"
+          <Tooltip title="Click to view detailed P&L report">
+            <Card
+              hoverable
+              onClick={() => {
+                const queryParams = new URLSearchParams();
+                if (filters.dateRange) {
+                  queryParams.set("startDate", filters.dateRange.startDate);
+                  queryParams.set("endDate", filters.dateRange.endDate);
                 }
-              >
-                <ArrowUpOutlined /> {data.summary?.profit.change || "0%"} from
-                last month
-              </Text>
-            </Spin>
-          </Card>
+                navigate(`/reports/profit-loss?${queryParams.toString()}`);
+              }}
+              style={{ cursor: "pointer" }}
+            >
+              <Spin spinning={loading.pnl}>
+                <Statistic
+                  title={
+                    <Space>
+                      <span>Detailed P&L</span>
+                      <FileTextOutlined
+                        style={{ fontSize: "14px", color: "#1890ff" }}
+                      />
+                    </Space>
+                  }
+                  value={formatCurrency(
+                    data.pnlSummary?.value ?? data.summary?.profit.value ?? 0,
+                    0
+                  )}
+                  precision={0}
+                  valueStyle={{ color: "#16a34a" }}
+                />
+                <Text type="secondary">
+                  {data.pnlSummary
+                    ? "Earnings Before Tax"
+                    : "Net Profit This Month"}
+                </Text>
+                <br />
+                <Text
+                  type={
+                    (
+                      data.pnlSummary?.change ?? data.summary?.profit.change
+                    )?.startsWith("+")
+                      ? "success"
+                      : "danger"
+                  }
+                >
+                  <ArrowUpOutlined />{" "}
+                  {data.pnlSummary?.change ??
+                    (data.summary?.profit.change || "0%")}{" "}
+                  from last month
+                </Text>
+              </Spin>
+            </Card>
+          </Tooltip>
         </Col>
       </Row>
 

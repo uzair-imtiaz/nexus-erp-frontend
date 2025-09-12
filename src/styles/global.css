@@ -186,7 +186,7 @@ body {
 }
 
 /* --- Text Colors --- */
-[data-theme="dark"] .ant-typography,
+/* [data-theme="dark"] .ant-typography,
 [data-theme="dark"] .ant-typography strong,
 [data-theme="dark"] .ant-typography h1,
 [data-theme="dark"] .ant-typography h2,
@@ -195,9 +195,15 @@ body {
 [data-theme="dark"] .ant-typography h5,
 [data-theme="dark"] .ant-typography h6 {
   color: var(--text-color-dark) !important;
-}
+} */
 [data-theme="dark"] .ant-typography-secondary {
   color: var(--text-secondary-dark) !important;
+}
+[data-theme="dark"]
+  .ant-typography:not(.ant-typography-success):not(.ant-typography-danger):not(
+    .ant-typography-warning
+  ) {
+  color: var(--text-color-dark) !important;
 }
 
 /* --- Buttons & Accent Elements --- */

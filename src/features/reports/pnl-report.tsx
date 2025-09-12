@@ -11,7 +11,8 @@ import {
   notification,
 } from "antd";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { getProfitLossReport } from "../../services/reports.services";
 import { buildQueryString, formatCurrency } from "../../utils";
 
@@ -124,11 +125,33 @@ const Section: React.FC<{
 // };
 
 const ProfitLossReport: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(
     null
   );
   const [data, setData] = useState<any>(null);
+
+  // Initialize date range from URL parameters
+  useEffect(() => {
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
+
+    if (startDate && endDate) {
+      const start = dayjs(startDate);
+      const end = dayjs(endDate);
+      if (start.isValid() && end.isValid()) {
+        setDateRange([start, end]);
+      }
+    }
+  }, [searchParams]);
+
+  // Auto-fetch data when date range is set from URL
+  useEffect(() => {
+    if (dateRange) {
+      fetchData();
+    }
+  }, [dateRange]);
 
   const fetchData = async () => {
     try {
