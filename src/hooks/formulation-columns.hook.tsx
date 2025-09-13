@@ -198,9 +198,15 @@ const useItemManagerColumns = (rmFactor) => {
       },
       {
         title: "Rate",
-        dataIndex: "debitAmount",
-        key: "dbtAmount",
-        render: (amount: number) => parseFloat(amount).toFixed(2),
+        dataIndex: "rate",
+        key: "rate",
+        editable: true,
+        inputType: "number",
+        min: 0,
+        step: 0.01,
+        precision: 5,
+        defaultValue: 1.0,
+        // render: (amount: number) => parseFloat(amount).toFixed(2),
       },
       {
         title: "Qty Required",
@@ -227,7 +233,7 @@ const useItemManagerColumns = (rmFactor) => {
   // Helper function to calculate amounts
   const calculateAmount = (item) => {
     const qtyPerUnit = parseFloat(item.qtyPerUnit) || 1;
-    const rate = parseFloat(item.debitAmount) || 0;
+    const rate = parseFloat(item.rate) || 0;
     const qtyRequired = parseFloat(item.qtyRequired) || 1;
     return qtyPerUnit * rate * qtyRequired;
   };
