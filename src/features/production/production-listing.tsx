@@ -117,7 +117,7 @@ const Production: React.FC = () => {
               type="text"
               size="small"
               icon={<CheckCircleOutlined />}
-              onClick={handleStatusChange}
+              onClick={() => handleStatusChange(record.id)}
             />
           )}
           <Button
