@@ -60,7 +60,7 @@ const useItemManagerColumns = (rmFactor) => {
         showTotal: true,
         min: 0,
         step: 0.01,
-        precision: 1,
+        precision: 2,
         defaultValue: 0.0,
       },
       {
@@ -89,7 +89,7 @@ const useItemManagerColumns = (rmFactor) => {
         inputType: "number",
         min: 0,
         step: 0.01,
-        precision: 0,
+        precision: 2,
         defaultValue: 0,
       },
     ],
@@ -145,8 +145,8 @@ const useItemManagerColumns = (rmFactor) => {
         editable: true,
         inputType: "number",
         min: 0,
-        step: 1,
-        precision: 0,
+        step: 0.01,
+        precision: 2,
         defaultValue: 1,
       },
       {
@@ -156,7 +156,9 @@ const useItemManagerColumns = (rmFactor) => {
         render: (_: number, record) =>
           formatCurrency(
             parseFloat(record.qtyRequired) *
-              parseFloat(record.amount / record.quantity || 0)
+              parseFloat(
+                record.baseRate || record.amount / record.quantity || 0
+              )
           ),
       },
     ],
@@ -256,17 +258,14 @@ const useItemManagerColumns = (rmFactor) => {
   };
 
   const handleFinishedGoodsCalculations = (item) => {
-    let newItem = { ...item };
-    if (item.hasOwnProperty("qtyFiPercent")) {
-      if (item.qtyFiPercent) {
-        newItem.quantity =
-          (parseFloat(item.qtyFiPercent) / 100) * parseFloat(rmFactor);
-      }
-      if (newItem.quantity !== undefined) {
-        newItem.baseQuantity =
-          newItem.quantity *
-          (parseFloat(item.multiUnits?.[newItem?.unit]) || 1);
-      }
+    const newItem = { ...item };
+    if (item.qtyFiPercent) {
+      newItem.quantity =
+        (parseFloat(item.qtyFiPercent) / 100) * parseFloat(rmFactor);
+    }
+    if (newItem.quantity !== undefined) {
+      newItem.baseQuantity =
+        newItem.quantity * (parseFloat(item.multiUnits?.[newItem?.unit]) || 1);
     }
 
     return newItem;
