@@ -140,7 +140,9 @@ const ProductionForm: React.FC = () => {
         date: values.date,
         formulationId: values.formulationId,
         quantity: values.batchSize,
-        totalCost: batchSize * parseFloat(selectedFormulation.totalCost ?? 0),
+        totalCost: (
+          batchSize * parseFloat(selectedFormulation?.totalCost ?? "0")
+        ).toFixed(3),
       };
       const response = await createProductionApi(payload);
       if (response.success) {
