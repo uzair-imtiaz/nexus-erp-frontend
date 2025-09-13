@@ -31,7 +31,7 @@ const useItemManagerColumns = (rmFactor) => {
         inputType: "number",
         min: 0,
         step: 0.01,
-        precision: 2,
+        precision: 5,
         defaultValue: 0.0,
       },
       {
@@ -60,7 +60,7 @@ const useItemManagerColumns = (rmFactor) => {
         showTotal: true,
         min: 0,
         step: 0.01,
-        precision: 2,
+        precision: 5,
         defaultValue: 0.0,
       },
       {
@@ -78,7 +78,7 @@ const useItemManagerColumns = (rmFactor) => {
         showTotal: true,
         min: 0,
         step: 0.01,
-        precision: 2,
+        precision: 5,
         defaultValue: 0.0,
       },
       {
@@ -89,7 +89,7 @@ const useItemManagerColumns = (rmFactor) => {
         inputType: "number",
         min: 0,
         step: 0.01,
-        precision: 2,
+        precision: 5,
         defaultValue: 0,
       },
     ],
@@ -135,7 +135,7 @@ const useItemManagerColumns = (rmFactor) => {
         inputType: "number",
         min: 0,
         step: 0.01,
-        precision: 2,
+        precision: 5,
         defaultValue: 1.0,
       },
       {
@@ -146,7 +146,7 @@ const useItemManagerColumns = (rmFactor) => {
         inputType: "number",
         min: 0,
         step: 0.01,
-        precision: 2,
+        precision: 5,
         defaultValue: 1,
       },
       {
@@ -193,7 +193,7 @@ const useItemManagerColumns = (rmFactor) => {
         inputType: "number",
         min: 0,
         step: 0.01,
-        precision: 2,
+        precision: 5,
         defaultValue: 1.0,
       },
       {
@@ -210,7 +210,7 @@ const useItemManagerColumns = (rmFactor) => {
         inputType: "number",
         min: 0,
         step: 0.01,
-        precision: 2,
+        precision: 5,
         defaultValue: 1.0,
       },
       {
