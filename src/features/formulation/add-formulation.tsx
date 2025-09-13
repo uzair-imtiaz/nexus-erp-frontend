@@ -285,8 +285,7 @@ const AddEditFormulation = () => {
   // Calculate total cost from ingredients and expenses
   const ingredientsCost = ingredients.reduce(
     (sum, ing) =>
-      sum +
-      parseFloat(ing.qtyRequired) * parseFloat(ing.amount / ing.quantity || 0),
+      sum + parseFloat(ing.qtyRequired) * parseFloat(ing.baseRate || 0),
     0
   );
   const expensesCost = expenses.reduce(
@@ -324,7 +323,7 @@ const AddEditFormulation = () => {
       perUnit: parseFloat(item.perUnit) || 0,
       unit: item.unit || "",
       availableQuantity: parseFloat(item.quantity) || 0,
-      amount: parseFloat(item.amount) || 0,
+      amount: parseFloat(item.qtyRequired * item.baseRate) || 0,
     }));
 
     const expensesPayload = expenses.map((item) => ({
@@ -333,7 +332,7 @@ const AddEditFormulation = () => {
       quantityRequired: parseFloat(item.qtyRequired) || 0,
       details: item.details || "",
       perUnit: parseFloat(item.perUnit) || 0,
-      amount: parseFloat(item.amount) || 0,
+      amount: calculateAmount(item),
     }));
 
     const payload = {
