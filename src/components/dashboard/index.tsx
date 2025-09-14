@@ -421,10 +421,9 @@ const Dashboard: React.FC = () => {
                     </span>
                   </Space>
                 }
-                value={data.summary?.production.value || 0}
+                value={formatCurrency(data.summary?.production.value)}
                 precision={0}
                 valueStyle={{ color: "#e11d48" }}
-                suffix=" units"
               />
               <Text type="secondary">Monthly Production Output</Text>
               <br />

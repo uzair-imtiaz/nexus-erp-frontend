@@ -41,6 +41,7 @@ interface FormValues {
   date: string;
   formulationId: string;
   batchSize: number;
+  repetition: number;
 }
 
 const validationSchema = Yup.object({
@@ -56,6 +57,7 @@ const ProductionForm: React.FC = () => {
   const [formulationId, setFormulationId] = useState<string>("");
   const [batchSize, setBatchSize] = useState<number>(1);
   const [ingredientShortages, setIngredientShortages] = useState<string[]>([]);
+  const [repetition, setRepetition] = useState<number>(1);
 
   const formikRef = useRef<FormikProps<FormValues>>(null);
   const navigate = useNavigate();
@@ -67,6 +69,7 @@ const ProductionForm: React.FC = () => {
     date: "",
     formulationId: "",
     batchSize: 1,
+    repetition: 1,
   };
 
   useEffect(() => {
@@ -114,19 +117,22 @@ const ProductionForm: React.FC = () => {
     const shortages = ((selectedFormulation as any).ingredients as any[])
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((ing: any) => {
-        const required =
-          (ing.quantityRequired ?? ing.qtyRequired ?? 0) * batchSize;
+        const requiredPerBatch = ing.quantityRequired ?? ing.qtyRequired ?? 0;
+        const required = requiredPerBatch * batchSize * repetition;
         const available = ing.quantityAvailable ?? ing.availableQuantity ?? 0;
         return required > available;
       })
       .map(
         (ing) =>
           `${ing.name} (Required: ${
-            (ing.quantityRequired ?? ing.qtyRequired ?? 0) * batchSize
+            (ing.quantityRequired ?? ing.qtyRequired ?? 0) *
+            batchSize *
+            repetition
           }, Available: ${ing.quantityAvailable ?? ing.availableQuantity ?? 0})`
       );
+
     setIngredientShortages(shortages);
-  }, [selectedFormulation, batchSize]);
+  }, [selectedFormulation, batchSize, repetition]);
 
   const formulationOptions = formulations.map((f) => ({
     label: `${f.name} (${f.id})`,
@@ -140,6 +146,7 @@ const ProductionForm: React.FC = () => {
         date: values.date,
         formulationId: values.formulationId,
         quantity: values.batchSize,
+        repetition,
         totalCost: (
           batchSize * parseFloat(selectedFormulation?.totalCost ?? "0")
         ).toFixed(3),
@@ -202,8 +209,8 @@ const ProductionForm: React.FC = () => {
             )}
             <div style={{ maxWidth: 1100, margin: "0 auto" }}>
               <Form>
-                <Row gutter={16} align="middle">
-                  <Col xs={24} sm={6} md={5} lg={5} xl={5}>
+                <Row gutter={12} align="middle" wrap>
+                  <Col xs={24} sm={4}>
                     <AntForm.Item
                       label="Code"
                       labelCol={{ span: 24 }}
@@ -220,7 +227,8 @@ const ProductionForm: React.FC = () => {
                       </Field>
                     </AntForm.Item>
                   </Col>
-                  <Col xs={24} sm={6} md={5} lg={5} xl={5}>
+
+                  <Col xs={24} sm={4}>
                     <AntForm.Item
                       label="Date"
                       labelCol={{ span: 24 }}
@@ -243,9 +251,10 @@ const ProductionForm: React.FC = () => {
                       />
                     </AntForm.Item>
                   </Col>
-                  <Col xs={24} sm={6} md={5} lg={5} xl={5}>
+
+                  <Col xs={24} sm={3}>
                     <AntForm.Item
-                      label="Batch Size"
+                      label="Batch"
                       labelCol={{ span: 24 }}
                       wrapperCol={{ span: 24 }}
                     >
@@ -257,7 +266,23 @@ const ProductionForm: React.FC = () => {
                       />
                     </AntForm.Item>
                   </Col>
-                  <Col xs={24} sm={7} md={6} lg={6} xl={6}>
+
+                  <Col xs={24} sm={3}>
+                    <AntForm.Item
+                      label="Repetition"
+                      labelCol={{ span: 24 }}
+                      wrapperCol={{ span: 24 }}
+                    >
+                      <InputNumber
+                        min={1}
+                        value={repetition}
+                        onChange={(value) => setRepetition(value || 1)}
+                        style={{ width: "100%" }}
+                      />
+                    </AntForm.Item>
+                  </Col>
+
+                  <Col xs={24} sm={6}>
                     <AntForm.Item
                       label="Formulation"
                       labelCol={{ span: 24 }}
@@ -271,17 +296,14 @@ const ProductionForm: React.FC = () => {
                     >
                       <Select
                         showSearch
-                        placeholder="Select a formulation"
+                        placeholder="Select"
                         optionFilterProp="label"
                         value={values.formulationId || undefined}
                         onChange={(value: string) => {
                           setFieldValue("formulationId", value);
                           setFormulationId(value);
                         }}
-                        filterOption={(
-                          input: string,
-                          option?: { label: string; value: string }
-                        ) =>
+                        filterOption={(input, option) =>
                           (option?.label ?? "")
                             .toLowerCase()
                             .includes(input.toLowerCase())
@@ -290,29 +312,18 @@ const ProductionForm: React.FC = () => {
                       />
                     </AntForm.Item>
                   </Col>
+
                   <Col
                     xs={24}
-                    sm={24}
-                    md={3}
-                    lg={3}
-                    xl={3}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      height: "100%",
-                      paddingTop: 24,
-                    }}
+                    sm={2}
+                    style={{ display: "flex", alignItems: "center" }}
                   >
-                    <AntForm.Item
-                      label=" "
-                      colon={false}
-                      style={{ marginBlock: 0 }}
-                    >
+                    <AntForm.Item label=" " colon={false}>
                       <Button
                         type="primary"
+                        className="mt-1"
                         htmlType="submit"
                         loading={isSubmitting}
-                        style={{ width: "100%" }}
                         disabled={ingredientShortages.length > 0}
                       >
                         Submit
