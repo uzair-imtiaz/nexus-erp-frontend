@@ -124,7 +124,7 @@ const Production: React.FC = () => {
             type="link"
             size="small"
             icon={<EditOutlined />}
-            onClick={() => navigate(`/productions/${record?.id}`)}
+            onClick={() => navigate(`/production/${record?.id}`)}
           />
           {/* <Popconfirm
             title="Delete this record?"

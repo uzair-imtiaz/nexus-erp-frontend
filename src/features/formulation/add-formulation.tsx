@@ -59,8 +59,8 @@ const AddEditFormulation = () => {
       const response = await getCodeApi(query);
       form.setFieldValue("code", response.data.code);
     };
-    getCode();
-  }, []);
+    if (!form.getFieldValue("code")) getCode();
+  }, [form]);
 
   useEffect(() => {
     const recalculateQtyRequired = (items, setItems) => {

@@ -27,7 +27,9 @@ export const getByTypeUnderTopLevel = async (
   topLevel: string,
   type: string
 ) => {
-  const response = await getCallback(`/accounts/${topLevel}/${type}`);
+  const response: responseMetadata = await getCallback(
+    `/accounts/${topLevel}/${type}`
+  );
   return response;
 };
 
