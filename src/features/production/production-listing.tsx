@@ -15,6 +15,7 @@ import {
   Popconfirm,
   Space,
   Tag,
+  Tooltip,
 } from "antd";
 import { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -113,19 +114,24 @@ const Production: React.FC = () => {
       render: (_, record) => (
         <Flex>
           {record.status !== "Completed" && (
-            <Button
-              type="text"
-              size="small"
-              icon={<CheckCircleOutlined />}
-              onClick={() => handleStatusChange(record.id)}
-            />
+            <Tooltip title="Mark as completed">
+              <Button
+                type="text"
+                size="small"
+                icon={<CheckCircleOutlined />}
+                onClick={() => handleStatusChange(record.id)}
+              />
+            </Tooltip>
           )}
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => navigate(`/production/${record?.id}`)}
-          />
+          <Tooltip title="Edit">
+            <Button
+              type="link"
+              size="small"
+              disabled={record.status === "Completed"}
+              icon={<EditOutlined />}
+              onClick={() => navigate(`/production/${record?.id}`)}
+            />
+          </Tooltip>
           {/* <Popconfirm
             title="Delete this record?"
             okText="Yes"
