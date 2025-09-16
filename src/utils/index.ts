@@ -111,3 +111,84 @@ export const redirectToLogin = () => {
     window.location.replace("/login");
   }
 };
+
+export const mapFinishedGoods = (products: any[], inventoryItems: any[]) =>
+  (products || []).map((item: any) => {
+    const available = inventoryItems.find((i: any) => i.id === item.product_id);
+    const _item = {
+      ...available, // hydrate meta info
+      ...item, // override with server values
+      id: item.product_id,
+      productId: item.product_id,
+      quantity: item.quantityRequired,
+    };
+    return _item;
+  });
+
+export const mapIngredients = (ingredients: any[], inventoryItems: any[]) =>
+  (ingredients || []).map((item: any) => {
+    const available = inventoryItems.find(
+      (i: any) => i.id === item.inventory_item_id
+    );
+    return {
+      ...available,
+      ...item,
+      id: item.inventory_item_id,
+      productId: item.inventory_item_id,
+      qtyRequired: item.quantityRequired,
+    };
+  });
+
+export const mapExpenses = (expenses: any[], expensesList: any[]) =>
+  (expenses || []).map((item: any) => {
+    const available = expensesList.find(
+      (i: any) => i.id === item.expense_account_id
+    );
+    return {
+      ...available,
+      ...item,
+      id: item.expense_account_id,
+      expenseId: item.expense_account_id,
+      qtyRequired: item.quantityRequired,
+    };
+  });
+
+// src/utils/formulationPayload.ts
+
+export const buildProductsPayload = (finishedGoods: any[]) => {
+  return (finishedGoods || []).map((item) => ({
+    product_id: parseInt(item.productId ?? item.id),
+    name: item?.name || "",
+    description: item.description || "",
+    qtyFiPercent: parseFloat(item.qtyFiPercent) || 0,
+    unit: item.unit || "",
+    costFiPercent: parseFloat(item.costFiPercent) || 0,
+    baseQuantity: parseFloat(item.baseQuantity) || 0,
+    quantityRequired: parseFloat(item.quantity) || 0,
+  }));
+};
+
+export const buildIngredientsPayload = (ingredients: any[]) => {
+  return (ingredients || []).map((item) => ({
+    inventory_item_id: parseInt(item.productId ?? item.id),
+    name: item?.name || "",
+    description: item.description || "",
+    quantityRequired: parseFloat(item.qtyRequired) || 0,
+    perUnit: parseFloat(item.perUnit) || 0,
+    unit: item.unit || "",
+    availableQuantity: parseFloat(item.quantity) || 0,
+    amount: parseFloat((item.qtyRequired || 0) * (item.baseRate || 0)) || 0,
+  }));
+};
+
+export const buildExpensesPayload = (expenses: any[]) => {
+  return (expenses || []).map((item) => ({
+    expense_account_id: parseInt(item.expenseId ?? item.id),
+    name: item?.name || "",
+    quantityRequired: parseFloat(item.qtyRequired) || 0,
+    details: item.details || "",
+    perUnit: parseFloat(item.perUnit) || 0,
+    rate: parseFloat(item.rate) || 0,
+    amount: parseFloat((item.rate || 0) * (item.qtyRequired || 0)) || 0,
+  }));
+};

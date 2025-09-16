@@ -4,6 +4,9 @@ export interface FormulationItem {
   finalProduct: { name: string; baseUnit: string };
   quantity: number;
   totalCost: number;
+  products: any[];
+  ingredients: any[];
+  expenses: any[];
   costPerUnit: number;
 }
 

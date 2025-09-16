@@ -85,11 +85,11 @@ const Production: React.FC = () => {
       key: "date",
       render: (date: string) => dayjs(date).format("DD MMM, YYYY"),
     },
-    {
-      title: "Formulation",
-      dataIndex: ["formulation", "name"],
-      key: "formulation",
-    },
+    // {
+    //   title: "Formulation",
+    //   dataIndex: ["formulation", "name"],
+    //   key: "formulation",
+    // },
     {
       title: "Total Cost",
       dataIndex: "totalCost",

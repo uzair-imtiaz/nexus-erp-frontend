@@ -3,7 +3,6 @@ import {
   Alert,
   Form as AntForm,
   Button,
-  Card,
   Col,
   DatePicker,
   Divider,
@@ -13,6 +12,7 @@ import {
   Row,
   Select,
   Space,
+  Spin,
   Typography,
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
@@ -24,15 +24,25 @@ import {
   Formik,
   FormikProps,
 } from "formik";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from "yup";
 import { getFormulationsApi } from "../../services/formulation.services";
-import { createProductionApi } from "../../services/production.services";
-import FormulationDetail from "../formulation/formulation-detail";
-import { FormulationItem } from "../formulation/types";
+import {
+  createProductionApi,
+  getProductionApi,
+  updateProductionApi,
+} from "../../services/production.services";
 import { getCodeApi } from "../../services/common.services";
-import { buildQueryString } from "../../utils";
+import {
+  buildExpensesPayload,
+  buildIngredientsPayload,
+  buildProductsPayload,
+  buildQueryString,
+} from "../../utils";
+import { FormulationItem } from "../formulation/types";
+import { useInventoryAndExpenses } from "../../hooks/useExpensesAndInventory.hook";
+import FormulationEditor from "../../components/common/formulation-editor/formulation-editor";
 
 const { Title } = Typography;
 
@@ -58,11 +68,15 @@ const ProductionForm: React.FC = () => {
   const [batchSize, setBatchSize] = useState<number>(1);
   const [ingredientShortages, setIngredientShortages] = useState<string[]>([]);
   const [repetition, setRepetition] = useState<number>(1);
+  const [productionFetchLoading, setProductionFetchLoading] = useState(false);
 
   const formikRef = useRef<FormikProps<FormValues>>(null);
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = !!id;
+
+  // inventory + expenses data
+  const { inventoryItems, expensesList, loading } = useInventoryAndExpenses();
 
   const initialValues: FormValues = {
     code: "",
@@ -92,30 +106,89 @@ const ProductionForm: React.FC = () => {
       }
     };
 
+    const fetchProduction = async (id: string) => {
+      try {
+        setProductionFetchLoading(true);
+        const response = await getProductionApi(id);
+        if (response?.success) {
+          setFormulationId(response?.data?.formulation?.id);
+          setSelectedFormulation({
+            ...response.data?.formulation,
+            products: response.data?.products,
+            ingredients: response.data?.ingredients,
+            expenses: response.data?.expenses,
+            totalCost: response.data?.formulationCost,
+          });
+          setBatchSize(response?.data?.quantity);
+          setRepetition(response?.data?.repetition);
+          formikRef?.current?.setValues({
+            code: response?.data?.code,
+            date: response?.data?.date,
+            formulationId: response?.data?.formulation?.id,
+            batchSize: response?.data?.quantity,
+            repetition: response?.data?.repetition,
+          });
+        } else {
+          notification.error({
+            message: "Error",
+            description: response?.message,
+          });
+        }
+      } catch {
+        notification.error({
+          message: "Error",
+          description: "Something Went Wrong",
+        });
+      } finally {
+        setProductionFetchLoading(false);
+      }
+    };
+
     const getCode = async () => {
       const query = buildQueryString({ entity: "PRODUCTION" });
       const response = await getCodeApi(query);
       formikRef?.current?.setFieldValue("code", response.data.code);
     };
+
     fetchFormulations();
-    if (!formikRef?.current?.values?.code) getCode();
+    if (isEditing) fetchProduction(id);
+    if (!formikRef?.current?.values?.code && !isEditing) getCode();
   }, []);
+
+  // inside ProductionForm component
 
   useEffect(() => {
     const found = formulations.find((f) => f.id === formulationId);
-    setSelectedFormulation(found || null);
+    // clone to avoid referencing list item directly (prevents accidental mutation)
+    setSelectedFormulation(found ? JSON.parse(JSON.stringify(found)) : null);
   }, [formulationId, formulations]);
+
+  const handleFormulationChange = useCallback(
+    ({ finishedGoods, ingredients, expenses, totalCost }) => {
+      setSelectedFormulation((prev) => {
+        const base = prev ? { ...prev } : {};
+        const newState = {
+          ...base,
+          products: finishedGoods, // keep stored shape consistent: products
+          ingredients,
+          expenses,
+          totalCost,
+        };
+        // compare shallow by stringifying base (safe since these are small)
+        if (JSON.stringify(base) === JSON.stringify(newState)) return prev;
+        return newState;
+      });
+    },
+    []
+  );
 
   // Check for ingredient shortages
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!selectedFormulation || !(selectedFormulation as any).ingredients) {
       setIngredientShortages([]);
       return;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const shortages = ((selectedFormulation as any).ingredients as any[])
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((ing: any) => {
         const requiredPerBatch = ing.quantityRequired ?? ing.qtyRequired ?? 0;
         const required = requiredPerBatch * batchSize * repetition;
@@ -147,11 +220,23 @@ const ProductionForm: React.FC = () => {
         formulationId: values.formulationId,
         quantity: values.batchSize,
         repetition,
+        products: buildProductsPayload(
+          (selectedFormulation as any)?.products || []
+        ),
+        ingredients: buildIngredientsPayload(
+          (selectedFormulation as any)?.ingredients || []
+        ),
+        expenses: buildExpensesPayload(
+          (selectedFormulation as any)?.expenses || []
+        ),
+        formulationCost: (selectedFormulation as any)?.totalCost,
         totalCost: (
-          batchSize * parseFloat(selectedFormulation?.totalCost ?? "0")
+          batchSize * parseFloat((selectedFormulation as any)?.totalCost ?? "0")
         ).toFixed(3),
       };
-      const response = await createProductionApi(payload);
+      const response = isEditing
+        ? await updateProductionApi(id, payload)
+        : await createProductionApi(payload);
       if (response.success) {
         notification.success({
           message: "Success",
@@ -173,7 +258,7 @@ const ProductionForm: React.FC = () => {
   };
 
   return (
-    <>
+    <Spin spinning={productionFetchLoading || loading}>
       <Space className="mb-6">
         <Button onClick={() => navigate(-1)} icon={<LeftOutlined />} />
         <Title level={3} style={{ margin: 0 }}>
@@ -253,11 +338,7 @@ const ProductionForm: React.FC = () => {
                   </Col>
 
                   <Col xs={24} sm={3}>
-                    <AntForm.Item
-                      label="Batch"
-                      labelCol={{ span: 24 }}
-                      wrapperCol={{ span: 24 }}
-                    >
+                    <AntForm.Item label="Batch" labelCol={{ span: 24 }}>
                       <InputNumber
                         min={1}
                         value={batchSize}
@@ -268,11 +349,7 @@ const ProductionForm: React.FC = () => {
                   </Col>
 
                   <Col xs={24} sm={3}>
-                    <AntForm.Item
-                      label="Repetition"
-                      labelCol={{ span: 24 }}
-                      wrapperCol={{ span: 24 }}
-                    >
+                    <AntForm.Item label="Repetition" labelCol={{ span: 24 }}>
                       <InputNumber
                         min={1}
                         value={repetition}
@@ -333,28 +410,26 @@ const ProductionForm: React.FC = () => {
                 </Row>
               </Form>
 
-              {/*  */}
-
-              <Divider style={{ margin: "32px 0 16px 0" }}>
-                Formulation Detail
-              </Divider>
-              <Card>
-                {selectedFormulation ? (
-                  <FormulationDetail
-                    formulation={selectedFormulation}
-                    batchSize={batchSize}
+              <div style={{ marginTop: 32 }}>
+                <Divider style={{ margin: "32px 0 16px 0" }}>
+                  Formulation Detail
+                </Divider>
+                {selectedFormulation && (
+                  <FormulationEditor
+                    initialData={selectedFormulation}
+                    inventoryItems={inventoryItems}
+                    expensesList={expensesList}
+                    showHeader={false}
+                    onChange={handleFormulationChange}
+                    loading={loading}
                   />
-                ) : (
-                  <span style={{ color: "#888" }}>
-                    Select a formulation to view its details.
-                  </span>
                 )}
-              </Card>
+              </div>
             </div>
           </div>
         )}
       </Formik>
-    </>
+    </Spin>
   );
 };
 
