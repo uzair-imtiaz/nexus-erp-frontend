@@ -56,6 +56,7 @@ const AppContent: React.FC = () => {
               <Route path="core/inventory" element={<Inventory />} />
               <Route path="production" element={<Production />} />
               <Route path="production/new" element={<ProductionForm />} />
+              <Route path="production/:id" element={<ProductionForm />} />
               <Route path="formulations" element={<Formulation />} />
               <Route path="formulations/new" element={<AddEditFormulation />} />
               <Route path="formulations/:id" element={<AddEditFormulation />} />

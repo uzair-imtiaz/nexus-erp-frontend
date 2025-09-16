@@ -26,7 +26,7 @@ const FormulationDetail: React.FC<FormulationDetailProps> = ({
       title: "Quantity Required",
       dataIndex: "quantityRequired",
       key: "quantityRequired",
-      render: (v: number) => v * batchSize,
+      render: (v: number) => (v * batchSize).toFixed(2),
     },
     {
       title: "Unit Cost",
@@ -53,7 +53,7 @@ const FormulationDetail: React.FC<FormulationDetailProps> = ({
       title: "Base Quantity",
       dataIndex: "baseQuantity",
       key: "baseQuantity",
-      render: (v: number) => v * batchSize,
+      render: (v: number) => (v * batchSize).toFixed(2),
     },
   ];
 
@@ -74,7 +74,7 @@ const FormulationDetail: React.FC<FormulationDetailProps> = ({
       title: "Quantity Required",
       dataIndex: "quantityRequired",
       key: "qtyRequired",
-      render: (v: number) => v * batchSize,
+      render: (v: number) => (v * batchSize).toFixed(2),
     },
     {
       title: "Available Quantity",
@@ -127,7 +127,7 @@ const FormulationDetail: React.FC<FormulationDetailProps> = ({
       title: "Quantity Required",
       dataIndex: "quantityRequired",
       key: "qtyRequired",
-      render: (v: number) => v * batchSize,
+      render: (v: number) => (v * batchSize).toFixed(2),
     },
   ];
 
