@@ -422,6 +422,8 @@ const ProductionForm: React.FC = () => {
                     showHeader={false}
                     onChange={handleFormulationChange}
                     loading={loading}
+                    batchSize={batchSize}
+                    repetition={repetition}
                   />
                 )}
               </div>

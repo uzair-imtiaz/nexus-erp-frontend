@@ -26,6 +26,8 @@ interface FormulationEditorProps {
   inventoryItems: any[];
   expensesList: any[];
   loading: boolean;
+  batchSize?: number;
+  repetition?: number;
   onChange?: (data: {
     finishedGoods: any[];
     ingredients: any[];
@@ -41,6 +43,8 @@ const FormulationEditor: React.FC<FormulationEditorProps> = ({
   inventoryItems,
   expensesList,
   onChange,
+  batchSize = 1,
+  repetition = 1,
   showHeader = true,
   loading = false,
 }) => {
@@ -118,24 +122,32 @@ const FormulationEditor: React.FC<FormulationEditorProps> = ({
   useEffect(() => {
     setIngredients((prev) => {
       if (!Array.isArray(prev) || prev.length === 0) return prev;
-      return prev.map((item) => ({
-        ...item,
-        qtyRequired:
+      return prev.map((item) => {
+        const baseQty =
           item.perUnit !== undefined && item.perUnit !== null
             ? rmFactor * item.perUnit
-            : item.qtyRequired,
-      }));
+            : item.qtyRequired;
+
+        return {
+          ...item,
+          qtyRequired: baseQty * batchSize,
+        };
+      });
     });
 
     setExpenses((prev) => {
       if (!Array.isArray(prev) || prev.length === 0) return prev;
-      return prev.map((item) => ({
-        ...item,
-        qtyRequired:
+      return prev.map((item) => {
+        const baseQty =
           item.perUnit !== undefined && item.perUnit !== null
             ? rmFactor * item.perUnit
-            : item.qtyRequired,
-      }));
+            : item.qtyRequired;
+
+        return {
+          ...item,
+          qtyRequired: baseQty * batchSize,
+        };
+      });
     });
 
     setFinishedGoods((prev) => {
@@ -146,15 +158,16 @@ const FormulationEditor: React.FC<FormulationEditorProps> = ({
           sum +
           ((item.qtyFiPercent !== undefined
             ? (item.qtyFiPercent / 100) * rmFactor
-            : 0) || 0),
+            : 0) || 0) *
+            batchSize,
         0
       );
 
       return prev.map((item) => {
         const updatedQuantity =
           item.qtyFiPercent !== undefined && item.qtyFiPercent !== null
-            ? (item.qtyFiPercent / 100) * rmFactor
-            : item.quantity;
+            ? (item.qtyFiPercent / 100) * rmFactor * batchSize
+            : item.quantity * batchSize;
 
         const baseQty =
           updatedQuantity !== undefined &&
@@ -175,8 +188,7 @@ const FormulationEditor: React.FC<FormulationEditorProps> = ({
         };
       });
     });
-    // only depend on rmFactor
-  }, [rmFactor]);
+  }, [rmFactor, batchSize]); // 🔑 add dependencies
 
   // Compute costs and push up
   useEffect(() => {
