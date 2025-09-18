@@ -140,7 +140,8 @@ const Inventory = () => {
     {
       title: "Stock Value",
       key: "stockValue",
-      render: (_, record) => formatCurrency(record?.amount),
+      render: (_, record) =>
+        formatCurrency(record?.baseRate * record?.quantity),
     },
     {
       title: "Actions",
