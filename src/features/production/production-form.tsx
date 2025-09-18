@@ -218,7 +218,7 @@ const ProductionForm: React.FC = () => {
         code: values.code,
         date: values.date,
         formulationId: values.formulationId,
-        quantity: values.batchSize,
+        quantity: batchSize,
         repetition,
         products: buildProductsPayload(
           (selectedFormulation as any)?.products || []
