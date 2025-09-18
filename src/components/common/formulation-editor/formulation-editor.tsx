@@ -116,7 +116,7 @@ const FormulationEditor: React.FC<FormulationEditorProps> = ({
 
     if (id) initializedForIdRef.current = id;
     // intentionally only depend on initialData identity — don't re-run when inventoryItems/expensesList update
-  }, [initialData, form, showHeader, loading]);
+  }, [initialData, form, showHeader]);
 
   // Recalculate quantities when rmFactor changes — but don't overwrite arrays if they're empty already
   useEffect(() => {

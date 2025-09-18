@@ -230,8 +230,8 @@ const ProductionForm: React.FC = () => {
           (selectedFormulation as any)?.expenses || []
         ),
         formulationCost: (selectedFormulation as any)?.totalCost,
-        totalCost: (
-          batchSize * parseFloat((selectedFormulation as any)?.totalCost ?? "0")
+        totalCost: parseFloat(
+          (selectedFormulation as any)?.totalCost ?? "0"
         ).toFixed(3),
       };
       const response = isEditing
