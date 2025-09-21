@@ -20,9 +20,17 @@ interface TransactorListComponentProps {
   onAddTransactor: (entity: Transactor) => void;
   onEditTransactor: (id: string, entity: Transactor) => Promise<void>;
   onDeleteTransactor: (id: string) => void;
-  fetch: (queryParams?: Record<string, any>) => {};
+  onImport?: () => void;
+  fetch: (queryParams?: Record<string, unknown>) => void;
   loading: boolean;
-  pagination: {};
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    nextPage: number | null;
+    prevPage: number | null;
+  };
 }
 
 export const TransactorListComponent: React.FC<
@@ -33,6 +41,7 @@ export const TransactorListComponent: React.FC<
   onAddTransactor,
   onEditTransactor,
   onDeleteTransactor,
+  onImport,
   fetch,
   loading,
   pagination,
@@ -80,7 +89,7 @@ export const TransactorListComponent: React.FC<
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: Transactor) => (
+      render: (_: unknown, record: Transactor) => (
         <Space size="small">
           <Button
             type="text"
@@ -117,11 +126,13 @@ export const TransactorListComponent: React.FC<
     try {
       if (!value) return;
       fetch({ name: value });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
       notification.error({
         message: "Error",
-        description: error?.message,
+        description: errorMessage,
       });
     }
   };
@@ -158,7 +169,11 @@ export const TransactorListComponent: React.FC<
             Add New {entityTypeCapitalized}
           </Button>
           <Button icon={<DownloadOutlined />}>Download Sample</Button>
-          <Button icon={<UploadOutlined />}>Import</Button>
+          {onImport && (
+            <Button icon={<UploadOutlined />} onClick={onImport}>
+              Import
+            </Button>
+          )}
         </Space>
       </div>
 
@@ -170,9 +185,20 @@ export const TransactorListComponent: React.FC<
         bordered
         size="small"
         loading={loading}
-        pagination={pagination}
-        onChange={(pagination) => {
-          fetch({ page: pagination.current, limit: pagination.pageSize });
+        pagination={{
+          current: pagination.page,
+          pageSize: pagination.limit,
+          total: pagination.total,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
+        }}
+        onChange={(paginationConfig) => {
+          fetch({
+            page: paginationConfig.current,
+            limit: paginationConfig.pageSize,
+          });
         }}
       />
 

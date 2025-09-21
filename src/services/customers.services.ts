@@ -6,6 +6,19 @@ import {
   putCallback,
 } from "../utils/network-helper";
 
+interface Customer {
+  id: string;
+  name: string;
+  personName: string;
+  address?: string;
+  contactNumber?: string;
+  code: string;
+  email?: string;
+  openingBalance: number;
+  openingBalanceDate: string;
+  status: boolean;
+}
+
 export const getCustomersApi = async (
   query: string = ""
 ): Promise<responseMetadata> => {
@@ -13,14 +26,16 @@ export const getCustomersApi = async (
   return response;
 };
 
-export const createCustomerApi = async (payload): Promise<responseMetadata> => {
+export const createCustomerApi = async (
+  payload: Partial<Customer>
+): Promise<responseMetadata> => {
   const response: responseMetadata = await postCallback(`customer`, payload);
   return response;
 };
 
 export const updateCustomerApi = async (
-  id,
-  payload
+  id: string,
+  payload: Partial<Customer>
 ): Promise<responseMetadata> => {
   const response: responseMetadata = await putCallback(
     `customer/${id}`,

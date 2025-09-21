@@ -1,8 +1,35 @@
 import { DatePicker, Form, Input, InputNumber, Modal, Row, Col } from "antd";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { useEffect } from "react";
 import { buildQueryString } from "../../utils";
 import { getCodeApi } from "../../services/common.services";
+
+interface Bank {
+  id: string;
+  name: string;
+  accountNumber: string;
+  iban: string;
+  code: string;
+  currentBalance: number;
+  openingDate: string;
+}
+
+interface BankFormValues {
+  code: string;
+  name: string;
+  accountNumber: string;
+  iban: string;
+  currentBalance: number;
+  openingDate: Dayjs;
+}
+
+interface BankFormModalProps {
+  visible: boolean;
+  onCancel: () => void;
+  onSubmit: (values: Partial<Bank>) => Promise<void>;
+  loading: boolean;
+  initialValues?: Bank | null;
+}
 
 export const BankFormModal = ({
   visible,
@@ -10,7 +37,7 @@ export const BankFormModal = ({
   onSubmit,
   loading,
   initialValues,
-}: any) => {
+}: BankFormModalProps) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -40,7 +67,7 @@ export const BankFormModal = ({
     }
   }, []);
 
-  const handleFinish = async (values: any) => {
+  const handleFinish = async (values: BankFormValues) => {
     const { code, ...rest } = values;
     await onSubmit({
       ...rest,
