@@ -6,11 +6,21 @@ import {
   SearchOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { Button, Flex, Input, notification, Select, Space, Table } from "antd";
+import {
+  Button,
+  Flex,
+  Input,
+  Modal,
+  notification,
+  Select,
+  Space,
+  Table,
+} from "antd";
 import { useEffect, useState } from "react";
 import { deleteInventory, getInventories } from "../../apis";
 import { buildQueryString, formatCurrency } from "../../utils";
 import AddEditItemModal from "./add-edit-modal/add-edit-modal";
+import { InventoryImport } from "./inventory-import";
 import { InventoryItem } from "./types";
 import ViewItemModal from "./view-item-modal/view-modal";
 
@@ -22,6 +32,7 @@ const Inventory = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [currentItem, setCurrentItem] = useState<InventoryItem | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -230,7 +241,12 @@ const Inventory = () => {
             Add New Item
           </Button>
           <Button icon={<DownloadOutlined />}>Export</Button>
-          <Button icon={<UploadOutlined />}>Import</Button>
+          <Button
+            icon={<UploadOutlined />}
+            onClick={() => setShowImportModal(true)}
+          >
+            Import
+          </Button>
         </Space>
       </Space>
 
@@ -276,6 +292,23 @@ const Inventory = () => {
           visible={showViewModal}
         />
       )}
+
+      <Modal
+        title="Import Inventory Items"
+        open={showImportModal}
+        onCancel={() => setShowImportModal(false)}
+        footer={null}
+        width={800}
+      >
+        <InventoryImport
+          onImportComplete={(result) => {
+            if (result.success > 0) {
+              fetchItems();
+              setShowImportModal(false);
+            }
+          }}
+        />
+      </Modal>
     </div>
   );
 };

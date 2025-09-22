@@ -1,6 +1,32 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Popconfirm, Space, Table } from "antd";
+import { Button, Popconfirm, Space, Table, TablePaginationConfig } from "antd";
 import dayjs from "dayjs";
+
+interface Bank {
+  id: string;
+  name: string;
+  accountNumber: string;
+  iban: string;
+  code: string;
+  currentBalance: number;
+  openingDate: string;
+}
+
+interface BankTableProps {
+  data: Bank[];
+  loading: boolean;
+  onEdit: (bank: Bank) => void;
+  onDelete: (id: string) => void;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    nextPage: number | null;
+    prevPage: number | null;
+  };
+  fetchItems: (params: { page?: number; limit?: number }) => void;
+}
 
 export const BankTable = ({
   data,
@@ -9,7 +35,7 @@ export const BankTable = ({
   onDelete,
   pagination,
   fetchItems,
-}: any) => {
+}: BankTableProps) => {
   const columns = [
     { title: "Bank Code", dataIndex: "code", key: "code" },
     { title: "Bank Name", dataIndex: "name", key: "name" },
@@ -28,11 +54,11 @@ export const BankTable = ({
       title: "Opening Date",
       dataIndex: "openingDate",
       key: "openingDate",
-      render: (openingDate: any) => dayjs(openingDate).format("DD-MMM-YY"),
+      render: (openingDate: string) => dayjs(openingDate).format("DD-MMM-YY"),
     },
     {
       title: "Actions",
-      render: (_: any, record: any) => (
+      render: (_: unknown, record: Bank) => (
         <Space>
           <Button
             size="small"
@@ -40,14 +66,14 @@ export const BankTable = ({
             icon={<EditOutlined />}
             type="link"
           />
-          {/* <Popconfirm
-            title="Are you sure?"
+          <Popconfirm
+            title="Are you sure you want to delete this bank?"
             onConfirm={() => onDelete(record.id)}
             okText="Yes"
             cancelText="No"
           >
             <Button danger size="small" icon={<DeleteOutlined />} type="link" />
-          </Popconfirm> */}
+          </Popconfirm>
         </Space>
       ),
     },
@@ -60,9 +86,20 @@ export const BankTable = ({
       loading={loading}
       rowKey="id"
       size="small"
-      pagination={pagination}
-      onChange={(pagination) => {
-        fetchItems({ page: pagination.current, limit: pagination.pageSize });
+      pagination={{
+        current: pagination.page,
+        pageSize: pagination.limit,
+        total: pagination.total,
+        showSizeChanger: true,
+        showQuickJumper: true,
+        showTotal: (total, range) =>
+          `${range[0]}-${range[1]} of ${total} items`,
+      }}
+      onChange={(paginationConfig: TablePaginationConfig) => {
+        fetchItems({
+          page: paginationConfig.current,
+          limit: paginationConfig.pageSize,
+        });
       }}
       bordered
     />
