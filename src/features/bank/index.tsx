@@ -1,4 +1,4 @@
-import { Button, Input, notification, Space } from "antd";
+import { Button, Input, Modal, notification, Space } from "antd";
 import { useEffect, useState } from "react";
 import {
   createBank,
@@ -7,6 +7,7 @@ import {
   updateBank,
 } from "../../services/bank-services";
 import { BankFormModal } from "./bank-form";
+import { BankImport } from "./bank-import";
 import { BankTable } from "./bank-listing";
 import { buildQueryString } from "../../utils";
 import {
@@ -16,12 +17,29 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 
+interface Bank {
+  id: string;
+  name: string;
+  accountNumber: string;
+  iban: string;
+  code: string;
+  currentBalance: number;
+  openingDate: string;
+}
+
+interface ImportResult {
+  success: number;
+  failed: number;
+  errors: string[];
+}
+
 const BanksPage = () => {
-  const [banks, setBanks] = useState<any>([]);
+  const [banks, setBanks] = useState<Bank[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [importModalVisible, setImportModalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [editingBank, setEditingBank] = useState(null);
+  const [editingBank, setEditingBank] = useState<Bank | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
@@ -32,7 +50,7 @@ const BanksPage = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
 
-  const fetchBanks = async (queryParams: Record<string, any> = {}) => {
+  const fetchBanks = async (queryParams: Record<string, unknown> = {}) => {
     try {
       setLoading(true);
       const queryString = buildQueryString(queryParams);
@@ -47,10 +65,12 @@ const BanksPage = () => {
 
       setBanks(response.data);
       setPagination(response.pagination);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
       notification.error({
         message: "Error",
-        description: error?.message,
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -61,7 +81,7 @@ const BanksPage = () => {
     fetchBanks();
   }, []);
 
-  const handleCreateOrUpdate = async (data: any) => {
+  const handleCreateOrUpdate = async (data: Partial<Bank>) => {
     setSubmitting(true);
     try {
       if (editingBank) {
@@ -69,7 +89,7 @@ const BanksPage = () => {
         if (response?.success) {
           notification.success({ message: response.message });
           const updatedBanks = banks.map((bank) => {
-            if (bank.id === editingBank.id) {
+            if (bank.id === editingBank?.id) {
               return response.data;
             }
             return bank;
@@ -88,8 +108,10 @@ const BanksPage = () => {
       // fetchBanks();
       setModalVisible(false);
       setEditingBank(null);
-    } catch (error: any) {
-      notification.error({ message: error.message });
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
+      notification.error({ message: errorMessage });
     } finally {
       setSubmitting(false);
     }
@@ -105,27 +127,39 @@ const BanksPage = () => {
       notification.success({ message: response.message });
       const updatedBanks = banks.filter((bank) => bank.id !== id);
       setBanks(updatedBanks);
-    } catch (error: any) {
-      notification.error({ message: error.message });
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
+      notification.error({ message: errorMessage });
     }
   };
 
-  const handleSeach = async (value: string) => {
+  const handleSearch = async (value: string) => {
     try {
       if (!value) return;
       fetchBanks({ name: value });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
       notification.error({
         message: "Error",
-        description: error?.message,
+        description: errorMessage,
       });
     }
   };
 
-  const handleEdit = (bank: any) => {
+  const handleEdit = (bank: Bank) => {
     setEditingBank(bank);
     setModalVisible(true);
+  };
+
+  const handleImportComplete = (result: ImportResult) => {
+    if (result.success > 0) {
+      // Refresh the bank list after successful import
+      fetchBanks();
+    }
+    setImportModalVisible(false);
   };
 
   return (
@@ -145,7 +179,7 @@ const BanksPage = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ width: 250 }}
-            onPressEnter={() => handleSeach(searchTerm)}
+            onPressEnter={() => handleSearch(searchTerm)}
           />
         </Space>
         <Space wrap>
@@ -160,7 +194,12 @@ const BanksPage = () => {
             Add New Bank
           </Button>
           <Button icon={<DownloadOutlined />}>Export</Button>
-          <Button icon={<UploadOutlined />}>Import</Button>
+          <Button
+            icon={<UploadOutlined />}
+            onClick={() => setImportModalVisible(true)}
+          >
+            Import
+          </Button>
         </Space>
       </Space>
 
@@ -185,6 +224,16 @@ const BanksPage = () => {
           initialValues={editingBank}
         />
       )}
+
+      <Modal
+        title="Import Banks"
+        open={importModalVisible}
+        onCancel={() => setImportModalVisible(false)}
+        footer={null}
+        width={800}
+      >
+        <BankImport onImportComplete={handleImportComplete} />
+      </Modal>
     </div>
   );
 };
