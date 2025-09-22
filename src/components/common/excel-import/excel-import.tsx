@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Upload, Button, Typography, Space, message } from "antd";
+import { Upload, Button, Typography, Space, message, notification } from "antd";
 import { UploadOutlined, DownloadOutlined } from "@ant-design/icons";
 import type { UploadProps } from "antd";
 import Cookies from "js-cookie";
@@ -90,7 +90,10 @@ export const ExcelImport: React.FC<ExcelImportProps> = ({
       }
       if (info.file.status === "error") {
         setUploading(false);
-        message.error("Upload failed. Please try again.");
+        notification.error({
+          message: "Error",
+          description: info.file.response?.message?.split(",")?.[0],
+        });
         console.error("Upload failed:", info.file.error);
       }
     },

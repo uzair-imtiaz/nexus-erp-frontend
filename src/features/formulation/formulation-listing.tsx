@@ -174,8 +174,8 @@ const Formulation: React.FC = () => {
           >
             Add New Item
           </Button>
-          <Button icon={<DownloadOutlined />}>Export</Button>
-          <Button icon={<UploadOutlined />}>Import</Button>
+          {/* <Button icon={<DownloadOutlined />}>Export</Button> */}
+          {/* <Button icon={<UploadOutlined />}>Import</Button> */}
         </Space>
       </Space>
       <DataTable

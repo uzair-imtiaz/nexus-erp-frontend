@@ -240,7 +240,7 @@ const Inventory = () => {
           >
             Add New Item
           </Button>
-          <Button icon={<DownloadOutlined />}>Export</Button>
+          {/* <Button icon={<DownloadOutlined />}>Export</Button> */}
           <Button
             icon={<UploadOutlined />}
             onClick={() => setShowImportModal(true)}

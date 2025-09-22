@@ -193,7 +193,7 @@ const BanksPage = () => {
           >
             Add New Bank
           </Button>
-          <Button icon={<DownloadOutlined />}>Export</Button>
+          {/* <Button icon={<DownloadOutlined />}>Export</Button> */}
           <Button
             icon={<UploadOutlined />}
             onClick={() => setImportModalVisible(true)}

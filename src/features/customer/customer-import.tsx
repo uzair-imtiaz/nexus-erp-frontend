@@ -30,7 +30,6 @@ export const CustomerImport: React.FC<CustomerImportProps> = ({
       "code",
       "opening_balance",
       "opening_balance_date",
-      "status",
       "address",
       "contact_number",
       "email",
@@ -42,7 +41,6 @@ export const CustomerImport: React.FC<CustomerImportProps> = ({
       "CUST-001",
       "1000.50",
       "2024-01-01",
-      "true",
       "123 Main St",
       "+1234567890",
       "john@abc.com",
@@ -71,7 +69,7 @@ export const CustomerImport: React.FC<CustomerImportProps> = ({
         </Button>
         <div style={{ fontSize: "12px", color: "#666" }}>
           Download the template to see the required format. Required fields:
-          name, person_name, code, opening_balance, opening_balance_date, status
+          name, person_name, code, opening_balance, opening_balance_date
         </div>
       </div>
 

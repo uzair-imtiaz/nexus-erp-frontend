@@ -168,7 +168,6 @@ export const TransactorListComponent: React.FC<
           >
             Add New {entityTypeCapitalized}
           </Button>
-          <Button icon={<DownloadOutlined />}>Download Sample</Button>
           {onImport && (
             <Button icon={<UploadOutlined />} onClick={onImport}>
               Import

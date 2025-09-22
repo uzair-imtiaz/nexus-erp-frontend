@@ -36,7 +36,6 @@ export const VendorImport: React.FC<VendorImportProps> = ({
       "code",
       "opening_balance",
       "opening_balance_date",
-      "status",
       "address",
       "contact_number",
       "email",
@@ -48,7 +47,6 @@ export const VendorImport: React.FC<VendorImportProps> = ({
       "VEND-001",
       "2000.00",
       "2024-01-01",
-      "true",
       "456 Oak Ave",
       "+0987654321",
       "jane@xyz.com",
@@ -77,7 +75,7 @@ export const VendorImport: React.FC<VendorImportProps> = ({
         </Button>
         <div style={{ fontSize: "12px", color: "#666" }}>
           Download the template to see the required format. Required fields:
-          name, person_name, code, opening_balance, opening_balance_date, status
+          name, person_name, code, opening_balance, opening_balance_date
         </div>
       </div>
 
