@@ -2,6 +2,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { ConfigProvider, Spin } from "antd";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/common/layout";
+import Dashboard from "./components/dashboard";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import Login from "./features/auth/LoginForm";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
@@ -18,15 +19,20 @@ import PaymentForm from "./features/payment/payment-form";
 import ProductionForm from "./features/production/production-form";
 import Production from "./features/production/production-listing";
 import ReceiptForm from "./features/receipt/create-receipt";
-import BalanceSheet from "./features/reports/balance-sheet";
-import JournalLedger from "./features/reports/journal-ledger";
-import ProfitLossReport from "./features/reports/pnl-report";
-import TrialBalance from "./features/reports/trial-balance";
+import {
+  BalanceSheet,
+  CustomerLedger,
+  JournalLedger,
+  ProductLedger,
+  ProfitLossReport,
+  Reports,
+  TrialBalance,
+  VendorLedger,
+} from "./features/reports";
 import PurchaseForm from "./features/transactions/purchase-form";
 import SaleForm from "./features/transactions/sale-form";
 import TransactionsPage from "./features/transactions/transactions";
 import { darkTheme, lightTheme } from "./styles/theme";
-import Dashboard from "./components/dashboard";
 
 const AppContent: React.FC = () => {
   const { themeMode } = useTheme();
@@ -72,10 +78,14 @@ const AppContent: React.FC = () => {
               <Route path="expenses/:id" element={<AddExpenses />} />
               <Route path="core" element={<Core />} />
               <Route path="reports">
+                <Route index element={<Reports />} />
                 <Route path="trial-balance" element={<TrialBalance />} />
                 <Route path="journal-ledger" element={<JournalLedger />} />
                 <Route path="profit-loss" element={<ProfitLossReport />} />
                 <Route path="balance-sheet" element={<BalanceSheet />} />
+                <Route path="product-ledger" element={<ProductLedger />} />
+                <Route path="vendor-ledger" element={<VendorLedger />} />
+                <Route path="customer-ledger" element={<CustomerLedger />} />
               </Route>
               <Route path="receipts/new" element={<ReceiptForm />} />
               <Route path="payments/new" element={<PaymentForm />} />
