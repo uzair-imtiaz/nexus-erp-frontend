@@ -70,31 +70,36 @@ const AppLayout = () => {
       label: "Journal",
     },
     {
-      key: "reports",
+      key: "/reports",
       icon: <BarChartOutlined />,
       label: "Reports",
-      children: [
-        {
-          key: "/reports/trial-balance",
-          icon: <BarChartOutlined />,
-          label: "Trial Balance",
-        },
-        {
-          key: "/reports/journal-ledger",
-          icon: <BookOutlined />,
-          label: "Journal Ledger",
-        },
-        {
-          key: "/reports/profit-loss",
-          icon: <ProfileOutlined />,
-          label: "Profit & Loss",
-        },
-        {
-          key: "/reports/balance-sheet",
-          icon: <FileTextOutlined />,
-          label: "Balance Sheet (As At)",
-        },
-      ],
+      // children: [
+      //   {
+      //     key: "/reports/trial-balance",
+      //     icon: <BarChartOutlined />,
+      //     label: "Trial Balance",
+      //   },
+      //   {
+      //     key: "/reports/journal-ledger",
+      //     icon: <BookOutlined />,
+      //     label: "Journal Ledger",
+      //   },
+      //   {
+      //     key: "/reports/profit-loss",
+      //     icon: <ProfileOutlined />,
+      //     label: "Profit & Loss",
+      //   },
+      //   {
+      //     key: "/reports/balance-sheet",
+      //     icon: <FileTextOutlined />,
+      //     label: "Balance Sheet (As At)",
+      //   },
+      //   {
+      //     key: "/reports/product-ledger",
+      //     icon: <FileTextOutlined />,
+      //     label: "Product Ledger",
+      //   },
+      // ],
     },
     {
       key: "/core",

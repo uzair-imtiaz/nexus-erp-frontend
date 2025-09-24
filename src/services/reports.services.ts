@@ -28,3 +28,34 @@ export const getBalanceSheetReport = async (query?: string) => {
   );
   return response;
 };
+
+export const getProductLedgerReport = async (query?: string) => {
+  const response: responseMetadata = await getCallback(
+    `/reports/product-ledger${query}`
+  );
+  return response;
+};
+
+export const getEntityLedgerReport = async (
+  entityType: string,
+  query?: string
+) => {
+  const response: responseMetadata = await getCallback(
+    `/reports/${entityType}-ledger${query}`
+  );
+  return response;
+};
+
+export const getCustomerLedgerReport = async (query?: string) => {
+  const response: responseMetadata = await getCallback(
+    `/reports/customer-ledger${query}`
+  );
+  return response;
+};
+
+export const getVendorLedgerReport = async (query?: string) => {
+  const response: responseMetadata = await getCallback(
+    `/reports/vendor-ledger${query}`
+  );
+  return response;
+};
