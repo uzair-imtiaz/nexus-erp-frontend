@@ -152,33 +152,33 @@ const Reports: React.FC = () => {
         },
       ],
     },
-    {
-      title: "Management Reports",
-      description: "Business intelligence and operational insights",
-      icon: <BarChartOutlined />,
-      color: "#722ed1",
-      reports: [
-        // Placeholder for future management reports
-        {
-          key: "cash-flow",
-          title: "Cash Flow Statement",
-          description:
-            "Track cash inflows and outflows across operating, investing, and financing activities",
-          icon: <WalletOutlined />,
-          path: "/reports/cash-flow",
-          color: "#13c2c2",
-        },
-        {
-          key: "aging-report",
-          title: "Aging Report",
-          description:
-            "Customer and vendor aging analysis for better credit management",
-          icon: <TeamOutlined />,
-          path: "/reports/aging",
-          color: "#fa541c",
-        },
-      ],
-    },
+    // {
+    //   title: "Management Reports",
+    //   description: "Business intelligence and operational insights",
+    //   icon: <BarChartOutlined />,
+    //   color: "#722ed1",
+    //   reports: [
+    //     // Placeholder for future management reports
+    //     {
+    //       key: "cash-flow",
+    //       title: "Cash Flow Statement",
+    //       description:
+    //         "Track cash inflows and outflows across operating, investing, and financing activities",
+    //       icon: <WalletOutlined />,
+    //       path: "/reports/cash-flow",
+    //       color: "#13c2c2",
+    //     },
+    //     {
+    //       key: "aging-report",
+    //       title: "Aging Report",
+    //       description:
+    //         "Customer and vendor aging analysis for better credit management",
+    //       icon: <TeamOutlined />,
+    //       path: "/reports/aging",
+    //       color: "#fa541c",
+    //     },
+    //   ],
+    // },
   ];
 
   const handleReportClick = (path: string) => {
